@@ -8,9 +8,20 @@ import { mongoDB } from './config/database';
 
 const app = express();
 
+const frontendOrigins = new Set(
+  [process.env.FRONTEND_URL, process.env.FRONTEND_URLS, 'https://lost-lol.vercel.app']
+    .filter((value): value is string => Boolean(value))
+    .flatMap((value) => value.split(','))
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
+  origin: (origin, callback) => {
+    callback(null, !origin || frontendOrigins.has(origin));
+  },
+  credentials: true,
+  optionsSuccessStatus: 204
 }));
 app.use(express.json());
 app.use((_req, _res, next) => {

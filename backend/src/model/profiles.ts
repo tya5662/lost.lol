@@ -35,6 +35,21 @@ const userSchema = new mongoose.Schema({
   description: {
     type: String,
   },
+  accentColor: {
+    type: String,
+    default: '#ff4056',
+    match: /^#[0-9a-fA-F]{6}$/,
+  },
+  textColor: {
+    type: String,
+    default: '#f4f0ef',
+    match: /^#[0-9a-fA-F]{6}$/,
+  },
+  backgroundColor: {
+    type: String,
+    default: '#090909',
+    match: /^#[0-9a-fA-F]{6}$/,
+  },
   profilePicture: {
     type: Buffer, // For binary data like images
   },

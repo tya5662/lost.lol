@@ -104,7 +104,7 @@ export const AuthPage: React.FC = () => {
               <span className="mb-2 block text-xs font-semibold text-[#c4bcbd]">Password</span>
               <span className="flex h-12 items-center gap-3 rounded-lg border border-white/[0.1] bg-[#090909] px-3.5 transition-colors focus-within:border-[#ff4056]/65">
                 <LockKeyhole size={16} className="shrink-0 text-[#81797b]" />
-                <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete={isRegister ? 'new-password' : 'current-password'} minLength={isRegister ? 12 : undefined} maxLength={128} required className="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-[#5f585a]" placeholder={isRegister ? 'At least 12 characters' : 'Your password'} />
+                <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete={isRegister ? 'new-password' : 'current-password'} minLength={isRegister ? 7 : undefined} maxLength={128} required className="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-[#5f585a]" placeholder={isRegister ? 'At least 7 characters' : 'Your password'} />
               </span>
             </label>
 

@@ -16,6 +16,9 @@ export interface User {
   email: string;
   profilePicture?: string
   backgroundImage?: string;
+  accentColor?: string;
+  textColor?: string;
+  backgroundColor?: string;
   bio?: string;
   totalVisit?: number;
 }

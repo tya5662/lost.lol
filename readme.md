@@ -121,6 +121,7 @@ Set these environment variables in the backend project's Vercel settings for eac
 
 - `MONGO`: MongoDB connection string for a hosted MongoDB deployment. Ensure its network access settings allow connections from Vercel.
 - `FRONTEND_URL`: exact deployed frontend origin, for example `https://your-site.vercel.app`.
+- `FRONTEND_URLS` (optional): comma-separated extra allowed frontend origins for preview deployments.
 - `JWT_SECRET`: long, random secret used to sign authentication tokens.
 
 Set `VITE_BACKEND_URL` in the frontend project's Vercel settings to the backend origin, for example `https://your-api.vercel.app`. This value is included in frontend assets, so it must only contain the public API origin, never a secret. Redeploy the frontend after changing it.

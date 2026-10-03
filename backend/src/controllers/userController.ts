@@ -373,6 +373,18 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const { username } = req.params;
     const { name, description } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const appearance = {
+      accentColor: req.body.accentColor,
+      textColor: req.body.textColor,
+      backgroundColor: req.body.backgroundColor,
+    };
+
+    for (const color of Object.values(appearance)) {
+      if (color !== undefined && (typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color))) {
+        res.status(400).json({ message: 'Profile colors must be six-digit hex values.' });
+        return;
+      }
+    }
 
     // Find user
     const user = await User.findOne({ username });
@@ -384,6 +396,9 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     // Update basic user info
     user.name = name;
     user.description = description;
+    if (appearance.accentColor) user.accentColor = appearance.accentColor;
+    if (appearance.textColor) user.textColor = appearance.textColor;
+    if (appearance.backgroundColor) user.backgroundColor = appearance.backgroundColor;
 
     // Handle profile picture
     if (files.profilePicture) {

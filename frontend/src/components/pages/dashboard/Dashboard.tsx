@@ -10,7 +10,7 @@ import UsernameSetup from './UsernameSetup';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Menu, Plus, Trash2, Link,  LogOut, Edit,  } from 'lucide-react';
+import { Menu, Plus, Trash2, Link, LogOut, Edit, UserRound, Share2, Link2, Eye, SlidersHorizontal } from 'lucide-react';
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LinkForm from '../../LinkForm';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
@@ -255,12 +255,44 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="h-fit rounded-xl border border-white/[0.08] bg-[#111010] p-3 lg:sticky lg:top-6">
+          <div className="flex items-center gap-3 px-2 py-2">
+            <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-[#ff4056]/30 bg-[#241114] font-semibold text-[#ff6878]">
+              {user.profilePicture ? <img src={user.profilePicture} alt="" className="h-full w-full object-cover" /> : user.username?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">{user.username}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[.12em] text-[#81797b]">Workspace</p>
+            </div>
+          </div>
+          <p className="px-2 pb-2 pt-5 text-[10px] font-bold uppercase tracking-[.16em] text-[#746d6e]">Manage page</p>
+          <nav aria-label="Dashboard sections" className="grid grid-cols-3 gap-1 sm:grid-cols-5 lg:grid-cols-1">
+            <a href="#profile" className="flex min-h-10 items-center gap-2 rounded-lg bg-[#ff3047]/[0.09] px-2 text-[11px] font-semibold text-[#ff7180] sm:px-3 sm:text-xs"><UserRound size={15} />Profile</a>
+            <a href="#appearance" className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-[11px] font-medium text-[#aaa2a3] transition-colors hover:bg-white/[0.05] hover:text-white sm:px-3 sm:text-xs"><SlidersHorizontal size={15} />Customize</a>
+            <a href="#socials" className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-[11px] font-medium text-[#aaa2a3] transition-colors hover:bg-white/[0.05] hover:text-white sm:px-3 sm:text-xs"><Share2 size={15} />Socials</a>
+            <a href="#links" className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-[11px] font-medium text-[#aaa2a3] transition-colors hover:bg-white/[0.05] hover:text-white sm:px-3 sm:text-xs"><Link2 size={15} />Links</a>
+            <a href={`/${user.username}`} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center gap-2 rounded-lg px-2 text-[11px] font-medium text-[#aaa2a3] transition-colors hover:bg-white/[0.05] hover:text-white sm:px-3 sm:text-xs"><Eye size={15} />View</a>
+          </nav>
+          <div className="mt-4 hidden items-center justify-between border-t border-white/[0.08] px-2 pt-4 text-xs lg:flex">
+            <span className="text-[#81797b]">Profile views</span>
+            <span className="font-semibold text-[#ff596b]">{user.totalVisit || 0}</span>
+          </div>
+        </aside>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="min-w-0">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#ff596b]">Your page / overview</p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">Account overview</h2>
+            </div>
+            <span className="rounded-md border border-white/[0.08] bg-[#111010] px-3 py-2 text-xs text-[#a39b9c]">lost.lol/{user.username}</span>
+          </div>
+
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           {/* Profile Section */}
 
-          <Card className="lg:col-span-1 border-white/[0.08] bg-[#111010] text-white">
+          <Card id="profile" className="xl:col-span-2 border-white/[0.08] bg-[#111010] text-white">
             <CardHeader className="space-y-1">
             <div className="inline-block rounded-lg border border-white/[0.08] bg-black/30 px-4 py-2 text-center">
   <h3 className="text-sm font-medium text-[#aaa2a3]">Total visits</h3>
@@ -303,7 +335,7 @@ export const Dashboard: React.FC = () => {
           </Card>
 
           {/* Social Links Section */}
-          <Card className="lg:col-span-1 border-white/[0.08] bg-[#111010] text-white">
+          <Card id="socials" className="border-white/[0.08] bg-[#111010] text-white">
             <CardHeader>
               <CardTitle className="text-2xl">Social Links</CardTitle>
               <p className="text-sm text-gray-500">
@@ -311,7 +343,7 @@ export const Dashboard: React.FC = () => {
               </p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {SOCIAL_PLATFORMS.map((platform) => {
   const existingLink = links.find(link =>
     (link.url?.includes(platform.baseUrl) || false) || // Add null check for url
@@ -319,38 +351,20 @@ export const Dashboard: React.FC = () => {
   );
 
   return (
-    <Dialog>
+                <Dialog key={platform.id}>
     <DialogTrigger asChild>
       <div
         key={platform.id}
-        className="relative group p-4 rounded-lg border bg-black dark:bg-gray-700 hover:shadow-md transition-all duration-200 cursor-pointer"
+        className="relative group flex min-h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-black/30 p-3 text-center transition-all duration-200 hover:border-[#ff4056]/35 hover:bg-white/[0.035]"
       >
-        <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-full bg-pink-500 dark:bg-gray-700">
-            <platform.icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#ff3047]/[0.09]">
+            <platform.icon className="h-5 w-5 text-[#ff6878]" />
           </div>
-          <div className="flex-grow">
-            <h3 className="font-medium">{platform.name}</h3>
-            {existingLink && existingLink.url ? (
-              <a
-                href={existingLink.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-500 hover:text-blue-600 truncate block"
-              >
-                {existingLink.url}
-              </a>
-            ) : (
-              <span className="text-sm text-black-500">Not connected</span>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          <h3 className="text-xs font-semibold text-[#e9e3e4]">{platform.name}</h3>
+          <span className={`max-w-full truncate text-[10px] ${existingLink ? 'text-[#ff6878]' : 'text-[#81797b]'}`}>
+            {existingLink?.url || 'Add social'}
+          </span>
         </div>
       </div>
     </DialogTrigger>
@@ -381,7 +395,7 @@ export const Dashboard: React.FC = () => {
 
 
 {/* Custom Links Section */}
-          <Card className="lg:col-span-1 border-white/[0.08] bg-[#111010] text-white">
+          <Card id="links" className="border-white/[0.08] bg-[#111010] text-white">
             <CardHeader>
               <CardTitle className="text-2xl">Custom Links</CardTitle>
               <p className="text-sm text-gray-500">
@@ -409,17 +423,17 @@ export const Dashboard: React.FC = () => {
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               ref={provided.innerRef}
-                              className="relative p-4 rounded-lg border bg-white dark:bg-gray-800 flex items-center justify-between hover:shadow-md transition-all duration-200"
+                              className="relative flex items-center justify-between rounded-lg border border-white/[0.08] bg-black/30 p-4 transition-all duration-200 hover:border-[#ff4056]/35 hover:bg-white/[0.035]"
                             >
                               <div className="flex items-center space-x-3">
-                                <Link className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                <Link className="h-5 w-5 text-[#ff6878]" />
                                 <div>
                                   <h3 className="font-medium">{link.title}</h3>
                                   <a
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-sm text-blue-500 hover:text-blue-600 truncate block"
+                                    className="text-sm text-[#aaa2a3] hover:text-white truncate block"
                                   >
                                     {link.url}
                                   </a>
@@ -440,8 +454,13 @@ export const Dashboard: React.FC = () => {
                                   </DropdownMenuItem>
                                   </DialogTrigger>
                                   <DialogContent>
-                                    <DialogTitle></DialogTitle>
-
+                                    <DialogHeader>
+                                      <DialogTitle>Edit custom link</DialogTitle>
+                                    </DialogHeader>
+                                    <LinkForm
+                                      initialData={{ title: link.title, url: link.url }}
+                                      onSubmit={(linkData) => handleUpdateLink(link._id, linkData)}
+                                    />
                                   </DialogContent>
                                      </Dialog>
                                   <DropdownMenuItem
@@ -488,6 +507,7 @@ export const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+        </section>
       </div>
     </div>
   );

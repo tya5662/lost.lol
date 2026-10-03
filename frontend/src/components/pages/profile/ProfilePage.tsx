@@ -23,6 +23,9 @@ interface UserProfile {
   name: string;
   description: string | null;
   profilePicture: string | null;
+  accentColor?: string;
+  textColor?: string;
+  backgroundColor?: string;
   backgroundMedia: string | null;
   backgroundType: 'image' | 'video' | null;
   links: Array<{
@@ -99,6 +102,8 @@ const ProfilePage: React.FC = () => {
   );
 
   const { profilePicture, backgroundMedia, backgroundType, name, description, links, username: profileUsername } = profile;
+  const accentColor = profile.accentColor || '#ff596b';
+  const textColor = profile.textColor || '#f4f0ef';
 
   const toggleVideo = async () => {
     const video = videoRef.current;
@@ -128,7 +133,7 @@ const ProfilePage: React.FC = () => {
   });
 
   return (
-    <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#090909] px-4 py-16 text-[#f4f0ef] sm:px-6">
+    <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-16 sm:px-6" style={{ backgroundColor: profile.backgroundColor || '#090909', color: textColor }}>
       {backgroundMedia && backgroundType === 'image' && (
         <div
           aria-hidden="true"
@@ -172,11 +177,11 @@ const ProfilePage: React.FC = () => {
       )}
 
       <section className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-white/[0.11] bg-[#0d0c0c]/90 shadow-[0_35px_120px_rgba(0,0,0,.58)] backdrop-blur-xl">
-        <div className="h-[3px] w-full bg-gradient-to-r from-[#721321] via-[#ff4056] to-[#721321]" />
+        <div className="h-[3px] w-full" style={{ backgroundColor: accentColor }} />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
             <div className="relative mb-5 h-[100px] w-[100px]">
-              <span aria-hidden="true" className="absolute -inset-1 rounded-full border border-[#ff4056]/45" />
+              <span aria-hidden="true" className="absolute -inset-1 rounded-full border" style={{ borderColor: accentColor }} />
               <img
                 src={profilePicture || '/p.png'}
                 alt={`${name}'s profile`}
@@ -184,9 +189,9 @@ const ProfilePage: React.FC = () => {
               />
             </div>
 
-            <span className="text-[11px] font-semibold uppercase tracking-[.18em] text-[#ff596b]">@{profileUsername}</span>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">{name}</h1>
-            {description && <p className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6 text-[#aaa2a3]">{description}</p>}
+            <span className="text-[11px] font-semibold uppercase tracking-[.18em]" style={{ color: accentColor }}>@{profileUsername}</span>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}</h1>
+            {description && <p className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</p>}
           </div>
 
           <div className="mx-auto mt-8 max-w-[420px] space-y-2.5">
@@ -200,10 +205,10 @@ const ProfilePage: React.FC = () => {
                   rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
                   className="group flex min-h-14 items-center gap-3 rounded-lg border border-white/[0.09] bg-white/[0.025] px-3.5 text-left transition-all duration-200 hover:-translate-y-px hover:border-[#ff4056]/40 hover:bg-[#ff3047]/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff596b]"
                 >
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-white/[0.08] bg-black/30 text-[#ff596b] transition-colors group-hover:border-[#ff4056]/25 group-hover:bg-[#ff3047]/10">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-white/[0.08] bg-black/30 transition-colors" style={{ color: accentColor }}>
                     <IconComponent size={17} />
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-[#ece7e7]">{link.title || 'Open link'}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold" style={{ color: textColor }}>{link.title || 'Open link'}</span>
                   <ArrowUpRight size={16} className="shrink-0 text-[#777173] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ff596b]" />
                 </a>
               );
@@ -214,7 +219,7 @@ const ProfilePage: React.FC = () => {
 
           <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]">
             <span>lost.lol/{profileUsername}</span>
-            <span>Made with <span className="text-[#ff596b]">lost.lol</span></span>
+            <span>Made with <span style={{ color: accentColor }}>lost.lol</span></span>
           </div>
         </div>
       </section>
