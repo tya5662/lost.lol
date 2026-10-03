@@ -58,17 +58,18 @@ const duplicateAccountMessage = (error: unknown): string | undefined => {
 };
 
 router.post('/register', async (req, res, next) => {
-  const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  const username = typeof req.body.username === 'string' ? req.body.username.trim().toLowerCase() : '';
-  const password = typeof req.body.password === 'string' ? req.body.password : '';
+  const body = req.body ?? {};
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : '';
+  const password = typeof body.password === 'string' ? body.password : '';
 
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ message: 'Enter a valid email address.' });
     return;
   }
 
-  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-    res.status(400).json({ message: 'Username must be 3-20 characters using lowercase letters, numbers, or underscores.' });
+  if (!/^[a-z0-9._]{1,20}$/.test(username)) {
+    res.status(400).json({ message: 'Username must be 1-20 characters using lowercase letters, numbers, periods, or underscores.' });
     return;
   }
   if (reservedUsernames.has(username)) {
@@ -82,7 +83,9 @@ router.post('/register', async (req, res, next) => {
   }
 
   if (!process.env.JWT_SECRET) {
-    next(new Error('JWT_SECRET environment variable is required'));
+    res.status(503).json({
+      message: 'Sign-up is temporarily unavailable. The server administrator must configure JWT_SECRET.',
+    });
     return;
   }
 
@@ -124,6 +127,13 @@ router.post('/login', async (req, res, next) => {
 
   if (!identifier || !password || password.length > 128) {
     res.status(400).json({ message: 'Enter your email or username and password.' });
+    return;
+  }
+
+  if (!process.env.JWT_SECRET) {
+    res.status(503).json({
+      message: 'Sign-in is temporarily unavailable. The server administrator must configure JWT_SECRET.',
+    });
     return;
   }
 

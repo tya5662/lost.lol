@@ -445,21 +445,22 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 export const setUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { username } = req.body;
+    const username = typeof req.body?.username === "string"
+      ? req.body.username.trim().toLowerCase()
+      : "";
     const userId = (req.user as any).id; // Assuming `id` is populated in the `req.user` middleware
 
     // Validation
-    if (!username || typeof userId === "undefined") {
+    if (typeof userId === "undefined") {
       res.status(400).json({ message: "Username and User ID are required" });
       return;
     }
 
     // Username regex validation
-    const usernameRegex = /^[a-z0-9_]{3,20}$/;
+    const usernameRegex = /^[a-z0-9._]{1,20}$/;
     if (!usernameRegex.test(username)) {
       res.status(400).json({
-        message:
-          "Username must be 3-20 characters long and can only contain lowercase letters, numbers, and underscores",
+        message: "Username must be 1-20 characters using lowercase letters, numbers, periods, or underscores.",
       });
       return;
     }

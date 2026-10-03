@@ -12,10 +12,24 @@ export const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
+const removeLegacyGoogleIdIndex = async (): Promise<void> => {
+  const users = mongoose.connection.collection('users');
+  const indexes = await users.indexes();
+  const legacyGoogleIdIndex = indexes.find((index) =>
+    index.unique === true &&
+    Object.keys(index.key).length === 1 &&
+    index.key.googleId === 1
+  );
+
+  if (legacyGoogleIdIndex?.name) {
+    await users.dropIndex(legacyGoogleIdIndex.name);
+    console.warn(`Removed obsolete unique MongoDB index "${legacyGoogleIdIndex.name}" from users.`);
+  }
+};
 
 export const mongoDB = (): Promise<void> => {
   if (mongoose.connection.readyState === 1) {
-    return Promise.resolve();
+    return mongoConnection ?? Promise.resolve();
   }
 
   if (!mongoConnection) {
@@ -25,8 +39,9 @@ export const mongoDB = (): Promise<void> => {
     }
 
     mongoConnection = mongoose.connect(mongoUri, { dbName: 'link_platform' })
-      .then(() => {
+      .then(async () => {
         console.log('MongoDB connected');
+        await removeLegacyGoogleIdIndex();
       })
       .catch((error: unknown) => {
         mongoConnection = undefined;

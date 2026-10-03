@@ -65,7 +65,7 @@ export const AuthPage: React.FC = () => {
                   <span className="mb-2.5 block text-sm font-medium text-[#e0dbe2]">Username</span>
                   <span className="flex h-[62px] items-center gap-4 rounded-[18px] border border-white/[0.11] bg-[#09090a] px-4 transition-colors focus-within:border-[#a951bb]/70 sm:h-[68px] sm:px-5">
                     <AtSign size={20} className="shrink-0 text-[#c05ad4]" />
-                    <input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase().replace(/\s/g, ''))} minLength={3} maxLength={20} pattern="[a-z0-9_]{3,20}" autoComplete="username" required className="h-full min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-[#66606a] sm:text-lg" placeholder="yourname" />
+                    <input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase().replace(/\s/g, ''))} minLength={1} maxLength={20} pattern="[a-z0-9._]{1,20}" autoComplete="username" required className="h-full min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-[#66606a] sm:text-lg" placeholder="yourname" />
                   </span>
                   <span className="mt-2 block text-[11px] text-[#817986]">Your page will be at lost.lol/{username || 'yourname'}</span>
                 </label>

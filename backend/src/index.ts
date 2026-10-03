@@ -8,6 +8,10 @@ import { mongoDB } from './config/database';
 
 const app = express();
 
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET is not configured; sign-up and sign-in requests will be unavailable.');
+}
+
 const frontendOrigins = new Set(
   [process.env.FRONTEND_URL, process.env.FRONTEND_URLS, 'https://lost-lol.vercel.app']
     .filter((value): value is string => Boolean(value))

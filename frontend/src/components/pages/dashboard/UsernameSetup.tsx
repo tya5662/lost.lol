@@ -19,10 +19,10 @@ const UsernameSetup: React.FC<UsernameSetupProps> = ({ onUsernameSet }) => {
     setIsChecking(true);
 
     try {
-      if (!username || username.length < 3) {
+      if (!/^[a-z0-9._]{1,20}$/.test(username)) {
         toast({
           title: "Invalid Username",
-          description: "Username must be at least 3 characters long",
+          description: "Username must be 1-20 characters using lowercase letters, numbers, periods, or underscores.",
           variant: "destructive"
         });
         return;
@@ -99,7 +99,9 @@ const UsernameSetup: React.FC<UsernameSetupProps> = ({ onUsernameSet }) => {
               onChange={(e) => setUsername(e.target.value.toLowerCase().trim())}
               placeholder="Enter a unique username"
               required
-              minLength={3}
+              minLength={1}
+              maxLength={20}
+              pattern="[a-z0-9._]{1,20}"
               disabled={isChecking}
               className="bg-black"
             />
