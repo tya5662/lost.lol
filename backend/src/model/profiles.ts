@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
   },
   accentColor: {
     type: String,
-    default: '#ff4056',
+    default: '#a951bb',
     match: /^#[0-9a-fA-F]{6}$/,
   },
   textColor: {

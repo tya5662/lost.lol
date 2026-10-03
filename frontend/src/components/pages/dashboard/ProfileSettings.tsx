@@ -19,7 +19,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
   const [description, setDescription] = useState(user.description || '');
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [backgroundMedia, setBackgroundMedia] = useState<File | null>(null);
-  const [accentColor, setAccentColor] = useState(user.accentColor || '#ff4056');
+  const [accentColor, setAccentColor] = useState(user.accentColor || '#a951bb');
   const [textColor, setTextColor] = useState(user.textColor || '#f4f0ef');
   const [backgroundColor, setBackgroundColor] = useState(user.backgroundColor || '#090909');
   const { toast } = useToast();
@@ -86,7 +86,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
     <form onSubmit={handleSubmit} className="space-y-7">
       <section className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-white">General customization</h3>
+          <h3 className="text-lg font-semibold text-white">General customization</h3>
           <p className="mt-1 text-xs text-[#81797b]">The details shown at the top of your page.</p>
         </div>
         <div className="space-y-2">
@@ -107,7 +107,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
             id="profile-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="min-h-24 w-full resize-y rounded-lg border border-white/[0.1] bg-[#090909] p-3 text-sm text-white outline-none transition-colors placeholder:text-[#655f60] focus:border-[#ff4056]/65"
+            className="min-h-24 w-full resize-y rounded-[16px] border border-white/[0.1] bg-[#09090a] p-3 text-sm text-white outline-none transition-colors placeholder:text-[#655f60] focus:border-[#a951bb]/65"
             placeholder="A little about you"
             maxLength={500}
           />
@@ -116,19 +116,19 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
 
       <section id="appearance" className="space-y-4 border-t border-white/[0.08] pt-6">
         <div>
-          <h3 className="text-sm font-semibold text-white">Color customization</h3>
+          <h3 className="text-lg font-semibold text-white">Color customization</h3>
           <p className="mt-1 text-xs text-[#81797b]">Adjust the profile palette.</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
-          <label className="flex h-12 items-center justify-between gap-3 rounded-lg border border-white/[0.08] bg-[#090909] px-3">
+          <label className="flex h-14 items-center justify-between gap-3 rounded-[16px] border border-white/[0.08] bg-[#09090a] px-4">
             <span className="text-xs text-[#c4bcbd]">Accent</span>
             <Input aria-label="Accent color" type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="h-8 w-10 cursor-pointer border-0 bg-transparent p-0" />
           </label>
-          <label className="flex h-12 items-center justify-between gap-3 rounded-lg border border-white/[0.08] bg-[#090909] px-3">
+          <label className="flex h-14 items-center justify-between gap-3 rounded-[16px] border border-white/[0.08] bg-[#09090a] px-4">
             <span className="text-xs text-[#c4bcbd]">Text</span>
             <Input aria-label="Text color" type="color" value={textColor} onChange={(event) => setTextColor(event.target.value)} className="h-8 w-10 cursor-pointer border-0 bg-transparent p-0" />
           </label>
-          <label className="flex h-12 items-center justify-between gap-3 rounded-lg border border-white/[0.08] bg-[#090909] px-3">
+          <label className="flex h-14 items-center justify-between gap-3 rounded-[16px] border border-white/[0.08] bg-[#09090a] px-4">
             <span className="text-xs text-[#c4bcbd]">Background</span>
             <Input aria-label="Background color" type="color" value={backgroundColor} onChange={(event) => setBackgroundColor(event.target.value)} className="h-8 w-10 cursor-pointer border-0 bg-transparent p-0" />
           </label>
@@ -141,12 +141,12 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
 
       <section className="space-y-4 border-t border-white/[0.08] pt-6">
         <div>
-          <h3 className="text-sm font-semibold text-white">Assets uploader</h3>
+          <h3 className="text-lg font-semibold text-white">Assets uploader</h3>
           <p className="mt-1 text-xs text-[#81797b]">Images and MP4 video, up to 5 MB each.</p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <label htmlFor="profile-picture" className="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.14] bg-[#0b0a0a] px-4 py-6 text-center transition-colors hover:border-[#ff4056]/55 hover:bg-[#ff3047]/[0.035]">
+          <label htmlFor="profile-picture" className="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-[20px] border border-white/[0.08] bg-[#0b0b0d] px-4 py-6 text-center transition-colors hover:border-[#a951bb]/55 hover:bg-[#3b1e43]/20">
             <input
               id="profile-picture"
               type="file"
@@ -154,12 +154,12 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
               accept="image/jpeg,image/png,image/gif"
               onChange={(e) => handleFileChange(e, setProfilePicture, ['image/jpeg', 'image/png', 'image/gif'])}
             />
-            <ImageUp size={25} className="mb-3 text-[#ff6878]" />
+            <ImageUp size={25} className="mb-3 text-[#d58ae1]" />
             <span className="text-xs font-semibold text-[#e9e3e4]">Profile avatar</span>
             <span className="mt-1 max-w-full truncate text-[11px] text-[#81797b]">{profilePicture?.name || 'Click to choose an image'}</span>
           </label>
 
-          <label htmlFor="background-media" className="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.14] bg-[#0b0a0a] px-4 py-6 text-center transition-colors hover:border-[#ff4056]/55 hover:bg-[#ff3047]/[0.035]">
+          <label htmlFor="background-media" className="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-[20px] border border-white/[0.08] bg-[#0b0b0d] px-4 py-6 text-center transition-colors hover:border-[#a951bb]/55 hover:bg-[#3b1e43]/20">
             <input
               id="background-media"
               type="file"
@@ -167,15 +167,14 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
               accept="image/jpeg,image/png,image/gif,video/mp4"
               onChange={(e) => handleFileChange(e, setBackgroundMedia, ['image/jpeg', 'image/png', 'image/gif', 'video/mp4'])}
             />
-            {backgroundMedia?.type.startsWith('video/') ? <Video size={25} className="mb-3 text-[#ff6878]" /> : <ImageUp size={25} className="mb-3 text-[#ff6878]" />}
+            {backgroundMedia?.type.startsWith('video/') ? <Video size={25} className="mb-3 text-[#d58ae1]" /> : <ImageUp size={25} className="mb-3 text-[#d58ae1]" />}
             <span className="text-xs font-semibold text-[#e9e3e4]">Background media</span>
             <span className="mt-1 max-w-full truncate text-[11px] text-[#81797b]">{backgroundMedia?.name || 'Choose an image or MP4'}</span>
           </label>
         </div>
       </section>
 
-      <Button type="submit" className="h-11 bg-[#e62940] px-5 font-semibold text-white hover:bg-[#ff3c53]">Save profile</Button>
+      <Button type="submit" className="h-12 rounded-full border border-[#9650a5] bg-[#572760] px-6 font-semibold text-white hover:bg-[#683073]">Save profile</Button>
     </form>
   );
 };
-

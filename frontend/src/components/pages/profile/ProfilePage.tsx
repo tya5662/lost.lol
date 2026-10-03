@@ -83,7 +83,7 @@ const ProfilePage: React.FC = () => {
 
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center bg-[#090909] text-sm text-[#a39b9c]">
-      <span className="mr-3 h-2 w-2 animate-pulse rounded-full bg-[#ff4056]" />Loading profile
+      <span className="mr-3 h-2 w-2 animate-pulse rounded-full bg-[#c15bd7]" />Loading profile
     </div>
   );
 
@@ -94,7 +94,7 @@ const ProfilePage: React.FC = () => {
       <p className="mt-2 text-sm text-[#928a8b]">The username may be unavailable or misspelled.</p>
       <button
             onClick={() => navigate('/')}
-            className="mt-6 inline-flex h-10 items-center rounded-lg border border-[#ff4056]/30 bg-[#e62940] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ff3c53] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff7a88]"
+            className="mt-6 inline-flex h-10 items-center rounded-full border border-[#9650a5] bg-[#572760] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#683073] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ce80dc]"
           >
            Back to lost.lol
           </button>
@@ -102,7 +102,7 @@ const ProfilePage: React.FC = () => {
   );
 
   const { profilePicture, backgroundMedia, backgroundType, name, description, links, username: profileUsername } = profile;
-  const accentColor = profile.accentColor || '#ff596b';
+  const accentColor = profile.accentColor || '#a951bb';
   const textColor = profile.textColor || '#f4f0ef';
 
   const toggleVideo = async () => {
@@ -162,15 +162,15 @@ const ProfilePage: React.FC = () => {
       )}
 
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(123,18,32,.18),transparent_58%)]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,39,113,.2),transparent_58%)]" />
 
       <a href="/" aria-label="lost.lol home" className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
-        <span className="grid h-8 w-8 place-items-center rounded-[9px] border border-[#ff3047]/35 bg-[#ff3047]/10 text-[#ff5265]"><AudioLines size={16} /></span>
-        lost<span className="-ml-2 text-[#ff4056]">.lol</span>
+        <span className="grid h-8 w-8 place-items-center rounded-[9px] border border-[#a951bb]/35 bg-[#a951bb]/10 text-[#d58ae1]"><AudioLines size={16} /></span>
+        lost<span className="-ml-2 text-[#c15bd7]">.lol</span>
       </a>
 
       {backgroundType === 'video' && backgroundMedia && (
-        <button onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur transition-colors hover:border-[#ff4056]/40 hover:bg-[#171010] sm:right-8 sm:top-7">
+        <button onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-lg border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur transition-colors hover:border-[#a951bb]/50 hover:bg-[#171418] sm:right-8 sm:top-7">
           {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}
           {isVideoPlaying ? 'Pause motion' : 'Play motion'}
         </button>
@@ -203,13 +203,13 @@ const ProfilePage: React.FC = () => {
                   href={link.safeUrl}
                   target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'}
                   rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                  className="group flex min-h-14 items-center gap-3 rounded-lg border border-white/[0.09] bg-white/[0.025] px-3.5 text-left transition-all duration-200 hover:-translate-y-px hover:border-[#ff4056]/40 hover:bg-[#ff3047]/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff596b]"
+                  className="group flex min-h-14 items-center gap-3 rounded-full border border-white/[0.09] bg-white/[0.025] px-4 text-left transition-all duration-200 hover:-translate-y-px hover:border-[#a951bb]/50 hover:bg-[#47204f]/[0.28] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c15bd7]"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-white/[0.08] bg-black/30 transition-colors" style={{ color: accentColor }}>
                     <IconComponent size={17} />
                   </span>
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold" style={{ color: textColor }}>{link.title || 'Open link'}</span>
-                  <ArrowUpRight size={16} className="shrink-0 text-[#777173] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ff596b]" />
+                  <ArrowUpRight size={16} className="shrink-0 text-[#777173] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#d58ae1]" />
                 </a>
               );
             })}
