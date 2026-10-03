@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import passport from 'passport';
-import session from 'express-session';
 import path from 'path';
 import userRoutes from './routes/userRoutes';
 import linkRoutes from "./routes/linkRoutes"
@@ -16,17 +15,11 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(session({
-  secret: process.env.SESSION_SECRET!,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
 app.use(passport.initialize());
 
+app.use((_req, _res, next) => {
+  void mongoDB().then(() => next()).catch(next);
+});
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
@@ -42,7 +35,16 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 app.get('/' , (req,res)=> {
   res.json({status: 'ok'})
 })
-app.listen(3000, () => {
-  mongoDB()
-  console.log(`Server is running `);
-});
+
+if (!process.env.VERCEL) {
+  void mongoDB().then(() => {
+    const port = Number(process.env.PORT) || 3000;
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  }).catch((error: unknown) => {
+    console.error('Unable to connect to MongoDB', error);
+  });
+}
+
+export default app;

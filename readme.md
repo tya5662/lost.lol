@@ -126,3 +126,22 @@ npm run build
 npx serve -s dist -p 5173
 ```
 
+## Deploying to Vercel
+
+Deploy the frontend and backend as two Vercel projects from this repository:
+
+- Frontend project root: `frontend`. Vercel builds with `npm run build` and serves `dist`; the rewrite keeps profile URLs working on refresh.
+- Backend project root: `backend`. Its `vercel.json` deploys the Express app as a Node function.
+
+Set these environment variables in the backend project's Vercel settings for each environment you deploy:
+
+- `MONGO`: MongoDB connection string for a hosted MongoDB deployment. Ensure its network access settings allow connections from Vercel.
+- `FRONTEND_URL`: exact deployed frontend origin, for example `https://your-site.vercel.app`.
+- `JWT_SECRET`: long, random secret used to sign authentication tokens.
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth credentials.
+- `GOOGLE_CALLBACK_URL`: absolute backend callback URL, `https://your-api.vercel.app/auth/google/callback`. Add this same URL to the authorized redirect URIs in Google Cloud.
+
+Set `VITE_BACKEND_URL` in the frontend project's Vercel settings to the backend origin, for example `https://your-api.vercel.app`. This value is included in frontend assets, so it must only contain the public API origin, never a secret. Redeploy the frontend after changing it.
+
+`SESSION_SECRET` is not required: the API uses JWT authentication and does not rely on server-side sessions.
+
