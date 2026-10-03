@@ -14,28 +14,22 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.2",
     "mongoose-plugin-autoinc": "^1.1.9",
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.11.4",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
     "vercel": "^39.1.0",
     "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
-    "@types/express-session": "^1.18.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^1.4.12",
     "@types/mysql": "^2.15.26",
     "@types/node": "^22.9.0",
-    "@types/passport": "^1.0.17",
-    "@types/passport-google-oauth20": "^2.0.16",
     "typescript": "^5.6.3"
   }
 }

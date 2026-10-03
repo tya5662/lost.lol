@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
   },
   username: {
     type: String,
+    lowercase: true,
+    trim: true,
+    unique: true,
+    sparse: true,
   },
   name: {
     type: String,
@@ -45,10 +49,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
+    lowercase: true,
+    trim: true,
   },
-  googleId: {
+  passwordHash: {
     type: String,
-    unique: true,
+    select: false,
   },
   createdAt: {
     type: Date,

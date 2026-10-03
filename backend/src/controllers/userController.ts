@@ -357,7 +357,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
         ? `data:image/jpeg;base64,${user.profilePicture.toString('base64')}`
         : null,
       backgroundMedia: user.backgroundMedia
-        ? `data:image/${user.backgroundType || 'jpeg'};base64,${user.backgroundMedia.toString('base64')}`
+        ? `data:${user.backgroundType === 'video' ? 'video/mp4' : 'image/jpeg'};base64,${user.backgroundMedia.toString('base64')}`
         : null,
       links
     };
@@ -449,10 +449,10 @@ export const setUsername = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
-    // Prevent specific username
-    if (username === "dashboard") {
+    // Keep profile names from shadowing application routes.
+    if (["api", "auth", "dashboard", "login", "register"].includes(username)) {
       res.status(400).json({
-        message: "Trying to be cheeky? YOU CANNOT USE IT.",
+        message: "That username is reserved.",
       });
       return;
     }

@@ -1,11 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import passport from 'passport';
 import path from 'path';
 import userRoutes from './routes/userRoutes';
 import linkRoutes from "./routes/linkRoutes"
 import authRoutes from './routes/authRoutes';
-import './config/passport';
 import { mongoDB } from './config/database';
 
 const app = express();
@@ -15,8 +13,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(passport.initialize());
-
 app.use((_req, _res, next) => {
   void mongoDB().then(() => next()).catch(next);
 });

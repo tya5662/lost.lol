@@ -87,8 +87,8 @@ const UsernameSetup: React.FC<UsernameSetupProps> = ({ onUsernameSet }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background text-center">
-      <h1 className="text-6xl font-bold mb-12">Before You Start</h1>
-      <div className="w-full max-w-md p-8 space-y-6 bg-gray-500/50 backdrop-blur-sm rounded-xl shadow-lg">
+      <h1 className="mb-8 text-3xl font-bold text-white">Set up your <span className="text-[#ff4056]">lost.lol</span> page</h1>
+      <div className="w-full max-w-md space-y-6 rounded-xl border border-white/10 bg-[#111010] p-8 shadow-lg">
         <h2 className="text-2xl font-bold text-center">Choose Your Username</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -106,7 +106,7 @@ const UsernameSetup: React.FC<UsernameSetupProps> = ({ onUsernameSet }) => {
           </div>
           <Button
             type="submit"
-            className="w-full bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+            className="w-full bg-[#e62940] text-white transition-colors hover:bg-[#ff3c53]"
             disabled={isChecking}
           >
             {isChecking ? "Checking..." : "Set Username"}

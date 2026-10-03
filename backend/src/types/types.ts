@@ -6,7 +6,6 @@ export interface User {
   name: string;
   email: string;
   profilePicture?: string;
-  googleId?: string;
   description?: string;
   backgroundMedia?: string;
   backgroundType?: 'image' | 'video';

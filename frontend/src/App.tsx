@@ -47,12 +47,8 @@ import {
 //   Menu
 // } from 'lucide-react';
 import ProfilePage from './components/pages/profile/ProfilePage';
-// import UsernameSetup from './components/UsernameSetup';
-// import LinkForm from './components/LinkForm';
-// // Types
-// import { apiService, API_URL } from './services/api';
 import { HomePage } from './components/pages/homepage/HomePage';
-import { AuthCallback } from './components/auth/AuthCallback';
+import { AuthPage } from './components/auth/AuthPage';
 import { Dashboard } from './components/pages/dashboard/Dashboard';
 
 import { Analytics } from "@vercel/analytics/react"
@@ -65,7 +61,8 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/oauth-callback" element={<AuthCallback />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/:username" element={<ProfilePage />} />
       </Routes>

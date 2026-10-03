@@ -240,14 +240,14 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-600">
-      <div className="w-full bg-white dark:bg-black shadow-sm">
+    <div className="min-h-screen bg-[#090909] text-[#f4f0ef]">
+      <div className="w-full border-b border-white/[0.08] bg-[#0e0d0d] shadow-sm">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">ProfilesMe Dashboard</h1>
+          <h1 className="text-xl font-semibold">lost<span className="text-[#ff4056]">.lol</span></h1>
           <Button
             variant="ghost"
             onClick={handleLogout}
-            className="flex items-center space-x-2 text-red-600 hover:text-red-700 dark:text-gray-300 dark:hover:text-white bg-red-700 hover:bg-red-900"
+            className="flex items-center space-x-2 bg-[#e62940] text-white hover:bg-[#ff3c53]"
           >
             <LogOut className="h-4 w-4" />
             <span>Logout</span>
@@ -260,17 +260,17 @@ export const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Section */}
 
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 border-white/[0.08] bg-[#111010] text-white">
             <CardHeader className="space-y-1">
-            <div className="inline-block px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm text-center">
-  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Visits to your profile</h3>
-  <p className="mt-1 text-lg font-bold text-blue-500 dark:text-blue-400">{user.totalVisit}</p>
+            <div className="inline-block rounded-lg border border-white/[0.08] bg-black/30 px-4 py-2 text-center">
+  <h3 className="text-sm font-medium text-[#aaa2a3]">Total visits</h3>
+  <p className="mt-1 text-lg font-bold text-[#ff596b]">{user.totalVisit}</p>
 </div>
 
               <CardTitle className="text-2xl">Profile</CardTitle>
 
               <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl">
+              <div className="h-12 w-12 rounded-full border border-[#ff4056]/35 bg-[#241114] flex items-center justify-center text-[#ff6878] text-xl">
                   {user.profilePicture ? (
                            <img
                                 src={user.profilePicture}
@@ -303,7 +303,7 @@ export const Dashboard: React.FC = () => {
           </Card>
 
           {/* Social Links Section */}
-          <Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 border-white/[0.08] bg-[#111010] text-white">
             <CardHeader>
               <CardTitle className="text-2xl">Social Links</CardTitle>
               <p className="text-sm text-gray-500">
@@ -381,7 +381,7 @@ export const Dashboard: React.FC = () => {
 
 
 {/* Custom Links Section */}
-<Card className="lg:col-span-1">
+          <Card className="lg:col-span-1 border-white/[0.08] bg-[#111010] text-white">
             <CardHeader>
               <CardTitle className="text-2xl">Custom Links</CardTitle>
               <p className="text-sm text-gray-500">

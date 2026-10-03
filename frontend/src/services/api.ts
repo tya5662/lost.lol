@@ -5,15 +5,48 @@ import {
 } from '../types';
 
 export const BURL = backendUrl
-export const GOOGLE_AUTH = `${backendUrl}/auth/google`
 export const AUTH = `${backendUrl}/auth/me`
 
 export const API_URL = `${backendUrl}/api`;
 
+interface AuthResponse {
+  token: string;
+  user: {
+    id: number;
+    username: string;
+    name: string;
+    email: string;
+  };
+}
+
+const submitAuth = async (path: 'register' | 'login', details: Record<string, string>): Promise<AuthResponse> => {
+  const response = await fetch(`${backendUrl}/auth/${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(details),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Unable to authenticate. Please try again.');
+  }
+
+  if (typeof data.token !== 'string') {
+    throw new Error('The server returned an invalid authentication response.');
+  }
+
+  localStorage.setItem('token', data.token);
+  return data as AuthResponse;
+};
+
 
 export const apiService = {
-  async googleLogin() {
-    window.location.href = GOOGLE_AUTH;
+  async registerAccount(details: { email: string; username: string; password: string }): Promise<AuthResponse> {
+    return submitAuth('register', details);
+  },
+
+  async loginAccount(details: { identifier: string; password: string }): Promise<AuthResponse> {
+    return submitAuth('login', details);
   },
 
   async getUser(username: string): Promise<User> {

@@ -189,7 +189,7 @@ export const Lid = ({
           className="absolute inset-0 bg-[#010101] rounded-lg flex items-center justify-center"
         >
           <span className="text-white font-bold">
-            ProfilesMe
+            lost.lol
           </span>
         </div>
       </div>

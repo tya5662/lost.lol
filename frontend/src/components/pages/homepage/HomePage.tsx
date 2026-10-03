@@ -1,11 +1,13 @@
-import { apiService, BURL } from "@/services/api";
+import { BURL } from "@/services/api";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { useEffect, useState } from "react";
 import { ArrowRight, ArrowUpRight, AudioLines, Check, Link2 } from "lucide-react";
 import { MacbookScrollDemo } from "./MacbookScrollDemo";
+import { useNavigate } from "react-router-dom";
 
 export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState('Offline');
   const [isOnline, setIsOnline] = useState(false);
@@ -66,7 +68,7 @@ export const HomePage: React.FC = () => {
               {status === 'Online' ? 'All systems operational' : 'Connecting'}
             </span>
             <Button
-              onClick={apiService.googleLogin}
+              onClick={() => navigate('/login')}
               className="group h-10 rounded-lg border border-white/10 bg-white/[0.055] px-4 text-sm font-semibold text-white shadow-[0_5px_20px_rgba(0,0,0,.25)] transition-all hover:border-[#ff4056]/40 hover:bg-[#ff3047]/10 focus-visible:ring-2 focus-visible:ring-[#ff4056] focus-visible:ring-offset-2 focus-visible:ring-offset-[#090909]"
             >
               Sign in
@@ -100,7 +102,7 @@ export const HomePage: React.FC = () => {
             className="mt-9 max-w-[560px]"
             onSubmit={(event) => {
               event.preventDefault();
-              apiService.googleLogin();
+              navigate(`/register${username ? `?username=${encodeURIComponent(username)}` : ''}`);
             }}
           >
             <label htmlFor="username" className="mb-2.5 block text-xs font-semibold uppercase tracking-[.1em] text-[#aaa3a4]">

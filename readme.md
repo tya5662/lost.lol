@@ -1,6 +1,6 @@
-# ProfilesMe
+# lost.lol
 
-### ProfilesMe is a profile builder platform similar to `guns.lol` that allows users to create a single, comprehensive profile link to showcase all their online presence.
+### lost.lol is a profile builder that lets users create a single page for their online presence.
 ![Screenshot from 2024-11-21 21-20-29](https://github.com/user-attachments/assets/f4e917d9-9767-45ea-8e7e-17437ef6804e)
 
 
@@ -30,9 +30,8 @@
 - TypeScript
 - NodeJS
 - Express
-- MySQL
 - MongoDB
-- Google OAuth
+- Email/password accounts with JWT authentication
 
 ## Getting Started
 
@@ -45,32 +44,21 @@
 
 1. Clone the repository
 ```bash
-git clone https://github.com/sadanandmiskin/profilesme.git
+git clone https://github.com/tya5662/lost.lol.git
 ```
 
 
 
 - Create a `.env` file in `/backend` with:
 ```bash
-DB_HOST=  #Mysql
-DB_USER=
-DB_PASSWORD=
-DB_NAME=
-PORT=
-GOOGLE_CLIENT_ID=  #get it from google cloud console
-GOOGLE_CLIENT_SECRET=
-JWT_SECRET=  # Random String
-SESSION_SECRET=  # Random String
-FRONTEND_URL=
-MONGO=mongodb://mongo:27017   #mongo uri
+PORT=3000
+MONGO=mongodb://localhost:27017
+JWT_SECRET=  # Random, high-entropy string
+FRONTEND_URL=http://localhost:5173
 ```
-
-
-### Using Docker (Recommended)
-- First Install docker and docker compose.
 - Then:
 ```bash
-cd profilesMe
+cd lost.lol
 ```
 - Run the whole app container
 ```bash
@@ -81,9 +69,6 @@ docker compose up
 
 ### Or
 ### Using npm - yarn
-
-### Running Backend-
-
 - Environment Setup
 ```bash
 cd backend
@@ -106,8 +91,7 @@ yarn install
 ```
 
 
-- Change the backend url in `frontend/src/backendUrl.ts`
-- Add the fronend Url in .env file in `/backend`
+- Set `VITE_BACKEND_URL` to the backend URL in the frontend environment.
 
 3. Run the development server
 ```bash
@@ -138,10 +122,8 @@ Set these environment variables in the backend project's Vercel settings for eac
 - `MONGO`: MongoDB connection string for a hosted MongoDB deployment. Ensure its network access settings allow connections from Vercel.
 - `FRONTEND_URL`: exact deployed frontend origin, for example `https://your-site.vercel.app`.
 - `JWT_SECRET`: long, random secret used to sign authentication tokens.
-- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`: Google OAuth credentials.
-- `GOOGLE_CALLBACK_URL`: absolute backend callback URL, `https://your-api.vercel.app/auth/google/callback`. Add this same URL to the authorized redirect URIs in Google Cloud.
 
 Set `VITE_BACKEND_URL` in the frontend project's Vercel settings to the backend origin, for example `https://your-api.vercel.app`. This value is included in frontend assets, so it must only contain the public API origin, never a secret. Redeploy the frontend after changing it.
 
-`SESSION_SECRET` is not required: the API uses JWT authentication and does not rely on server-side sessions.
+Authentication uses email/username and password with JWTs.
 
