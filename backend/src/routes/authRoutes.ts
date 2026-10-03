@@ -39,6 +39,24 @@ const issueToken = (id: number, email: string, username: string): string => {
   return jwt.sign({ id, email, username }, secret, { expiresIn: '7d' });
 };
 
+const duplicateAccountMessage = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error === null || !('code' in error) || error.code !== 11000) {
+    return undefined;
+  }
+
+  if ('keyPattern' in error && typeof error.keyPattern === 'object' && error.keyPattern !== null) {
+    if ('email' in error.keyPattern) return 'An account with this email already exists. Try signing in instead.';
+    if ('username' in error.keyPattern) return 'That username is already taken. Please choose another.';
+  }
+
+  if ('message' in error && typeof error.message === 'string') {
+    if (error.message.includes('email_1')) return 'An account with this email already exists. Try signing in instead.';
+    if (error.message.includes('username_1')) return 'That username is already taken. Please choose another.';
+  }
+
+  return undefined;
+};
+
 router.post('/register', async (req, res, next) => {
   const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   const username = typeof req.body.username === 'string' ? req.body.username.trim().toLowerCase() : '';
@@ -63,10 +81,18 @@ router.post('/register', async (req, res, next) => {
     return;
   }
 
+  if (!process.env.JWT_SECRET) {
+    next(new Error('JWT_SECRET environment variable is required'));
+    return;
+  }
+
   try {
-    const existingUser = await User.exists({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      res.status(409).json({ message: 'That email or username is already in use.' });
+    if (await User.exists({ email })) {
+      res.status(409).json({ message: 'An account with this email already exists. Try signing in instead.' });
+      return;
+    }
+    if (await User.exists({ username })) {
+      res.status(409).json({ message: 'That username is already taken. Please choose another.' });
       return;
     }
 
@@ -83,8 +109,9 @@ router.post('/register', async (req, res, next) => {
       user: { id: user.id, username, name: user.name, email: user.email },
     });
   } catch (error) {
-    if ((error as { code?: number }).code === 11000) {
-      res.status(409).json({ message: 'That email or username is already in use.' });
+    const message = duplicateAccountMessage(error);
+    if (message) {
+      res.status(409).json({ message });
       return;
     }
     next(error);

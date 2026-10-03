@@ -9,7 +9,7 @@ const counterSchema = new mongoose.Schema({
   },
   count: {
     type: Number,
-    default: 1,
+    default: 0,
   },
 });
 
@@ -88,10 +88,26 @@ const userSchema = new mongoose.Schema({
 // Pre-save Hook for Auto-Incrementing ID
 userSchema.pre('save', async function (next) {
   if (!this.id) {
+    const highestUser = await mongoose.model('User').collection.findOne(
+      { id: { $type: 'number' } },
+      { sort: { id: -1 }, projection: { id: 1 } }
+    );
+    const highestId = typeof highestUser?.id === 'number' ? highestUser.id : 0;
+
+    try {
+      await Counter.updateOne(
+        { field: 'userId' },
+        { $max: { count: highestId } },
+        { upsert: true, setDefaultsOnInsert: false }
+      );
+    } catch (error) {
+      if ((error as { code?: number }).code !== 11000) throw error;
+    }
+
     const counter = await Counter.findOneAndUpdate(
       { field: 'userId' },
       { $inc: { count: 1 } },
-      { new: true, upsert: true } // Create the counter if it doesn't exist
+      { new: true, upsert: true }
     );
     this.id = counter.count;
   }
