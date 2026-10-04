@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes, Award, Search, Menu, X as XIcon } from 'lucide-react';
+import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes, Award, Search, Menu, X as XIcon, Sparkles } from 'lucide-react';
 import { User } from '../../../types';
 
 const nav = [
@@ -21,7 +21,7 @@ export const DashboardHome: React.FC<{user:User}> = ({user}) => {
   const [open,setOpen]=React.useState(false);
   const location=useLocation();
   const privileged=['owner','co-owner','staff'].includes(user.role||'');
-  const Sidebar=()=> <aside className={`fixed inset-y-0 left-0 z-50 w-[270px] border-r border-white/[.07] bg-[#0b0b0c] px-4 py-5 transition-transform duration-200 lg:static lg:translate-x-0 ${open?'translate-x-0':'-translate-x-full'}`}>
+  const Sidebar=()=> <aside className={`fixed inset-y-0 left-0 z-50 flex max-h-screen w-[270px] flex-col overflow-y-auto overscroll-contain border-r border-white/[.07] bg-[#0b0b0c] px-4 py-5 transition-transform duration-200 lg:static lg:translate-x-0 ${open?'translate-x-0':'-translate-x-full'}`}>
     <div className="flex items-center justify-between px-3 pb-7">
       <Link to="/dashboard" className="text-xl font-black tracking-tight">lost<span className="text-orange-500">.lol</span></Link>
       <button className="lg:hidden rounded-lg p-2 hover:bg-white/5" onClick={()=>setOpen(false)}><XIcon size={18}/></button>
@@ -37,7 +37,7 @@ export const DashboardHome: React.FC<{user:User}> = ({user}) => {
     <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Premium</div>
     <nav className="space-y-1">{premium.map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200"><Icon size={17}/>{label}{label!=='General'&&<span className="ml-auto rounded-full bg-amber-400/10 px-1.5 py-0.5 text-[8px] uppercase text-amber-400">Pro</span>}</Link>)}</nav>
     {privileged&&<Link to="/admin" className="mt-6 flex items-center gap-3 rounded-xl border border-red-500/10 bg-red-500/[.04] px-3 py-2.5 text-sm text-red-300"><Shield size={17}/>Admin Panel</Link>}
-    <div className="absolute bottom-5 left-4 right-4"><Link to={`/${user.username}`} target="_blank" className="flex items-center justify-center gap-2 rounded-xl border border-white/[.08] bg-white/[.03] px-3 py-2.5 text-sm hover:bg-white/[.06]"><Eye size={16}/>View profile</Link></div>
+    <div className="sticky bottom-0 mt-auto bg-[#0b0b0c] pt-4"><Link to={`/${user.username}`} target="_blank" className="flex items-center justify-center gap-2 rounded-xl border border-white/[.08] bg-white/[.03] px-3 py-2.5 text-sm hover:bg-white/[.06]"><Eye size={16}/>View profile</Link></div>
   </aside>;
   return <div className="min-h-screen bg-[#080809] text-white lg:flex">
     {open&&<button aria-label="Close menu" onClick={()=>setOpen(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden"/>}<Sidebar/>
@@ -47,19 +47,11 @@ export const DashboardHome: React.FC<{user:User}> = ({user}) => {
         <div className="flex items-center gap-2"><span className="hidden rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold uppercase text-orange-400 sm:block">{user.role||'member'}</span>{user.premium&&<Crown size={16} className="text-amber-400"/>}<button onClick={()=>{localStorage.removeItem('token');window.location.href='/';}} className="rounded-xl px-3 py-2 text-xs text-zinc-500 hover:bg-white/5 hover:text-white">Logout</button></div>
       </div></header>
       <main className="mx-auto max-w-6xl px-4 py-7 sm:px-7">
-        <div className="mb-7"><p className="text-xs font-semibold uppercase tracking-[.18em] text-zinc-600">Account</p><h1 className="mt-2 text-3xl font-bold tracking-tight">Overview</h1><p className="mt-2 text-sm text-zinc-500">Manage your profile, content, appearance and account from one workspace.</p></div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {[
-            ['/dashboard/profile','Profile',UserRound,'Your public identity and profile information.'],
-            ['/dashboard/appearance','Customize',Palette,'Colors, layout, effects and background.'],
-            ['/dashboard/socials','Socials',Share2,'Social profiles and connected accounts.'],
-            ['/dashboard/links','Links',Link2,'Create and organize your profile links.'],
-            ['/dashboard/music','Music',Music2,'Profile audio and playback settings.'],
-            ['/dashboard/widgets','Widgets',Boxes,'Extra profile content and widgets.'],
-            ['/dashboard/analytics','Analytics',BarChart3,'Visits and profile performance.'],
-            ['/dashboard/badges','Badges',Award,'Manage your public profile badges.'],
-            ['/dashboard/account','Account',Settings,'Account preferences and security.'],
-          ].map(([to,title,Icon,text])=>{const C=Icon as React.ElementType;return <Link key={to as string} to={to as string} className="rounded-2xl border border-white/[.07] bg-[#0e0e10] p-5 transition hover:-translate-y-0.5 hover:border-orange-500/25 hover:bg-[#111113]"><div className="mb-5 grid h-10 w-10 place-items-center rounded-xl bg-white/[.04] text-orange-400"><C size={18}/></div><h2 className="text-sm font-semibold">{title as string}</h2><p className="mt-1 text-xs leading-5 text-zinc-600">{text as string}</p></Link>})}
+        <div className="mb-7"><p className="text-xs font-semibold uppercase tracking-[.18em] text-zinc-600">Account</p><h1 className="mt-2 text-3xl font-bold tracking-tight">Overview</h1><p className="mt-2 text-sm text-zinc-500">Your profile at a glance.</p></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link to="/dashboard/analytics" className="group rounded-2xl border border-white/[.07] bg-[#0e0e10] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-orange-500/30"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-orange-500/10 text-orange-400 transition-transform duration-300 group-hover:scale-110"><BarChart3 size={19}/></div><h2 className="text-base font-semibold">Views</h2><p className="mt-2 text-sm text-zinc-600">See profile views and performance.</p></Link>
+          <Link to="/dashboard/premium" className="group rounded-2xl border border-white/[.07] bg-[#0e0e10] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-orange-500/30"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-orange-500/10 text-orange-400 transition-transform duration-300 group-hover:scale-110"><Crown size={19}/></div><h2 className="text-base font-semibold">Statistics</h2><p className="mt-2 text-sm text-zinc-600">View your profile statistics.</p></Link>
+          {user.premium&&<Link to="/dashboard/aliases" className="group rounded-2xl border border-amber-500/15 bg-amber-500/[.03] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/30"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-amber-400/10 text-amber-300 transition-transform duration-300 group-hover:scale-110"><Sparkles size={19}/></div><h2 className="text-base font-semibold">Aliases</h2><p className="mt-2 text-sm text-zinc-600">Manage alternate names like list or mourn.</p></Link>}
         </div>
       </main>
     </section>
