@@ -57,6 +57,8 @@ const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [musicBlocked, setMusicBlocked] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
   useEffect(()=>{
