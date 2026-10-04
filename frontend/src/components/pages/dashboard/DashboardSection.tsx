@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound, Shield } from 'lucide-react';
 import { User, Link as LinkType } from '../../../types';
-import { apiService, AUTH } from '../../../services/api';
+import { apiService } from '../../../services/api';
 
 const nav=[
   ['Overview','/dashboard',BarChart3],['Analytics','/dashboard/analytics',BarChart3],['Badges','/dashboard/badges',Crown],
