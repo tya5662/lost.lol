@@ -189,7 +189,40 @@
 // };
 
 
-// export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+// 
+export const updatePreferences = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const username = req.params.username;
+    const actorId = (req.user as any).id;
+    const user = await User.findOne({ username });
+    if (!user || user.id !== actorId) {
+      res.status(403).json({ message: 'You can only update your own profile settings.' });
+      return;
+    }
+
+    const allowed = [
+      'location','showLocation','showDiscordPresence','discordUsername',
+      'profileOpacity','profileBlur','profileGradient','monochromeIcons','animatedTitle',
+      'usernameEffect','backgroundEffect','cursorEffect','fontFamily',
+      'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
+      'audioUrl','audioTitle','layout','metadataTitle','metadataDescription','metadataImage',
+      'secondTab'
+    ] as const;
+
+    for (const key of allowed) {
+      if (Object.prototype.hasOwnProperty.call(req.body, key)) {
+        (user as any)[key] = req.body[key];
+      }
+    }
+
+    await user.save();
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
 //   try {
 //     const { username } = req.params;
 
