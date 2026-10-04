@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Pause, Play, X,
+  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Pause, Play, X, Disc3, BadgeCheck,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_URL } from '@/services/api';
@@ -12,6 +12,9 @@ interface UserProfile {
   accentColor?: string; textColor?: string; backgroundColor?: string; backgroundMedia: string | null;
   backgroundType: 'image' | 'video' | null;
   usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
+  fontFamily?: string; customFontFamily?: string; verified?: boolean;
+  customEmojis?: Array<{name:string;value:string}>;
+  profileOpacity?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
   audioTitle?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
