@@ -392,6 +392,9 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
       backgroundMedia: user.backgroundMedia
         ? `data:${user.backgroundType === 'video' ? 'video/mp4' : 'image/jpeg'};base64,${user.backgroundMedia.toString('base64')}`
         : null,
+      audioUrl: user.audioMedia
+        ? `data:${user.audioMime || 'audio/mpeg'};base64,${user.audioMedia.toString('base64')}`
+        : user.audioUrl || '',
       links
     };
 
@@ -438,10 +441,27 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       user.profilePicture = files.profilePicture[0].buffer;
     }
 
-    // Handle background media
+    // Handle background media. MP4/video audio is preserved.
     if (files.backgroundMedia) {
-      user.backgroundMedia = files.backgroundMedia[0].buffer;
-      user.backgroundType = files.backgroundMedia[0].mimetype.startsWith('video') ? 'video' : 'image';
+      const file = files.backgroundMedia[0];
+      if (!file.mimetype.startsWith('image/') && !file.mimetype.startsWith('video/')) {
+        res.status(400).json({ message: 'Background must be an image or video file.' });
+        return;
+      }
+      user.backgroundMedia = file.buffer;
+      user.backgroundType = file.mimetype.startsWith('video/') ? 'video' : 'image';
+    }
+
+    const audioFile = files.audioFile?.[0];
+    if (audioFile) {
+      if (!['audio/mpeg','audio/mp3','audio/wav','audio/ogg','audio/mp4','audio/aac'].includes(audioFile.mimetype)) {
+        res.status(400).json({ message: 'Music must be an MP3 or supported audio file.' });
+        return;
+      }
+      user.audioMedia = audioFile.buffer;
+      user.audioMime = audioFile.mimetype === 'audio/mp3' ? 'audio/mpeg' : audioFile.mimetype;
+      user.audioUrl = '';
+      user.audioTitle = audioFile.originalname.replace(/\.[^/.]+$/, '').slice(0, 80);
     }
 
     await user.save();
