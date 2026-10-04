@@ -205,7 +205,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       'profileOpacity','profileBlur','profileGradient','monochromeIcons','animatedTitle',
       'usernameEffect','backgroundEffect','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
-      'audioUrl','audioTitle','layout','metadataTitle','metadataDescription','metadataImage',
+      'audioUrl','audioTitle','layout','metadataTitle','metadataDescription','metadataImage','aliases',
       'secondTab'
     ] as const;
 
