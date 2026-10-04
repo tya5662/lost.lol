@@ -17,8 +17,6 @@ const submitAuth=async(path:'register'|'login',details:Record<string,string>):Pr
 export const apiService={
  registerAccount:(details:{email:string;username:string;password:string})=>submitAuth('register',details),
  loginAccount:(details:{identifier:string;password:string})=>submitAuth('login',details),
- verifyOtp:async(identifier:string,code:string)=>{const data=await requestJson('/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier,code})});if(typeof data.token!=='string')throw new Error('The server returned an invalid authentication response.');localStorage.setItem('token',data.token);return data as AuthResponse;},
- resendOtp:async(identifier:string)=>requestJson('/auth/resend-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier})}),
  logout:()=>{localStorage.removeItem('token');},
  getUser:async(username:string):Promise<User>=>requestJson(`/api/users/${encodeURIComponent(username)}`),
  getUserLinks:async(userId:number|string):Promise<LinkType[]>=>requestJson(`/api/links/user/${userId}`),
