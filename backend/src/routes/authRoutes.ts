@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { randomBytes, scrypt, timingSafeEqual } from 'crypto';
+import { createHash, randomBytes, scrypt, timingSafeEqual } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { isAuthenticated } from '../middleware/auth';
 import { User } from '../model/profiles';
@@ -36,7 +36,43 @@ const verifyPassword = async (password: string, passwordHash: string): Promise<b
 const issueToken = (id: number, email: string, username: string): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error('JWT_SECRET environment variable is required');
-  return jwt.sign({ id, email, username }, secret, { expiresIn: '7d' });
+  return jwt.sign({ id, email, username }, secret, { expiresIn: '30d' });
+};
+
+const hashOtp = (code: string): string => createHash('sha256').update(code + (process.env.JWT_SECRET || '')).digest('hex');
+
+const maskEmail = (email: string): string => {
+  const [name, domain] = email.split('@');
+  if (!domain) return email;
+  const visible = name.length <= 2 ? name[0] || '' : name.slice(0, 2);
+  return visible + '***@' + domain;
+};
+
+const sendOtpEmail = async (email: string, code: string): Promise<void> => {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) throw new Error('Email OTP is not configured. Set RESEND_API_KEY and RESEND_FROM_EMAIL.');
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      subject: 'Your verification code',
+      html: `<div style="font-family:Arial,sans-serif;background:#080808;color:#fff;padding:32px"><h2>Email verification</h2><p>Your verification code is:</p><div style="font-size:32px;font-weight:700;letter-spacing:8px">${code}</div><p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p></div>`,
+    }),
+  });
+  if (!response.ok) throw new Error('Unable to send the verification email.');
+};
+
+const createAndSendOtp = async (user: any): Promise<void> => {
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  user.otpHash = hashOtp(code);
+  user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  user.otpAttempts = 0;
+  await user.save();
+  await sendOtpEmail(user.email, code);
 };
 
 const duplicateAccountMessage = (error: unknown): string | undefined => {
@@ -104,11 +140,14 @@ router.post('/register', async (req, res, next) => {
       username,
       name: username,
       passwordHash: await hashPassword(password),
+      emailVerified: false,
     });
     await user.save();
+    await createAndSendOtp(user);
 
     res.status(201).json({
-      token: issueToken(Number(user.id), user.email, username),
+      otpRequired: true,
+      email: maskEmail(user.email),
       user: { id: user.id, username, name: user.name, email: user.email },
     });
   } catch (error) {
@@ -144,13 +183,38 @@ router.post('/login', async (req, res, next) => {
       return;
     }
 
-    res.json({
-      token: issueToken(Number(user.id), user.email, user.username || ''),
-      user: { id: user.id, username: user.username, name: user.name, email: user.email },
-    });
+    await createAndSendOtp(user);
+    res.json({ otpRequired: true, email: maskEmail(user.email), user: { id: user.id, username: user.username, name: user.name, email: user.email } });
   } catch (error) {
     next(error);
   }
+});
+
+router.post('/verify-otp', async (req, res, next) => {
+  const identifier = typeof req.body.identifier === 'string' ? req.body.identifier.trim().toLowerCase() : '';
+  const code = typeof req.body.code === 'string' ? req.body.code.trim() : '';
+  if (!identifier || !/^\d{6}$/.test(code)) { res.status(400).json({ message: 'Enter the 6-digit verification code.' }); return; }
+  try {
+    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+otpHash +otpExpiresAt +otpAttempts');
+    if (!user?.otpHash || !user.otpExpiresAt || user.otpExpiresAt.getTime() < Date.now()) { res.status(400).json({ message: 'That code has expired. Request a new one.' }); return; }
+    if ((user.otpAttempts || 0) >= 5) { res.status(429).json({ message: 'Too many incorrect codes. Request a new one.' }); return; }
+    user.otpAttempts = (user.otpAttempts || 0) + 1;
+    const expected = Buffer.from(user.otpHash, 'hex');
+    const actual = Buffer.from(hashOtp(code), 'hex');
+    if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) { await user.save(); res.status(401).json({ message: 'Incorrect verification code.' }); return; }
+    user.emailVerified = true; user.otpHash = undefined; user.otpExpiresAt = undefined; user.otpAttempts = 0; await user.save();
+    res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), user: { id: user.id, username: user.username, name: user.name, email: user.email } });
+  } catch (error) { next(error); }
+});
+
+router.post('/resend-otp', async (req, res, next) => {
+  const identifier = typeof req.body.identifier === 'string' ? req.body.identifier.trim().toLowerCase() : '';
+  if (!identifier) { res.status(400).json({ message: 'Enter your email or username first.' }); return; }
+  try {
+    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
+    if (!user) { res.status(404).json({ message: 'Account not found.' }); return; }
+    await createAndSendOtp(user); res.json({ email: maskEmail(user.email) });
+  } catch (error) { next(error); }
 });
 
 router.get('/me', isAuthenticated, async (req, res, next) => {
