@@ -15,6 +15,10 @@ router.put('/:username', isAuthenticated, upload.fields([
   { name: 'backgroundMedia', maxCount: 1 }
 ]), updateUser);
 router.patch('/:username/preferences', isAuthenticated, updatePreferences);
+router.post('/:username/media', isAuthenticated, upload.fields([
+  { name: 'audioFile', maxCount: 1 },
+  { name: 'backgroundMedia', maxCount: 1 }
+]), updateUser);
 router.delete('/:username', isAuthenticated, deleteUser);
 router.post('/username' , isAuthenticated , setUsername)
 // router.get('/username' , )
