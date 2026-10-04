@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Pause, Play, X, Disc3, BadgeCheck,
+  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Pause, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles, ExternalLink,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_URL } from '@/services/api';
@@ -17,6 +17,12 @@ interface UserProfile {
   profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
   audioTitle?: string;
+  totalVisit?: number;
+  location?: string;
+  showLocation?: boolean;
+  showDiscordPresence?: boolean;
+  discordUsername?: string;
+  badges?: string[];
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -150,6 +156,29 @@ const ProfilePage: React.FC = () => {
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
           </div>
           {audioUrl && <div className="mx-auto mt-7 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400"><Disc3 size={15} style={{color:"#1ed760"}} />{audioTitle || "Profile music"}</div><audio ref={audioRef} controls preload="auto" autoPlay className="h-9 w-full" src={audioUrl}>Your browser does not support audio playback.</audio></div>}
+          <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Eye size={13} /> Views</div>
+              <div className="mt-1 text-sm font-bold" style={{color:textColor}}>{(profile.totalVisit ?? 0).toLocaleString()}</div>
+            </div>
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Sparkles size={13} /> Status</div>
+              <div className="mt-1 flex items-center gap-1.5 text-sm font-bold" style={{color:textColor}}><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.7)]" /> Online</div>
+            </div>
+          </div>
+          {(profile.showDiscordPresence || profile.showLocation) && <div className="mx-auto mt-3 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
+                <MessageCircle size={17} className="shrink-0 text-[#7289da]" />
+                <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}</div></div>
+              </div>}
+              {profile.showLocation && profile.location && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5">
+                <MapPin size={17} className="shrink-0" style={{color:accentColor}} />
+                <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Location</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.location}</div></div>
+              </div>}
+            </div>
+          </div>}
+          {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=><span key={b} className="inline-flex items-center gap-1.5 rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em]" style={{color:textColor}}><BadgeCheck size={12} style={{color:accentColor}} />{b}</span>)}</div> : null}
           <div className="mx-auto mt-8 max-w-[420px] space-y-3">
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
               <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">
