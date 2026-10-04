@@ -11,6 +11,7 @@ interface UserProfile {
   id: number; username: string; name: string; description: string | null; profilePicture: string | null;
   accentColor?: string; textColor?: string; backgroundColor?: string; backgroundMedia: string | null;
   backgroundType: 'image' | 'video' | null;
+  usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
   audioUrl?: string;
   audioTitle?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
@@ -85,9 +86,12 @@ const ProfilePage: React.FC = () => {
       <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to lost.lol</button>
     </div>
   );
-  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, name, description, links, username: profileUsername } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const textColor = profile.textColor || '#f4f0ef';
+  const usernameAnimation = usernameEffect === 'pulse' ? { scale: [1, 1.035, 1] } : usernameEffect === 'float' ? { y: [0, -4, 0] } : usernameEffect === 'shake' ? { x: [0, -2, 2, -2, 0] } : usernameEffect === 'glow' ? { textShadow: [`0 0 0px ${accentColor}`, `0 0 18px ${accentColor}`, `0 0 0px ${accentColor}`] } : {};
+  const usernameAnimationTransition = usernameEffect === 'none' ? {} : { duration: 2.2, repeat: Infinity, ease: 'easeInOut' as const };
+  const backgroundClass = backgroundEffect === 'aurora' ? 'animate-pulse' : backgroundEffect === 'pulse' ? 'animate-[pulse_4s_ease-in-out_infinite]' : backgroundEffect === 'scanlines' ? 'opacity-70' : '';
   const toggleVideo = async () => {
     const video = videoRef.current; if (!video) return;
     if (video.paused) { try { await video.play(); setIsVideoPlaying(true); } catch { setIsVideoPlaying(false); } }
@@ -98,10 +102,10 @@ const ProfilePage: React.FC = () => {
     return safeUrl ? [{ ...link, safeUrl }] : [];
   });
   return (
-    <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-16 sm:px-6" style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
+    <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? '[&_*]:cursor-default' : ''}` items-center justify-center overflow-hidden px-4 py-16 sm:px-6" style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
       {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)]" />
+      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
       <motion.a href="/" aria-label="lost.lol home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
@@ -120,7 +124,7 @@ const ProfilePage: React.FC = () => {
               <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full rounded-full border border-white/15 bg-[#120708] object-cover" />
             </motion.div>
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .24 }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}</motion.h1>
+            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}</motion.h1>
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
           </div>
           {audioUrl && <div className="mx-auto mt-7 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400"><AudioLines size={14} style={{color:accentColor}} />{audioTitle || "Profile music"}</div><audio controls preload="metadata" className="h-9 w-full" src={audioUrl}>Your browser does not support audio playback.</audio></div>}
