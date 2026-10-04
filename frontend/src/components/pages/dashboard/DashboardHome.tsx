@@ -1,42 +1,67 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes, Award, Search, Menu, X as XIcon } from 'lucide-react';
 import { User } from '../../../types';
 
-const cards = [
-  { to:'/dashboard/profile', icon:UserRound, title:'Profile', text:'Name, bio, avatar, location and profile details.' },
-  { to:'/dashboard/appearance', icon:Palette, title:'Appearance', text:'Colors, layouts, fonts, effects and backgrounds.' },
-  { to:'/dashboard/socials', icon:Share2, title:'Socials', text:'Manage your social profiles and connected accounts.' },
-  { to:'/dashboard/links', icon:Link2, title:'Links', text:'Create, edit and reorder your profile links.' },
-  { to:'/dashboard/music', icon:Music2, title:'Music', text:'Set profile audio, title and playback settings.' },
-  { to:'/dashboard/widgets', icon:Boxes, title:'Widgets', text:'Add profile widgets and extra content.' },
-  { to:'/dashboard/analytics', icon:BarChart3, title:'Analytics', text:'Track profile visits and growth.' },
-  { to:'/dashboard/premium', icon:Crown, title:'Premium', text:'Unlock and manage advanced customization.' },
-  { to:'/dashboard/account', icon:Settings, title:'Account', text:'Account settings and security.' },
+const nav = [
+  { label:'Overview', to:'/dashboard', icon:BarChart3 },
+  { label:'Analytics', to:'/dashboard/analytics', icon:BarChart3 },
+  { label:'Badges', to:'/dashboard/badges', icon:Award },
+  { label:'Settings', to:'/dashboard/settings', icon:Settings },
+  { label:'Customize', to:'/dashboard/appearance', icon:Palette },
+  { label:'Links', to:'/dashboard/links', icon:Link2 },
+];
+const premium = [
+  { label:'General', to:'/dashboard/premium', icon:Crown },
+  { label:'Layout Settings', to:'/dashboard/premium/layout', icon:Boxes },
+  { label:'Profile Metadata', to:'/dashboard/premium/metadata', icon:Search },
 ];
 
 export const DashboardHome: React.FC<{user:User}> = ({user}) => {
-  const privileged = ['owner','co-owner','staff'].includes(user.role || '');
-  return <div className="min-h-screen bg-[#090909] text-white">
-    <header className="border-b border-white/[.08] bg-[#0e0d0f]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
-        <div><div className="text-xl font-bold">lost<span className="text-orange-500">.lol</span></div><div className="text-[10px] uppercase tracking-[.2em] text-zinc-500">Control center</div></div>
-        <div className="flex items-center gap-2">
-          <Link to={`/${user.username}`} target="_blank" className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5"><Eye className="mr-2 inline h-4 w-4"/>View</Link>
-          <button onClick={()=>{localStorage.removeItem('token');location.href='/';}} className="rounded-xl bg-white/10 px-4 py-2 text-sm hover:bg-white/15">Logout</button>
+  const [open,setOpen]=React.useState(false);
+  const location=useLocation();
+  const privileged=['owner','co-owner','staff'].includes(user.role||'');
+  const Sidebar=()=> <aside className={`fixed inset-y-0 left-0 z-50 w-[270px] border-r border-white/[.07] bg-[#0b0b0c] px-4 py-5 transition-transform duration-200 lg:static lg:translate-x-0 ${open?'translate-x-0':'-translate-x-full'}`}>
+    <div className="flex items-center justify-between px-3 pb-7">
+      <Link to="/dashboard" className="text-xl font-black tracking-tight">lost<span className="text-orange-500">.lol</span></Link>
+      <button className="lg:hidden rounded-lg p-2 hover:bg-white/5" onClick={()=>setOpen(false)}><XIcon size={18}/></button>
+    </div>
+    <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Account</div>
+    <nav className="space-y-1">{nav.map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${location.pathname===to?'bg-white/[.07] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200'}`}><Icon size={17}/><span>{label}</span></Link>)}</nav>
+    <div className="my-6 h-px bg-white/[.06]"/>
+    <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Workspace</div>
+    <nav className="space-y-1">{[
+      {label:'Socials',to:'/dashboard/socials',icon:Share2},{label:'Music',to:'/dashboard/music',icon:Music2},{label:'Widgets',to:'/dashboard/widgets',icon:Boxes},{label:'Profile',to:'/dashboard/profile',icon:UserRound}
+    ].map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${location.pathname===to?'bg-white/[.07] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200'}`}><Icon size={17}/>{label}</Link>)}</nav>
+    <div className="my-6 h-px bg-white/[.06]"/>
+    <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Premium</div>
+    <nav className="space-y-1">{premium.map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200"><Icon size={17}/>{label}{label!=='General'&&<span className="ml-auto rounded-full bg-amber-400/10 px-1.5 py-0.5 text-[8px] uppercase text-amber-400">Pro</span>}</Link>)}</nav>
+    {privileged&&<Link to="/admin" className="mt-6 flex items-center gap-3 rounded-xl border border-red-500/10 bg-red-500/[.04] px-3 py-2.5 text-sm text-red-300"><Shield size={17}/>Admin Panel</Link>}
+    <div className="absolute bottom-5 left-4 right-4"><Link to={`/${user.username}`} target="_blank" className="flex items-center justify-center gap-2 rounded-xl border border-white/[.08] bg-white/[.03] px-3 py-2.5 text-sm hover:bg-white/[.06]"><Eye size={16}/>View profile</Link></div>
+  </aside>;
+  return <div className="min-h-screen bg-[#080809] text-white lg:flex">
+    {open&&<button aria-label="Close menu" onClick={()=>setOpen(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden"/>}<Sidebar/>
+    <section className="min-w-0 flex-1">
+      <header className="sticky top-0 z-30 border-b border-white/[.06] bg-[#080809]/90 backdrop-blur-xl"><div className="flex h-16 items-center justify-between px-4 sm:px-7">
+        <div className="flex items-center gap-3"><button onClick={()=>setOpen(true)} className="rounded-xl border border-white/[.08] p-2 lg:hidden"><Menu size={18}/></button><div className="relative hidden w-72 md:block"><Search size={15} className="absolute left-3 top-2.5 text-zinc-600"/><input placeholder="Search features...     Ctrl K" className="h-9 w-full rounded-xl border border-white/[.07] bg-white/[.025] pl-9 pr-3 text-xs text-zinc-300 outline-none placeholder:text-zinc-600"/></div><span className="text-sm font-semibold lg:hidden">Overview</span></div>
+        <div className="flex items-center gap-2"><span className="hidden rounded-full bg-orange-500/10 px-2.5 py-1 text-[10px] font-bold uppercase text-orange-400 sm:block">{user.role||'member'}</span>{user.premium&&<Crown size={16} className="text-amber-400"/>}<button onClick={()=>{localStorage.removeItem('token');window.location.href='/';}} className="rounded-xl px-3 py-2 text-xs text-zinc-500 hover:bg-white/5 hover:text-white">Logout</button></div>
+      </div></header>
+      <main className="mx-auto max-w-6xl px-4 py-7 sm:px-7">
+        <div className="mb-7"><p className="text-xs font-semibold uppercase tracking-[.18em] text-zinc-600">Account</p><h1 className="mt-2 text-3xl font-bold tracking-tight">Overview</h1><p className="mt-2 text-sm text-zinc-500">Manage your profile, content, appearance and account from one workspace.</p></div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {[
+            ['/dashboard/profile','Profile',UserRound,'Your public identity and profile information.'],
+            ['/dashboard/appearance','Customize',Palette,'Colors, layout, effects and background.'],
+            ['/dashboard/socials','Socials',Share2,'Social profiles and connected accounts.'],
+            ['/dashboard/links','Links',Link2,'Create and organize your profile links.'],
+            ['/dashboard/music','Music',Music2,'Profile audio and playback settings.'],
+            ['/dashboard/widgets','Widgets',Boxes,'Extra profile content and widgets.'],
+            ['/dashboard/analytics','Analytics',BarChart3,'Visits and profile performance.'],
+            ['/dashboard/badges','Badges',Award,'Manage your public profile badges.'],
+            ['/dashboard/account','Account',Settings,'Account preferences and security.'],
+          ].map(([to,title,Icon,text])=>{const C=Icon as React.ElementType;return <Link key={to as string} to={to as string} className="rounded-2xl border border-white/[.07] bg-[#0e0e10] p-5 transition hover:-translate-y-0.5 hover:border-orange-500/25 hover:bg-[#111113]"><div className="mb-5 grid h-10 w-10 place-items-center rounded-xl bg-white/[.04] text-orange-400"><C size={18}/></div><h2 className="text-sm font-semibold">{title as string}</h2><p className="mt-1 text-xs leading-5 text-zinc-600">{text as string}</p></Link>})}
         </div>
-      </div>
-    </header>
-    <main className="mx-auto max-w-7xl px-5 py-8">
-      <div className="mb-8 rounded-[28px] border border-orange-500/20 bg-gradient-to-br from-orange-950/40 via-[#151014] to-black p-7">
-        <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-400">{user.role || 'member'}</span>{user.premium && <span className="rounded-full bg-amber-400/15 px-3 py-1 text-xs font-bold text-amber-300">PREMIUM</span>}</div>
-        <h1 className="mt-3 text-3xl font-bold">Welcome back, {user.username}.</h1>
-        <p className="mt-2 max-w-2xl text-zinc-400">Everything is separated into its own workspace so you can build your profile without one giant settings page.</p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map(({to,icon:Icon,title,text})=><Link key={to} to={to} className="group rounded-[24px] border border-white/[.08] bg-[#111012] p-5 transition hover:-translate-y-0.5 hover:border-orange-500/30 hover:bg-[#161316]"><div className="mb-5 grid h-11 w-11 place-items-center rounded-2xl bg-orange-500/10 text-orange-400"><Icon className="h-5 w-5"/></div><h2 className="font-semibold">{title}</h2><p className="mt-1 text-sm text-zinc-500">{text}</p></Link>)}
-        {privileged && <Link to="/admin" className="group rounded-[24px] border border-red-500/20 bg-red-950/10 p-5 hover:border-red-400/40"><div className="mb-5 grid h-11 w-11 place-items-center rounded-2xl bg-red-500/10 text-red-400"><Shield className="h-5 w-5"/></div><h2 className="font-semibold">Admin Panel</h2><p className="mt-1 text-sm text-zinc-500">Manage roles, premium status and badges.</p></Link>}
-      </div>
-    </main>
+      </main>
+    </section>
   </div>;
 };
