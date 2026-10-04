@@ -200,6 +200,11 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       return;
     }
 
+    if (Object.prototype.hasOwnProperty.call(req.body, 'aliases') && !user.premium) {
+      res.status(403).json({ message: 'Aliases are a premium feature.' });
+      return;
+    }
+
     const allowed = [
       'name','location','showLocation','showDiscordPresence','discordUsername',
       'profileOpacity','profileBlur','profileGradient','monochromeIcons','animatedTitle',
