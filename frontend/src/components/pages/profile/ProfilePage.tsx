@@ -99,7 +99,7 @@ const ProfilePage: React.FC = () => {
       <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to lost.lol</button>
     </div>
   );
-  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', verified = false, customEmojis = [] } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const bgOpacity = Math.max(0.25, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0.25, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
