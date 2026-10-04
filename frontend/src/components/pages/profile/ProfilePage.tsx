@@ -17,6 +17,8 @@ interface UserProfile {
   profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
   audioTitle?: string;
+  audioAutoplay?: boolean;
+  audioCoverUrl?: string;
   totalVisit?: number;
   location?: string;
   showLocation?: boolean;
@@ -105,7 +107,7 @@ const ProfilePage: React.FC = () => {
       <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to lost.lol</button>
     </div>
   );
-  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '' } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const bgOpacity = Math.max(0.25, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0.25, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
@@ -152,10 +154,21 @@ const ProfilePage: React.FC = () => {
             </motion.div>
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
             <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>
-            {profile.customEmojis?.length ? <div className="mt-3 flex flex-wrap justify-center gap-1.5">{profile.customEmojis.slice(0,12).map(e=><span key={e.name} title={`:${e.name}:`} className="rounded-full border border-white/10 bg-white/[.04] px-2 py-1 text-xs transition-transform hover:scale-110">{e.value}</span>)}</div> : null}
+            {profile.customEmojis?.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{profile.customEmojis.slice(0,12).map(e=>{const isImage=/^(https?:\\/\\/|data:image\\/)/i.test(e.value);return <span key={e.name} title={`:${e.name}:`} className="grid h-8 min-w-8 place-items-center rounded-lg border border-white/10 bg-white/[.035] px-1.5 transition-transform hover:scale-110">{isImage?<img src={e.value} alt={e.name} className="h-6 w-6 rounded object-contain"/>:<span className="text-[10px] font-semibold text-zinc-300">{e.name}</span>}</span>})}</div> : null}
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
           </div>
-          {audioUrl && <div className="mx-auto mt-7 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400"><Disc3 size={15} style={{color:"#1ed760"}} />{audioTitle || "Profile music"}</div><audio ref={audioRef} controls preload="auto" autoPlay className="h-9 w-full" src={audioUrl}>Your browser does not support audio playback.</audio></div>}
+          {audioUrl && <div className="mx-auto mt-7 max-w-[420px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
+  <audio ref={audioRef} preload="metadata" autoPlay={audioAutoplay} src={audioUrl}>Your browser does not support audio playback.</audio>
+  <div className="p-3.5 sm:p-4">
+    <div className="flex items-center gap-3">
+      <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-md bg-[#202020]">{audioCoverUrl?<img src={audioCoverUrl} alt="" className="h-full w-full object-cover"/>:<Disc3 size={25} className="text-zinc-500"/>}</div>
+      <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{audioTitle || 'Profile music'}</p><p className="mt-0.5 truncate text-[11px] text-zinc-500">@{profileUsername}</p></div>
+      <button type="button" aria-label="Play or pause profile music" onClick={async()=>{const a=audioRef.current;if(!a)return;if(a.paused){try{await a.play();}catch{}}else a.pause();}} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-black transition-transform hover:scale-105"><Play size={17} fill="currentColor"/></button>
+    </div>
+    <div className="mt-4 h-1 rounded-full bg-[#3a3a3a]"><div className="h-full w-[28%] rounded-full bg-white"/></div>
+    <div className="mt-1.5 flex justify-between text-[9px] text-zinc-500"><span>0:00</span><span>—</span></div>
+  </div>
+</div>}
           <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Eye size={13} /> Views</div>
