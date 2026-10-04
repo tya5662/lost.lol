@@ -3,7 +3,6 @@ import {Route,BrowserRouter as Router,Routes,useLocation} from 'react-router-dom
 import ProfilePage from './components/pages/profile/ProfilePage';
 import {HomePage} from './components/pages/homepage/HomePage';
 import {AuthPage} from './components/auth/AuthPage';
-import {Dashboard} from './components/pages/dashboard/Dashboard';
 import {DashboardHome} from './components/pages/dashboard/DashboardHome';
 import {DashboardSection} from './components/pages/dashboard/DashboardSection';
 import {AdminPanel} from './components/pages/admin/AdminPanel';
@@ -16,8 +15,9 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
  if(loading)return <div className="min-h-screen grid place-items-center bg-[#090909] text-zinc-500">Loading dashboard...</div>;
  if(!user){window.location.href='/login';return null;}
  if(location.pathname==='/dashboard')return <DashboardHome user={user}/>;
- if(location.pathname==='/dashboard/links')return <Dashboard/>;
- const section=location.pathname.split('/')[2]||'profile';
+ const parts=location.pathname.split('/').filter(Boolean);
+ if(parts[0]==='dashboard'&&parts[1]==='premium'&&parts[2])return <DashboardSection user={user} section={`premium-${parts[2]}`}/>;
+ const section=parts[1]||'profile';
  return <DashboardSection user={user} section={section}/>;
 };
 
