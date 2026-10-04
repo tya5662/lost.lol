@@ -9,6 +9,7 @@ const themes = [
   { name: 'Ice', accent: '#60a5fa', glow: 'rgba(96,165,250,.20)' },
 ];
 
+// Enhanced landing experience: interactive preview and profile-first controls.
 export const HomePage: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState(0);
