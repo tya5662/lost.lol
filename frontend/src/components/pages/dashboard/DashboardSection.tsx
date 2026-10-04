@@ -18,7 +18,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
  const [saving,setSaving]=React.useState(false);
 
  React.useEffect(()=>{setLocal(user);},[user]);
- React.useEffect(()=>{if(section==='links')apiService.getUserLinks(user.id).then(setLinks).catch(()=>setLinks([]));},[section,user.id]);
+ React.useEffect(()=>{if(section==='links')apiService.getUserLinks(user._id).then(setLinks).catch(()=>setLinks([]));},[section,user.id]);
 
  const save=async(body:Record<string,unknown>)=>{
    setSaving(true);setMessage('');
