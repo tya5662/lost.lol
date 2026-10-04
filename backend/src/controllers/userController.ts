@@ -222,7 +222,8 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+// Legacy deleteUser declaration removed; active implementation is below.
+
 //   try {
 //     const { username } = req.params;
 
