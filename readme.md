@@ -131,3 +131,7 @@ Set `VITE_BACKEND_URL` in the frontend project's Vercel settings to the backend 
 Authentication uses email/username and password with JWTs.
 
 When the backend connects to MongoDB, it removes the obsolete unique `googleId` index left by the former Google sign-in flow. This index rejects multiple password-based accounts because each has a missing `googleId`; removing the index does not delete account data.
+
+
+## Profile experience
+The profile UI supports responsive glass cards, media backgrounds, music, effects, badges, aliases, and customization controls.
