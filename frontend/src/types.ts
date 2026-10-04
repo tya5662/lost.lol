@@ -39,6 +39,7 @@ export interface User {
   pageClickSound?: string;
   audioUrl?: string;
   audioTitle?: string;
+  audioMedia?: string;
   layout?: string;
   metadataTitle?: string;
   metadataDescription?: string;
