@@ -17,7 +17,7 @@ const normalizeLinkUrl = (rawUrl: string): string | null => {
   const value = rawUrl.trim();
   if (!value) return null;
   if (/^mailto:/i.test(value)) return value;
-  if (/^(https?:\\/\\/)/i.test(value)) {
+  if (/^(https?:\/\/)/i.test(value)) {
     try {
       const parsed = new URL(value);
       return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
@@ -26,14 +26,15 @@ const normalizeLinkUrl = (rawUrl: string): string | null => {
     }
   }
 
-  const candidate = `https://${value.replace(/^\\/\\//, '')}`;
+  const candidate = `https://${value.replace(/^\/\//, '')}`;
   try {
     const parsed = new URL(candidate);
     return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
   } catch {
     return null;
   }
-};\nconst getLinkIcon = (url: string) => {
+};
+const getLinkIcon = (url: string) => {
   const domain = url.toLowerCase();
   if (domain.includes('x.com')) return X;
   if (domain.includes('instagram.com')) return Instagram;
