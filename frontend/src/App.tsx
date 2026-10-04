@@ -14,7 +14,7 @@ import {Analytics} from '@vercel/analytics/react';
 const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(null);const [loading,setLoading]=useState(true);const location=useLocation();
  useEffect(()=>{const token=localStorage.getItem('token');if(!token){setLoading(false);return;}fetch(AUTH,{headers:{Authorization:`Bearer ${token}`}}).then(async r=>{if(!r.ok)throw new Error();return r.json()}).then(setUser).catch(()=>{}).finally(()=>setLoading(false))},[]);
  if(loading)return <div className="min-h-screen grid place-items-center bg-[#090909] text-zinc-500">Loading dashboard...</div>;
- if(!user){location.href='/login';return null;}
+ if(!user){window.location.href='/login';return null;}
  if(location.pathname==='/dashboard')return <DashboardHome user={user}/>;
  if(location.pathname==='/dashboard/links')return <Dashboard/>;
  const section=location.pathname.split('/')[2]||'profile';
