@@ -26,4 +26,5 @@ export const apiService={
  getAdminUsers:async()=>requestJson('/admin/users',{headers:authHeaders()}),
  updateAdminUser:async(id:number,body:{role?:UserRole;premium?:boolean})=>requestJson(`/admin/users/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  addAdminBadge:async(id:number,badge:string)=>requestJson(`/admin/users/${id}/badges`,{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({badge})}),
+ updateProfilePreferences:async(username:string,body:Record<string,unknown>)=>requestJson(`/api/users/${encodeURIComponent(username)}/preferences`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
 };
