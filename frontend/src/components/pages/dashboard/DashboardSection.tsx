@@ -37,7 +37,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
 
  return <div className="min-h-screen bg-[#080809] text-white lg:flex">
   {menuOpen&&<button aria-label="Close menu" onClick={()=>setMenuOpen(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden"/>}
-  <aside className={`fixed inset-y-0 left-0 z-50 flex max-h-screen w-[250px] flex-col overflow-y-auto overscroll-contain border-r border-white/[.07] bg-[#0b0b0c] p-4 transition-transform duration-200 lg:static lg:translate-x-0 ${menuOpen?'translate-x-0':'-translate-x-full'}` w-[250px] shrink-0 border-r border-white/[.07] bg-[#0b0b0c] p-4 lg:block">
+  <aside className={`fixed inset-y-0 left-0 z-50 flex max-h-screen w-[250px] flex-col overflow-y-auto overscroll-contain border-r border-white/[.07] bg-[#0b0b0c] p-4 transition-transform duration-200 lg:static lg:translate-x-0 ${menuOpen?'translate-x-0':'-translate-x-full'} lg:block`}>
    <Link to="/dashboard" className="block px-3 pb-6 text-xl font-black">lost<span className="text-orange-500">.lol</span></Link>
    <nav className="space-y-1">{nav.map(([label,to,Icon])=><Link key={to} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${location.pathname===to?'bg-white/[.08] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-white'}`}><Icon size={17}/>{label}</Link>)}</nav>
    <div className="my-5 border-t border-white/[.06] pt-4 text-[10px] uppercase tracking-[.18em] text-zinc-600">Premium</div>
