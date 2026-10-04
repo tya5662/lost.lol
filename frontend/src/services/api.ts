@@ -26,6 +26,7 @@ export const apiService={
  reorderLinks:async(userId:number,linkIds:number[])=>{await requestJson(`/api/links/reorder/${userId}`,{method:'PUT',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({linkIds})})},
  getAdminUsers:async()=>requestJson('/admin/users',{headers:authHeaders()}),
  getAvailableBadges:async()=>requestJson('/users/badges',{headers:authHeaders()}),
+ claimBadge:async(badge:string)=>requestJson('/api/users/badges/claim',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({badge})}),
  updateAdminUser:async(id:number,body:{role?:UserRole;premium?:boolean})=>requestJson(`/admin/users/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  updateAdminCustomization:async(id:number,body:Record<string,unknown>)=>requestJson(`/admin/users/${id}/customization`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  addAdminBadge:async(id:number,badge:string)=>requestJson(`/admin/users/${id}/badges`,{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({badge})}),
