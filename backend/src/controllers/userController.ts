@@ -343,7 +343,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       res.status(401).json({ message: 'Authentication required.' });
       return;
     }
-    if (String((req.user as any)?.username || '').toLowerCase() !== String(username || '').toLowerCase()) {
+    const actor = await User.findOne({ id: actorId }).select('username');
+    if (!actor || actor.username.toLowerCase() !== String(username || '').toLowerCase()) {
       res.status(403).json({ message: 'You can only create your own profile.' });
       return;
     }
