@@ -102,7 +102,7 @@ const ProfilePage: React.FC = () => {
     return safeUrl ? [{ ...link, safeUrl }] : [];
   });
   return (
-    <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? '[&_*]:cursor-default' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6` style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
+    <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? '[&_*]:cursor-default' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
       {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} />
