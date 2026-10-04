@@ -14,7 +14,7 @@ interface UserProfile {
   usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
   fontFamily?: string; customFontFamily?: string; verified?: boolean;
   customEmojis?: Array<{name:string;value:string}>;
-  profileOpacity?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
+  profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
   audioTitle?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
@@ -58,7 +58,6 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [musicBlocked, setMusicBlocked] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
   useEffect(()=>{
