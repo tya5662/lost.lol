@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound } from 'lucide-react';
+import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound, Shield } from 'lucide-react';
 import { User, Link as LinkType } from '../../../types';
 import { apiService, AUTH } from '../../../services/api';
 
@@ -40,6 +40,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
    <Link to="/dashboard" className="block px-3 pb-6 text-xl font-black">lost<span className="text-orange-500">.lol</span></Link>
    <nav className="space-y-1">{nav.map(([label,to,Icon])=><Link key={to} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${location.pathname===to?'bg-white/[.08] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-white'}`}><Icon size={17}/>{label}</Link>)}</nav>
    <div className="my-5 border-t border-white/[.06] pt-4 text-[10px] uppercase tracking-[.18em] text-zinc-600">Premium</div>
+   {['owner','co-owner','staff'].includes(user.role||'')&&<Link to="/admin" className="mb-3 flex items-center gap-3 rounded-xl border border-red-500/10 bg-red-500/[.04] px-3 py-2.5 text-sm text-red-300"><Shield size={17}/>Admin Panel</Link>}
    <nav className="space-y-1"><Link to="/dashboard/premium" className="flex gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-400 hover:bg-white/[.04]"><Crown size={17}/>General</Link><Link to="/dashboard/premium/layout" className="flex gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-400 hover:bg-white/[.04]"><Boxes size={17}/>Layout Settings</Link><Link to="/dashboard/premium/metadata" className="flex gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-400 hover:bg-white/[.04]"><Save size={17}/>Profile Metadata</Link></nav>
   </aside>
   <main className="min-w-0 flex-1">
