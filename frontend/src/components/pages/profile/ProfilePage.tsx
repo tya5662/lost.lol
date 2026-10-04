@@ -11,6 +11,8 @@ interface UserProfile {
   id: number; username: string; name: string; description: string | null; profilePicture: string | null;
   accentColor?: string; textColor?: string; backgroundColor?: string; backgroundMedia: string | null;
   backgroundType: 'image' | 'video' | null;
+  audioUrl?: string;
+  audioTitle?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -83,7 +85,7 @@ const ProfilePage: React.FC = () => {
       <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to lost.lol</button>
     </div>
   );
-  const { profilePicture, backgroundMedia, backgroundType, name, description, links, username: profileUsername } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, name, description, links, username: profileUsername } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const textColor = profile.textColor || '#f4f0ef';
   const toggleVideo = async () => {
@@ -98,7 +100,7 @@ const ProfilePage: React.FC = () => {
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-16 sm:px-6" style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
-      {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop muted playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
+      {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
@@ -121,6 +123,7 @@ const ProfilePage: React.FC = () => {
             <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .24 }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}</motion.h1>
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
           </div>
+          {audioUrl && <div className="mx-auto mt-7 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3"><div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400"><AudioLines size={14} style={{color:accentColor}} />{audioTitle || "Profile music"}</div><audio controls preload="metadata" className="h-9 w-full" src={audioUrl}>Your browser does not support audio playback.</audio></div>}
           <div className="mx-auto mt-8 max-w-[420px] space-y-3">
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
               <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">
