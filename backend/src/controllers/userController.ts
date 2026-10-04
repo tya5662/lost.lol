@@ -338,6 +338,16 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const { username, name, description } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
+    const actorId = (req.user as any)?.id;
+    if (typeof actorId !== 'number') {
+      res.status(401).json({ message: 'Authentication required.' });
+      return;
+    }
+    if (String((req.user as any)?.username || '').toLowerCase() !== String(username || '').toLowerCase()) {
+      res.status(403).json({ message: 'You can only create your own profile.' });
+      return;
+    }
+
     // Check if username already exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
