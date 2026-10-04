@@ -30,4 +30,5 @@ export const apiService={
  addAdminBadge:async(id:number,badge:string)=>requestJson(`/admin/users/${id}/badges`,{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({badge})}),
  uploadProfileMedia:async(username:string,formData:FormData)=>requestJson(`/api/users/${encodeURIComponent(username)}/media`,{method:'POST',headers:authHeaders(),body:formData}),
  updateProfilePreferences:async(username:string,body:Record<string,unknown>)=>requestJson(`/api/users/${encodeURIComponent(username)}/preferences`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
+ setUsername:async(username:string)=>requestJson('/api/users/username',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({username})}),
 };
