@@ -12,7 +12,7 @@ const requestJson = async (path:string, init?:RequestInit):Promise<any>=>{
   catch(error){if(error instanceof TypeError)throw new Error('Unable to reach the lost.lol server. Please try again in a moment.');throw error;}
 };
 const authHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('token')??''}`});
-const submitAuth=async(path:'register'|'login',details:Record<string,string>):Promise<AuthResponse=>{const data=await requestJson(`/auth/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;};
+const submitAuth=async(path:'register'|'login',details:Record<string,string>):Promise<AuthResponse>=>{const data=await requestJson(`/auth/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;};
 
 export const apiService={
  registerAccount:(details:{email:string;username:string;password:string})=>submitAuth('register',details),
