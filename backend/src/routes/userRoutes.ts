@@ -41,7 +41,7 @@ router.post('/badges/claim', isAuthenticated, async (req,res,next)=>{
     const eligible =
       (badge === 'Premium' && !!actor.premium) ||
       (badge === 'Explorer' && (actor.totalVisit || 0) >= 10) ||
-      (badge === 'Early' && !!actor.createdAt);
+      (badge === 'Early' && !!actor.createdAt && new Date(actor.createdAt).getTime() <= new Date('2026-10-01T00:00:00Z').getTime());
     if (!eligible) { res.status(403).json({ message: 'You do not meet the eligibility requirements for this badge.' }); return; }
     if (!actor.badges.includes(badge)) actor.badges.push(badge);
     await actor.save();
