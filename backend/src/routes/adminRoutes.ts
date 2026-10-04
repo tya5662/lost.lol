@@ -113,4 +113,6 @@ router.post('/users/:id/badges', async (req, res, next) => {
   }
 });
 
+router.get('/badges', async (_req,res,next)=>{try{const users=await User.find({badges:{$exists:true,$ne:[]}}).select('username badges').lean();const names=[...new Set(users.flatMap((u:any)=>u.badges||[]))];res.json(names.map(name=>({name,holders:users.filter((u:any)=>(u.badges||[]).includes(name)).length})));}catch(error){next(error)}});
+
 export default router;
