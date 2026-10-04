@@ -14,6 +14,9 @@ export const AuthPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [otpStep, setOtpStep] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [verifiedEmail, setVerifiedEmail] = useState('');
   const isEmailTaken = error.toLowerCase().includes('email') && error.toLowerCase().includes('account');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -22,18 +25,36 @@ export const AuthPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      if (isRegister) {
-        await apiService.registerAccount({ email, username, password });
-      } else {
-        await apiService.loginAccount({ identifier, password });
-      }
-      navigate('/dashboard');
+      const result = isRegister
+        ? await apiService.registerAccount({ email, username, password })
+        : await apiService.loginAccount({ identifier, password });
+      if (result.otpRequired) {
+        setVerifiedEmail(result.email || (isRegister ? email : identifier));
+        setOtpStep(true);
+      } else navigate('/dashboard');
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Unable to authenticate. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (otpStep) return (
+    <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-3 py-7 text-white sm:px-6 sm:py-12">
+      <section className="w-full max-w-[620px] rounded-[28px] border border-[#ff6a00]/20 bg-[#0d0d0f]/95 p-6 shadow-[0_32px_120px_rgba(0,0,0,.65)] sm:rounded-[36px] sm:p-12">
+        <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#ff7a24]">Email verification</p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-[-.05em]">Check your email.</h1>
+        <p className="mt-4 text-sm leading-6 text-[#aaa4a0]">We sent a 6-digit code to <span className="text-white">{verifiedEmail}</span>. The code expires in 10 minutes.</p>
+        <form onSubmit={async (event)=>{event.preventDefault();setError('');setIsSubmitting(true);try{await apiService.verifyOtp(isRegister?email:identifier,otp);navigate('/dashboard')}catch(e){setError(e instanceof Error?e.message:'Unable to verify the code.')}finally{setIsSubmitting(false)}}} className="mt-8 space-y-4">
+          <input value={otp} onChange={e=>setOtp(e.target.value.replace(/\D/g,'').slice(0,6))} inputMode="numeric" autoComplete="one-time-code" maxLength={6} required className="h-16 w-full rounded-2xl border border-white/10 bg-[#080808] px-5 text-center text-2xl tracking-[.5em] text-white outline-none focus:border-[#ff6a00]/70" placeholder="000000" />
+          {error&&<div role="alert" className="rounded-2xl border border-[#8e2c39]/60 bg-[#35171d]/60 px-4 py-3 text-sm text-[#ff8392]">{error}</div>}
+          <button disabled={isSubmitting||otp.length!==6} className="w-full rounded-2xl border border-[#ff6a00] bg-[#b83b00] py-4 font-semibold transition hover:bg-[#d94b00] disabled:opacity-60">{isSubmitting?'Verifying…':'Verify email'}</button>
+        </form>
+        <button onClick={async()=>{setError('');try{await apiService.resendOtp(isRegister?email:identifier)}catch(e){setError(e instanceof Error?e.message:'Unable to resend the code.')}}} className="mt-5 w-full text-sm text-[#ff8a3d] hover:text-white">Resend code</button>
+        <button onClick={()=>{setOtpStep(false);setOtp('');setError('')}} className="mt-3 w-full text-sm text-zinc-500 hover:text-white">Back</button>
+      </section>
+    </main>
+  );
 
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-3 py-7 text-white sm:px-6 sm:py-12">
