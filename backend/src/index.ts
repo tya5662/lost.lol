@@ -20,9 +20,24 @@ const frontendOrigins = new Set(
     .filter(Boolean)
 );
 
+const isAllowedFrontendOrigin = (origin?: string): boolean => {
+  if (!origin) return true;
+  if (frontendOrigins.has(origin)) return true;
+
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === 'lost-lol.vercel.app' ||
+      hostname.endsWith('.vercel.app');
+  } catch {
+    return false;
+  }
+};
+
 app.use(cors({
   origin: (origin, callback) => {
-    callback(null, !origin || frontendOrigins.has(origin));
+    callback(null, isAllowedFrontendOrigin(origin));
   },
   credentials: true,
   optionsSuccessStatus: 204
