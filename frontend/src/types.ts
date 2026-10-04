@@ -25,7 +25,13 @@ export interface User {
   showDiscordPresence?: boolean;
   discordUsername?: string;
   profileOpacity?: number;
+  backgroundOpacity?: number;
+  cardOpacity?: number;
+  cardBlur?: number;
   profileBlur?: number;
+  verified?: boolean;
+  customEmojis?: {name:string;value:string}[];
+  customFontFamily?: string;
   profileGradient?: boolean;
   monochromeIcons?: boolean;
   animatedTitle?: boolean;
