@@ -49,18 +49,18 @@ const maskEmail = (email: string): string => {
 };
 
 const sendOtpEmail = async (email: string, code: string): Promise<void> => {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL;
-  if (!apiKey || !from) throw new Error('Email OTP is not configured. Set RESEND_API_KEY and RESEND_FROM_EMAIL.');
+  const apiKey = process.env.BREVO_API_KEY;
+  const from = process.env.BREVO_FROM_EMAIL;
+  if (!apiKey || !from) throw new Error('Email OTP is not configured. Set BREVO_API_KEY and BREVO_FROM_EMAIL.');
 
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({
-      from,
-      to: [email],
+      sender: { email: from },
+      to: [{ email }],
       subject: 'Your verification code',
-      html: `<div style="font-family:Arial,sans-serif;background:#080808;color:#fff;padding:32px"><h2>Email verification</h2><p>Your verification code is:</p><div style="font-size:32px;font-weight:700;letter-spacing:8px">${code}</div><p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p></div>`,
+      htmlContent: `<div style="font-family:Arial,sans-serif;background:#080808;color:#fff;padding:32px"><h2>Email verification</h2><p>Your verification code is:</p><div style="font-size:32px;font-weight:700;letter-spacing:8px">${code}</div><p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p></div>`,
     }),
   });
   if (!response.ok) throw new Error('Unable to send the verification email.');
