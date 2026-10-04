@@ -201,7 +201,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
     }
 
     const allowed = [
-      'location','showLocation','showDiscordPresence','discordUsername',
+      'name','location','showLocation','showDiscordPresence','discordUsername',
       'profileOpacity','profileBlur','profileGradient','monochromeIcons','animatedTitle',
       'usernameEffect','backgroundEffect','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
