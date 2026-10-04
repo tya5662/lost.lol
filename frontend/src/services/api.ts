@@ -24,6 +24,7 @@ export const apiService={
  deleteLink:async(id:number)=>{await requestJson(`/api/links/${id}`,{method:'DELETE',headers:authHeaders()})},
  reorderLinks:async(userId:number,linkIds:number[])=>{await requestJson(`/api/links/reorder/${userId}`,{method:'PUT',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({linkIds})})},
  getAdminUsers:async()=>requestJson('/admin/users',{headers:authHeaders()}),
+ getAvailableBadges:async()=>requestJson('/admin/badges',{headers:authHeaders()}),
  updateAdminUser:async(id:number,body:{role?:UserRole;premium?:boolean})=>requestJson(`/admin/users/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  addAdminBadge:async(id:number,badge:string)=>requestJson(`/admin/users/${id}/badges`,{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({badge})}),
  uploadProfileMedia:async(username:string,formData:FormData)=>requestJson(`/api/users/${encodeURIComponent(username)}/media`,{method:'POST',headers:authHeaders(),body:formData}),
