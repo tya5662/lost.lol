@@ -13,7 +13,27 @@ interface UserProfile {
   backgroundType: 'image' | 'video' | null;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
-const getLinkIcon = (url: string) => {
+const normalizeLinkUrl = (rawUrl: string): string | null => {
+  const value = rawUrl.trim();
+  if (!value) return null;
+  if (/^mailto:/i.test(value)) return value;
+  if (/^(https?:\\/\\/)/i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const candidate = `https://${value.replace(/^\\/\\//, '')}`;
+  try {
+    const parsed = new URL(candidate);
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
+  } catch {
+    return null;
+  }
+};\nconst getLinkIcon = (url: string) => {
   const domain = url.toLowerCase();
   if (domain.includes('x.com')) return X;
   if (domain.includes('instagram.com')) return Instagram;
@@ -71,11 +91,8 @@ const ProfilePage: React.FC = () => {
     else { video.pause(); setIsVideoPlaying(false); }
   };
   const validLinks = links.flatMap((link) => {
-    try {
-      const parsed = new URL(link.url, window.location.origin);
-      if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) return [];
-      return [{ ...link, safeUrl: parsed.href }];
-    } catch { return []; }
+    const safeUrl = normalizeLinkUrl(link.url);
+    return safeUrl ? [{ ...link, safeUrl }] : [];
   });
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-16 sm:px-6" style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
