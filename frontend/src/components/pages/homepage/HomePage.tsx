@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, BadgeCheck, BarChart3, Check, CirclePlay, Disc3, Globe2, Link2, Menu, Palette, Sparkles, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BadgeCheck, BarChart3, Check, CirclePlay, Disc3, Link2, Menu, Palette, Sparkles, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const themes = [
