@@ -4,6 +4,11 @@ import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2
 import { User, Link as LinkType } from '../../../types';
 import { apiService } from '../../../services/api';
 
+const FONT_OPTIONS=[['Inter','Inter'],['Arial','Arial'],['Georgia','Georgia'],['Courier New','Courier New'],['Trebuchet MS','Trebuchet MS'],['Verdana','Verdana'],['Times New Roman','Times New Roman'],['Impact','Impact'],['monospace','Monospace'],['serif','Serif'],['sans-serif','Sans Serif']] as string[][];
+const USERNAME_EFFECTS=[['none','None'],['glow','Glow'],['pulse','Pulse'],['float','Float'],['shake','Shake']] as string[][];
+const BACKGROUND_EFFECTS=[['none','None'],['pulse','Pulse glow'],['aurora','Aurora'],['scanlines','Scanlines']] as string[][];
+const CURSOR_EFFECTS=[['none','None'],['glow','Glow'],['red','Red trail']] as string[][];
+
 const nav=[
   ['Overview','/dashboard',BarChart3],['Analytics','/dashboard/analytics',BarChart3],['Badges','/dashboard/badges',Crown],
   ['Settings','/dashboard/settings',Settings],['Customize','/dashboard/appearance',Palette],['Links','/dashboard/links',Link2],
