@@ -134,7 +134,7 @@ const ProfilePage: React.FC = () => {
       {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
         {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
       </motion.button>}
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/[0.10] bg-[#080808]/90 shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)] backdrop-blur-2xl">
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/[0.10] shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)]" style={{backgroundColor:`rgba(8,8,8,${cardOpacity})`,backdropFilter:`blur(${cardBlur}px)`}}>
         <div className="h-[3px] w-full bg-gradient-to-r from-[#8d1721] via-[#ef3340] to-[#ff6670]" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
