@@ -34,6 +34,15 @@ const userSchema = new mongoose.Schema({
   premium: { type: Boolean, default: false },
   premiumSince: { type: Date },
   badges: { type: [String], default: [] },
+  verified: { type: Boolean, default: false },
+  customEmojis: {
+    type: [{
+      name: { type: String, trim: true, maxlength: 24 },
+      value: { type: String, trim: true, maxlength: 32 },
+    }],
+    default: [],
+  },
+  customFontFamily: { type: String, default: '' },
 
   // Profile customization
   location: { type: String, default: '' },
