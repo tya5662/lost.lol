@@ -1,11 +1,6 @@
 import { LucideIcon } from "lucide-react";
 
-// types.ts
-
-// interface ProfilePicture {
-//   data: string,
-//   type: string
-// }
+export type UserRole = 'owner' | 'co-owner' | 'staff' | 'member';
 
 export interface User {
   _id: string,
@@ -21,6 +16,39 @@ export interface User {
   backgroundColor?: string;
   bio?: string;
   totalVisit?: number;
+  role?: UserRole;
+  premium?: boolean;
+  premiumSince?: string;
+  badges?: string[];
+  location?: string;
+  showLocation?: boolean;
+  showDiscordPresence?: boolean;
+  discordUsername?: string;
+  profileOpacity?: number;
+  profileBlur?: number;
+  profileGradient?: boolean;
+  monochromeIcons?: boolean;
+  animatedTitle?: boolean;
+  usernameEffect?: string;
+  backgroundEffect?: string;
+  cursorEffect?: string;
+  fontFamily?: string;
+  typewriterEnabled?: boolean;
+  typewriterTexts?: string[];
+  pageEnterText?: string;
+  pageClickSound?: string;
+  audioUrl?: string;
+  audioTitle?: string;
+  layout?: string;
+  metadataTitle?: string;
+  metadataDescription?: string;
+  metadataImage?: string;
+  aliases?: string[];
+  secondTab?: {
+    enabled?: boolean;
+    title?: string;
+    widgets?: unknown[];
+  };
 }
 
 export interface Link {
@@ -38,7 +66,6 @@ export interface ProfileSettings {
   profilePicture?: File;
   backgroundMedia?: File;
 }
-
 
 export interface SocialPlatform {
   id: string;
