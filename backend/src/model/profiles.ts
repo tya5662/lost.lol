@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
   backgroundType: { type: String, enum: ['image', 'video'] },
   email: { type: String, unique: true, required: true, lowercase: true, trim: true },
   passwordHash: { type: String, select: false },
+  emailVerified: { type: Boolean, default: false },
+  otpHash: { type: String, select: false },
+  otpExpiresAt: { type: Date, select: false },
+  otpAttempts: { type: Number, default: 0, select: false },
 
   // Platform/team permissions
   role: {
