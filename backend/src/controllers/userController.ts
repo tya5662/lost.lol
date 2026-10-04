@@ -430,8 +430,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     }
 
     // Update basic user info
-    user.name = name;
-    user.description = description;
+    if (typeof name === 'string') user.name = name;
+    if (typeof description === 'string') user.description = description;
     if (appearance.accentColor) user.accentColor = appearance.accentColor;
     if (appearance.textColor) user.textColor = appearance.textColor;
     if (appearance.backgroundColor) user.backgroundColor = appearance.backgroundColor;
