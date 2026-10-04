@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, Sparkles, UserRound, Music2, Boxes } from 'lucide-react';
+import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes } from 'lucide-react';
 import { User } from '../../../types';
 
 const cards = [
