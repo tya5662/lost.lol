@@ -77,7 +77,64 @@ const ProfilePage: React.FC = () => {
     setLoading(true);
     setProfile(null);
     void fetchProfile();
-    return (
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [username]);
+
+  if (loading) return (
+    <div className="flex min-h-screen items-center justify-center bg-[#050505] text-sm text-[#a39b9c]">
+      <span className="mr-3 h-2 w-2 animate-pulse rounded-full bg-[#ef3340]" />Loading profile
+    </div>
+  );
+
+  if (!profile) return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#050505] px-5 text-center text-white">
+      <img src={logo} alt="lost.lol" className="mb-5 h-14 w-14 rounded-xl border border-white/10" />
+      <h1 className="text-2xl font-bold">This profile isn’t here.</h1>
+      <p className="mt-2 text-sm text-[#928a8b]">The username may be unavailable or misspelled.</p>
+      <button
+        onClick={() => navigate('/')}
+        className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]"
+      >
+        Back to lost.lol
+      </button>
+    </div>
+  );
+
+  const { profilePicture, backgroundMedia, backgroundType, name, description, links, username: profileUsername } = profile;
+  const accentColor = profile.accentColor || '#ef3340';
+  const textColor = profile.textColor || '#f4f0ef';
+
+  const toggleVideo = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      try {
+        await video.play();
+        setIsVideoPlaying(true);
+      } catch {
+        setIsVideoPlaying(false);
+      }
+    } else {
+      video.pause();
+      setIsVideoPlaying(false);
+    }
+  };
+
+  const validLinks = links.flatMap((link) => {
+    try {
+      const parsed = new URL(link.url, window.location.origin);
+      if (!['http:', 'https:', 'mailto:'].includes(parsed.protocol)) return [];
+      return [{ ...link, safeUrl: parsed.href }];
+    } catch {
+      return [];
+    }
+  });
+
+  return (
     <main
       className="relative isolate flex min-h-screen items-center justify-center overflow-hidden px-4 py-16 sm:px-6"
       style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}
