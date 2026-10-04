@@ -55,6 +55,15 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
+  useEffect(()=>{
+    if(profile?.cursorEffect !== 'red') { setCursorTrail([]); return; }
+    let frame=0; let nextId=0; let points:{x:number;y:number;id:number}[]=[];
+    const move=(e:MouseEvent)=>{points=[...points.slice(-10),{x:e.clientX,y:e.clientY,id:nextId++}];};
+    const tick=()=>{setCursorTrail(points);frame=requestAnimationFrame(tick);};
+    window.addEventListener('mousemove',move,{passive:true}); frame=requestAnimationFrame(tick);
+    return()=>{window.removeEventListener('mousemove',move);cancelAnimationFrame(frame);};
+  },[profile?.cursorEffect]);
   useEffect(() => {
     document.title = `${username} | lost.lol`;
     let isCurrent = true;
@@ -102,7 +111,8 @@ const ProfilePage: React.FC = () => {
     return safeUrl ? [{ ...link, safeUrl }] : [];
   });
   return (
-    <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? '[&_*]:cursor-default' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
+    <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor }}>
+      {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
       {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} />
