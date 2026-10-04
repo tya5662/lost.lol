@@ -51,6 +51,8 @@ const userSchema = new mongoose.Schema({
   pageClickSound: { type: String, default: '' },
   audioUrl: { type: String, default: '' },
   audioTitle: { type: String, default: '' },
+  audioMedia: { type: Buffer },
+  audioMime: { type: String, default: '' },
   layout: { type: String, enum: ['default', 'modern', 'minimal', 'portfolio'], default: 'default' },
   metadataTitle: { type: String, default: '' },
   metadataDescription: { type: String, default: '' },
