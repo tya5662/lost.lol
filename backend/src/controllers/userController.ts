@@ -430,9 +430,15 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
     // Find user
     const user = await User.findOne({ username });
+    const actorId = (req.user as any)?.id;
     if (!user) {
        res.status(404).json({ message: 'User not found' });
        return
+    }
+
+    if (user.id !== actorId) {
+      res.status(403).json({ message: 'You can only modify your own profile.' });
+      return;
     }
 
     // Update basic user info
@@ -482,6 +488,16 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
   try {
     const { username } = req.params;
+    const actorId = (req.user as any)?.id;
+    const target = await User.findOne({ username });
+    if (!target) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+    if (target.id !== actorId) {
+      res.status(403).json({ message: 'You can only delete your own account.' });
+      return;
+    }
 
     // Delete user and associated links
     const deletedUser = await User.findOneAndDelete({ username });
