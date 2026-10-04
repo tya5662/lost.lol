@@ -14,7 +14,25 @@ export const AuthPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isEmailTaken = error.toLowerCase().includes('email') && error.toLowerCase().includes('account');
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+    try {
+      if (isRegister) {
+        await apiService.registerAccount({ email, username, password });
+      } else {
+        await apiService.loginAccount({ identifier, password });
+      }
+      navigate('/dashboard');
+    } catch (authError) {
+      setError(authError instanceof Error ? authError.message : 'Unable to authenticate. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-3 py-7 text-white sm:px-6 sm:py-12">
