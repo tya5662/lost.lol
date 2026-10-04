@@ -209,3 +209,5 @@ const ProfilePage: React.FC = () => {
   );
 };
 export default ProfilePage;
+
+// Production refresh marker: keep Vercel's Git deployment in sync with main.
