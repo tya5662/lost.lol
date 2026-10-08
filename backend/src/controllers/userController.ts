@@ -343,6 +343,7 @@ import { NextFunction, Request, Response } from 'express';
 import { User } from '../model/profiles'; // Assuming you have a User model
 import { Link } from '../model/link'; // Assuming you have a Link model
 import mongoose from 'mongoose';
+import { Badge } from '../model/badges';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
   try {
@@ -410,6 +411,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
 
     // Find links for the user
     const links = await Link.find({ userId: user._id }).sort({ order: 1 });
+    const badgeDefinitions = user.badges?.length ? await Badge.find({ name: { $in: user.badges } }).select('name image fontFamily textColor accentColor animation description').lean() : [];
 
     // Prepare user profile response
     const userProfile = {
