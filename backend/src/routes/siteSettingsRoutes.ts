@@ -24,6 +24,7 @@ const defaults = {
   ghostMode: true,
   featureSection: true,
   mediaLayers: [],
+  siteAnimations: [],
 };
 
 router.get('/', async (_req, res, next) => {
