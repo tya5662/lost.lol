@@ -430,7 +430,8 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
       audioUrl: user.audioMedia
         ? `data:${user.audioMime || 'audio/mpeg'};base64,${user.audioMedia.toString('base64')}`
         : user.audioUrl || '',
-      links
+      links,
+      badgeDefinitions
     };
 
     res.json(userProfile);
