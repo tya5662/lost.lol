@@ -200,9 +200,19 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       return;
     }
 
-    if (Object.prototype.hasOwnProperty.call(req.body, 'aliases') && !user.premium) {
-      res.status(403).json({ message: 'Aliases are a premium feature.' });
-      return;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'aliases')) {
+      if (!user.premium) {
+        res.status(403).json({ message: 'Aliases are a premium feature.' });
+        return;
+      }
+      const requestedAliases = Array.isArray(req.body.aliases) ? req.body.aliases : [];
+      const normalizedAliases = [...new Set(requestedAliases.map((alias: unknown) => String(alias).trim().toLowerCase()).filter((alias: string) => /^[a-z0-9._]{1,20}$/.test(alias)).filter((alias: string) => alias !== String(user.username).toLowerCase()))].slice(0, 2);
+      const conflictingUser = await User.findOne({_id:{$ne:user._id},$or:[{username:{$in:normalizedAliases}},{aliases:{$in:normalizedAliases}}]}).select('_id');
+      if (conflictingUser) {
+        res.status(409).json({ message: 'One or more aliases are already in use.' });
+        return;
+      }
+      req.body.aliases = normalizedAliases;
     }
 
     const allowed = [
