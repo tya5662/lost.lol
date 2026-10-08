@@ -281,7 +281,7 @@ router.post('/badge-definitions', async (req,res,next)=>{
     const accentColor=typeof body.accentColor==='string'?body.accentColor:'#ef3340';
     const animation=['none','pulse','float','spin','bounce','glow'].includes(body.animation)?body.animation:'none';
     if(!/^#[0-9a-fA-F]{6}$/.test(textColor)||!/^#[0-9a-fA-F]{6}$/.test(accentColor)){res.status(400).json({message:'Badge colors must be six-digit hex values.'});return;}
-    const badge=await Badge.findOneAndUpdate({name},{name,image,fontFamily,textColor,accentColor,animation,description:typeof body.description==='string'?body.description.slice(0,160):''},{new:true,upsert:true,setDefaultsOnInsert:true});
+    const badge=await Badge.findOneAndUpdate({name},{name,image,fontFamily,textColor,accentColor,animation,description:typeof body.description==='string'?body.description.slice(0,160):'',selfClaimable:body.selfClaimable===true,requiredPremium:body.requiredPremium===true,requiredRole:['member','staff','co-owner','owner'].includes(body.requiredRole)?body.requiredRole:'member',maxHolders:typeof body.maxHolders==='number'?Math.min(1000000,Math.max(0,Math.floor(body.maxHolders))):0},{new:true,upsert:true,setDefaultsOnInsert:true});
     res.json(badge);
   } catch(error){next(error);}
 });
