@@ -16,6 +16,7 @@ export const AuthPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
   const isEmailTaken = error.toLowerCase().includes('email') && error.toLowerCase().includes('account');
   const TURNSTILE_SITE_KEY = '0x4AAAAAAFRAyeyXHwm1-O5M';
 
@@ -24,12 +25,27 @@ export const AuthPage: React.FC = () => {
     const renderWidget = () => {
       if (cancelled || !turnstileRef.current || !window.turnstile) return;
       turnstileRef.current.innerHTML = '';
-      window.turnstile.render(turnstileRef.current, {
+      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
         theme: 'dark',
-        callback: (token: string) => setTurnstileToken(token),
-        'expired-callback': () => setTurnstileToken(''),
-        'error-callback': () => setTurnstileToken(''),
+        retry: 'auto',
+        callback: (token: string) => {
+          setTurnstileToken(token);
+          setError('');
+        },
+        'expired-callback': () => {
+          setTurnstileToken('');
+          setError('The CAPTCHA expired. Please complete it again.');
+        },
+        'timeout-callback': () => {
+          setTurnstileToken('');
+          setError('The CAPTCHA timed out. Please complete it again.');
+        },
+        'error-callback': (code?: string) => {
+          setTurnstileToken('');
+          setError(code ? `CAPTCHA error ${code}. Please refresh and try again.` : 'The CAPTCHA could not load. Please refresh and try again.');
+          return true;
+        },
       });
     };
     if (window.turnstile) renderWidget();
@@ -46,7 +62,7 @@ export const AuthPage: React.FC = () => {
         document.head.appendChild(script);
       }
     }
-    return () => { cancelled = true; setTurnstileToken(''); };
+    return () => { cancelled = true; setTurnstileToken(''); turnstileWidgetId.current = null; };
   }, [isRegister]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -66,6 +82,10 @@ export const AuthPage: React.FC = () => {
       navigate('/dashboard');
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Unable to authenticate. Please try again.');
+      if (turnstileWidgetId.current !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+        setTurnstileToken('');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -73,11 +93,11 @@ export const AuthPage: React.FC = () => {
 
   return (
     <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#080808] px-3 py-7 text-white sm:px-6 sm:py-12">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[680px] bg-[radial-gradient(ellipse_at_50%_-20%,rgba(255,85,0,.28),transparent_64%)]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[680px] bg-[radial-gradient(ellipse_at_50%_-20%,rgba(239,51,64,.22),transparent_64%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute left-[-12%] top-[20%] -z-10 h-72 w-72 rounded-full bg-[#ef3340]/10 blur-[100px]" />
       <div aria-hidden="true" className="pointer-events-none absolute right-[-10%] bottom-[8%] -z-10 h-80 w-80 rounded-full bg-[#8b8b9a]/10 blur-[110px]" />
 
-      <section className="w-full max-w-[820px] overflow-hidden rounded-[28px] border border-[#ef3340]/20 bg-[#0d0d0f]/95 shadow-[0_32px_120px_rgba(0,0,0,.65),0_0_70px_rgba(255,85,0,.08)] sm:rounded-[36px]">
+      <section className="w-full max-w-[820px] overflow-hidden rounded-[28px] border border-[#ef3340]/20 bg-[#0d0d0f]/95 shadow-[0_32px_120px_rgba(0,0,0,.65),0_0_70px_rgba(239,51,64,.08)] sm:rounded-[36px]">
         <div className="flex items-center justify-between px-5 pt-5 sm:px-10 sm:pt-8">
           <Link to="/" aria-label="Back to suffer.info home" className="inline-flex items-center gap-3 text-sm font-semibold text-[#aaa4a0] transition-colors hover:text-white sm:text-base">
             <ArrowLeft size={19} />
@@ -145,7 +165,7 @@ export const AuthPage: React.FC = () => {
               </div>
             )}
 
-            <button type="submit" disabled={isSubmitting} className="group mt-2 flex min-h-[62px] w-full items-center justify-center gap-3 rounded-[18px] border border-[#ef3340] bg-[#ef3340] px-5 text-base font-semibold text-white shadow-[0_8px_34px_rgba(255,90,0,.18)] transition-all hover:-translate-y-0.5 hover:bg-[#ef3340] hover:shadow-[0_10px_38px_rgba(255,90,0,.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0f] disabled:cursor-wait disabled:opacity-60 sm:min-h-[68px] sm:text-lg">
+            <button type="submit" disabled={isSubmitting} className="group mt-2 flex min-h-[62px] w-full items-center justify-center gap-3 rounded-[18px] border border-[#ef3340] bg-[#ef3340] px-5 text-base font-semibold text-white shadow-[0_8px_34px_rgba(239,51,64,.18)] transition-all hover:-translate-y-0.5 hover:bg-[#ef3340] hover:shadow-[0_10px_38px_rgba(239,51,64,.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d0f] disabled:cursor-wait disabled:opacity-60 sm:min-h-[68px] sm:text-lg">
               {isSubmitting ? 'One moment…' : isRegister ? 'Create account' : 'Sign in'}
               {!isSubmitting && <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />}
             </button>
