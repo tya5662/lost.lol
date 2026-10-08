@@ -9,6 +9,8 @@ type AdminUser={
  fontFamily?:string;customFontFamily?:string;profileOpacity?:number;profileBlur?:number;
  usernameEffect?:string;backgroundEffect?:string;cursorEffect?:string;layout?:string;
  customEmojis?:{name:string;value:string}[];
+ rootOwner?:boolean;canBan?:boolean;canDemote?:boolean;canManageRoles?:boolean;canManagePremium?:boolean;canManageBadges?:boolean;canCustomizeUsers?:boolean;
+ banned?:boolean;banReason?:string;
 };
 
 const Field=({label,value,onChange,placeholder}:{label:string;value:string;onChange:(v:string)=>void;placeholder?:string})=>
@@ -23,16 +25,19 @@ export const AdminPanel:React.FC=()=>{
  const [users,setUsers]=useState<AdminUser[]>([]); const [error,setError]=useState(''); const [loading,setLoading]=useState(true);
  const [query,setQuery]=useState(''); const [selected,setSelected]=useState<number|null>(null);
  const [badge,setBadge]=useState(''); const [emojiName,setEmojiName]=useState(''); const [emojiValue,setEmojiValue]=useState('');
- const [saving,setSaving]=useState(false); const [badgeDefs,setBadgeDefs]=useState<any[]>([]); const [newBadge,setNewBadge]=useState({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#ef3340',animation:'glow',description:''});
+ const [saving,setSaving]=useState(false); const [badgeDefs,setBadgeDefs]=useState<any[]>([]); const [me,setMe]=useState<any>(null); const [banReason,setBanReason]=useState(''); const [newBadge,setNewBadge]=useState({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#ef3340',animation:'glow',description:''});
  const load=async()=>{try{setUsers(await apiService.getAdminUsers() as AdminUser[])}catch(e){setError(e instanceof Error?e.message:'Unable to load admin panel')}finally{setLoading(false)}};
- useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([]));},[]);
- const target=users.find(u=>u.id===selected)||null;
+ useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([])); fetch('/auth/me',{headers:{Authorization:`Bearer ${localStorage.getItem('token')??''}`}}).then(r=>r.ok?r.json():null).then(setMe).catch(()=>{});},[]);
+ const target=users.find(u=>u.id===selected)||null; const isRootOwner=!!me?.rootOwner;
  const update=async(id:number,body:{role?:UserRole;premium?:boolean})=>{setError('');try{await apiService.updateAdminUser(id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Update failed')}};
  const customize=async(body:Record<string,unknown>)=>{if(!target)return;setSaving(true);setError('');try{await apiService.updateAdminCustomization(target.id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Customization update failed')}finally{setSaving(false)}};
  const addBadge=async()=>{if(!target||!badge.trim())return;try{await apiService.addAdminBadge(target.id,badge.trim());setBadge('');await load()}catch(e){setError(e instanceof Error?e.message:'Badge update failed')}};
  const saveBadgeDefinition=async()=>{if(!newBadge.name.trim())return;setSaving(true);setError('');try{const saved=await apiService.saveAdminBadgeDefinition(newBadge);setBadgeDefs(prev=>[...prev.filter(x=>x.name!==saved.name),saved]);setNewBadge({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#ef3340',animation:'glow',description:''});}catch(e){setError(e instanceof Error?e.message:'Badge definition save failed')}finally{setSaving(false)}};
  const deleteBadgeDefinition=async(name:string)=>{try{await apiService.deleteAdminBadgeDefinition(name);setBadgeDefs(prev=>prev.filter(x=>x.name!==name));}catch(e){setError(e instanceof Error?e.message:'Badge definition delete failed')}};
  const readBadgeImage=(file:File)=>{const reader=new FileReader();reader.onload=()=>setNewBadge(v=>({...v,image:String(reader.result||'')}));reader.readAsDataURL(file)};
+ const setPermissions=async(body:Record<string,boolean>)=>{if(!target)return;setSaving(true);setError('');try{await apiService.updateAdminPermissions(target.id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Permission update failed')}finally{setSaving(false)}};
+ const banUser=async()=>{if(!target)return;setSaving(true);setError('');try{await apiService.banAdminUser(target.id,banReason);setBanReason('');await load()}catch(e){setError(e instanceof Error?e.message:'Ban failed')}finally{setSaving(false)}};
+ const unbanUser=async()=>{if(!target)return;setSaving(true);setError('');try{await apiService.unbanAdminUser(target.id);await load()}catch(e){setError(e instanceof Error?e.message:'Unban failed')}finally{setSaving(false)}};
  const removeBadge=async(b:string)=>{if(!target)return;try{await apiService.removeAdminBadge(target.id,b);await load()}catch(e){setError(e instanceof Error?e.message:'Badge removal failed')}};
  const addEmoji=async()=>{if(!target||!emojiName.trim()||!emojiValue.trim())return;const next=[...(target.customEmojis||[]),{name:emojiName.trim(),value:emojiValue.trim()}];await customize({customEmojis:next});setEmojiName('');setEmojiValue('')};
  const filtered=users.filter(u=>`${u.username} ${u.email} ${u.name||''}`.toLowerCase().includes(query.toLowerCase()));
@@ -58,13 +63,16 @@ export const AdminPanel:React.FC=()=>{
     <section className="space-y-4">
      {!target?<div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-6 text-sm text-zinc-500">Select an account to manage roles, premium access, verification, colors, fonts, effects, badges, and custom emojis.</div>:
      <>
-      <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h2 className="font-semibold">{target.username}</h2><p className="mt-1 text-xs text-zinc-500">{target.email}</p>
+      <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h2 className="font-semibold">{target.username}{target.rootOwner&&<span className="ml-2 rounded-full bg-red-500/10 px-2 py-1 text-[9px] uppercase tracking-wider text-red-300">Primary owner</span>}</h2><p className="mt-1 text-xs text-zinc-500">{target.email}</p>
        <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <Select label="Role" value={target.role} onChange={v=>update(target.id,{role:v as UserRole})} options={['member','staff','co-owner','owner']}/>
         <div><span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Premium</span><button onClick={()=>update(target.id,{premium:!target.premium})} className={`h-10 w-full rounded-xl ${target.premium?'bg-amber-500/20 text-amber-200':'bg-white/10 text-zinc-400'}`}>{target.premium?'Enabled':'Disabled'}</button></div>
        </div>
        <label className="mt-3 flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm"><span>Verified badge</span><input type="checkbox" checked={!!target.verified} onChange={e=>customize({verified:e.target.checked})}/></label>
+       <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between"><div><h3 className="font-semibold">Moderation</h3><p className="mt-1 text-xs text-zinc-500">{target.banned?'This account is currently banned.':'Ban or unban this account.'}</p></div><span className={target.banned?'text-red-300':'text-emerald-300'}>{target.banned?'BANNED':'ACTIVE'}</span></div>
+       {target.banned?<button disabled={saving||target.rootOwner} onClick={unbanUser} className="mt-3 w-full rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-300 disabled:opacity-40">Unban user</button>:<><Field label="Ban reason (optional)" value={banReason} onChange={setBanReason} placeholder="Reason shown to the user"/><button disabled={saving||target.rootOwner||(!!me&&!isRootOwner&&!me?.canBan)} onClick={banUser} className="mt-3 w-full rounded-xl bg-red-500/15 px-4 py-2.5 text-sm font-semibold text-red-300 disabled:opacity-40">Ban user</button></>}</div>
       </div>
+      {isRootOwner&&!target.rootOwner&&<div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><div className="flex items-center justify-between"><div><h3 className="font-semibold">Delegated permissions</h3><p className="mt-1 text-xs text-zinc-500">Only you can grant or revoke these permissions.</p></div><span className="text-[10px] uppercase tracking-wider text-red-300">Owner only</span></div><div className="mt-4 grid gap-2 sm:grid-cols-2">{([['canDemote','Demote users'],['canBan','Ban / unban users'],['canManageRoles','Manage promotions'],['canManagePremium','Manage Premium'],['canManageBadges','Manage badges'],['canCustomizeUsers','Customize users']] as [keyof AdminUser,string][]).map(([key,label])=><label key={String(key)} className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-sm"><span>{label}</span><input type="checkbox" checked={!!target[key]} onChange={e=>setPermissions({[key]:e.target.checked})}/></label>)}</div></div>}
       <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h3 className="font-semibold">Colors & fonts</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">
        <Field label="Accent" value={color(target.accentColor)} onChange={v=>customize({accentColor:v})}/><Field label="Text" value={color(target.textColor)} onChange={v=>customize({textColor:v})}/><Field label="Background" value={color(target.backgroundColor)} onChange={v=>customize({backgroundColor:v})}/><Field label="Font family" value={target.fontFamily||'Inter'} onChange={v=>customize({fontFamily:v})}/><Field label="Custom font family" value={target.customFontFamily||''} onChange={v=>customize({customFontFamily:v})}/>
        </div></div>
