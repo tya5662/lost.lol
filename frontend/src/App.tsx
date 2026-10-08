@@ -17,7 +17,7 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
  if(!user){window.location.href='/login';return null;}
  if(location.pathname==='/dashboard')return <DashboardHome user={user}/>;
  const parts=location.pathname.split('/').filter(Boolean);
- const isPremiumRoute = parts[1] === 'premium' || parts[1] === 'aliases';
+ const isPremiumRoute = (parts[1] === 'premium' && parts[2] !== 'metadata') || parts[1] === 'aliases';
  if(isPremiumRoute && !user.premium){
    if(location.pathname !== '/dashboard') window.history.replaceState({},'', '/dashboard');
    return <DashboardHome user={user}/>;
