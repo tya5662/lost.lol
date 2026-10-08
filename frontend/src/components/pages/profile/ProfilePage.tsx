@@ -1,68 +1,254 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
+import {
+  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Pause, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles,
+} from 'lucide-react';
 import { toast } from 'react-toastify';
-import { FaDiscord, FaGithub, FaInstagram, FaSpotify, FaTiktok, FaTwitch, FaYoutube, FaXTwitter } from 'react-icons/fa6';
-import { Globe, Linkedin, Mail, BadgeCheck, Eye, MapPin } from 'lucide-react';
 import { API_URL } from '@/services/api';
-import './template.css';
-
-interface BadgeDefinition { name:string; image?:string; fontFamily?:string; textColor?:string; accentColor?:string; animation?:string; description?:string }
+import logo from '../../../../public/p.png'
 interface UserProfile {
- id:number; username:string; name:string; description:string|null; profilePicture:string|null; accentColor?:string; textColor?:string; backgroundColor?:string; backgroundMedia:string|null; backgroundType:'image'|'video'|null;
- usernameEffect?:string; backgroundEffect?:string; cursorEffect?:string; fontFamily?:string; customFontFamily?:string; customFontUrl?:string; verified?:boolean; customEmojis?:Array<{name:string;value:string}>;
- profileOpacity?:number; profileBlur?:number; backgroundOpacity?:number; cardOpacity?:number; cardBlur?:number; audioUrl?:string; audioTitle?:string; audioAutoplay?:boolean; audioCoverUrl?:string;
- totalVisit?:number; location?:string; showLocation?:boolean; showDiscordPresence?:boolean; discordUsername?:string; discordAvatar?:string; badges?:string[]; badgeDefinitions?:BadgeDefinition[]; aliases?:string[];
- role?:'owner'|'co-owner'|'staff'|'member'; roleLabel?:string; profileLayout?:string; cardStyle?:string; cardRadius?:number; linkRadius?:number; linkSpacing?:number; linkOpacity?:number; linkBlur?:number; avatarSize?:number; avatarShape?:string; avatarGlow?:boolean; showViews?:boolean; showStatus?:boolean; showBranding?:boolean; accentGlow?:number;
- pageEnterEffect?:string; clickEffect?:string; cursorTrailSize?:number; particleEffect?:string; typewriterEnabled?:boolean; typewriterTexts?:string[]; typewriterSpeed?:number; typewriterLoop?:boolean; pageEnterText?:string; pageClickSound?:string; metadataTitle?:string; metadataDescription?:string; metadataImage?:string; animatedTitle?:boolean; monochromeIcons?:boolean; customCss?:string;
- links:Array<{_id?:string;id?:number;title:string;url:string}>;
+  id: number; username: string; name: string; description: string | null; profilePicture: string | null;
+  accentColor?: string; textColor?: string; backgroundColor?: string; backgroundMedia: string | null;
+  backgroundType: 'image' | 'video' | null;
+  usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
+  fontFamily?: string; customFontFamily?: string; customFontUrl?: string; verified?: boolean;
+  customEmojis?: Array<{name:string;value:string}>;
+  profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
+  audioUrl?: string;
+  audioTitle?: string;
+  audioAutoplay?: boolean;
+  audioCoverUrl?: string;
+  totalVisit?: number;
+  location?: string;
+  showLocation?: boolean;
+  showDiscordPresence?: boolean;
+  discordUsername?: string;
+  badges?: string[];
+  aliases?: string[];
+  role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
+  profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
+  linkRadius?: number; linkSpacing?: number; linkOpacity?: number; linkBlur?: number; avatarSize?: number; avatarShape?: 'circle'|'rounded'|'square'; avatarGlow?: boolean; showViews?: boolean; showStatus?: boolean; showBranding?: boolean; accentGlow?: number;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
+  links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
-const normalizeLinkUrl=(raw:string):string|null=>{const v=raw.trim();if(!v)return null;if(/^mailto:/i.test(v))return v;try{const p=new URL(/^(https?:\/\/)/i.test(v)?v:'https://'+v.replace(/^\/\//,''));return ['http:','https:'].includes(p.protocol)?p.href:null}catch{return null}};
-const getLinkIcon=(url:string)=>{const d=url.toLowerCase();if(d.includes('discord'))return FaDiscord;if(d.includes('instagram'))return FaInstagram;if(d.includes('spotify'))return FaSpotify;if(d.includes('tiktok'))return FaTiktok;if(d.includes('twitch'))return FaTwitch;if(d.includes('youtube'))return FaYoutube;if(d.includes('github'))return FaGithub;if(d.includes('x.com')||d.includes('twitter'))return FaXTwitter;if(d.includes('linkedin'))return Linkedin;if(d.startsWith('mailto:'))return Mail;return Globe};
+const normalizeLinkUrl = (rawUrl: string): string | null => {
+  const value = rawUrl.trim();
+  if (!value) return null;
+  if (/^mailto:/i.test(value)) return value;
+  if (/^(https?:\/\/)/i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
+    } catch {
+      return null;
+    }
+  }
 
-const ProfilePage:React.FC=()=>{
- const {username}=useParams<{username:string}>();const navigate=useNavigate();const [profile,setProfile]=useState<UserProfile|null>(null);const [loading,setLoading]=useState(true);const [entered,setEntered]=useState(false);const [muted,setMuted]=useState(true);const [isVideoPlaying,setIsVideoPlaying]=useState(false);const [seed,setSeed]=useState(1);const [typewriterText,setTypewriterText]=useState('');const videoRef=useRef<HTMLVideoElement|null>(null);const cursorRef=useRef<HTMLCanvasElement|null>(null);
- useEffect(()=>{let active=true;fetch(API_URL+'/users/'+username).then(async r=>{if(!r.ok)throw new Error();return r.json()}).then(d=>{if(active)setProfile(d)}).catch(()=>{if(active)toast.error('Failed to load profile')}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[username]);
- useEffect(()=>{if(!profile)return;document.title=profile.metadataTitle||'@'+profile.username+' | suffer.info';const m=document.querySelector('meta[name="description"]') as HTMLMetaElement|null;if(m)m.content=profile.metadataDescription||profile.description||'';if(profile.metadataImage){let og=document.querySelector('meta[property="og:image"]') as HTMLMetaElement|null;if(!og){og=document.createElement('meta');og.setAttribute('property','og:image');document.head.appendChild(og)}og.content=profile.metadataImage}},[profile]);
- useEffect(()=>{if(profile?.usernameEffect!=='noise')return;const t=window.setInterval(()=>setSeed(Math.floor(Math.random()*9999)),40);return()=>window.clearInterval(t)},[profile?.usernameEffect]);
- useEffect(()=>{if(!profile?.typewriterEnabled||!(profile.typewriterTexts||[]).length){setTypewriterText('');return}const texts=profile.typewriterTexts||[];let idx=0,pos=0,deleting=false,timer:number;const tick=()=>{const target=texts[idx]||'';if(!deleting){setTypewriterText(target.slice(0,pos++));if(pos>target.length){deleting=true;timer=window.setTimeout(tick,1800);return}}else{setTypewriterText(target.slice(0,pos--));if(pos<0){pos=0;deleting=false;idx=(idx+1)%texts.length;timer=window.setTimeout(tick,500);return}}timer=window.setTimeout(tick,deleting?35:Math.max(20,profile.typewriterSpeed||70))};tick();return()=>window.clearTimeout(timer)},[profile?.typewriterEnabled,profile?.typewriterTexts,profile?.typewriterSpeed]);
- useEffect(()=>{if(!entered||profile?.cursorEffect==='none')return;const canvas=cursorRef.current;if(!canvas)return;const ctx=canvas.getContext('2d');if(!ctx)return;let raf=0,mx=-999,my=-999,lx=-999,ly=-999;let dots:Array<{x:number;y:number;vx:number;vy:number;life:number;size:number}>=[];const move=(e:MouseEvent)=>{mx=e.clientX;my=e.clientY};const resize=()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight};const star=(x:number,y:number,s:number)=>{ctx.beginPath();ctx.moveTo(x,y-s);ctx.quadraticCurveTo(x+s*.2,y-s*.2,x+s,y);ctx.quadraticCurveTo(x+s*.2,y+s*.2,x,y+s);ctx.quadraticCurveTo(x-s*.2,y+s*.2,x-s,y);ctx.quadraticCurveTo(x-s*.2,y-s*.2,x,y-s);ctx.fill()};const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);if(mx!==lx||my!==ly){for(let i=0;i<4;i++)dots.push({x:mx,y:my,vx:(Math.random()-.5)*1.2,vy:(Math.random()-.5)*1.2,life:1,size:1.5+Math.random()*2});lx=mx;ly=my}dots.forEach(d=>{d.x+=d.vx;d.y+=d.vy;d.life-=1/30;ctx.globalAlpha=Math.max(0,d.life);ctx.fillStyle=profile?.cursorEffect==='red'?'#ef3340':'#ffd87a';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=8;star(d.x,d.y,d.size*d.life)});dots=dots.filter(d=>d.life>0);ctx.globalAlpha=1;ctx.shadowBlur=0;raf=requestAnimationFrame(draw)};resize();window.addEventListener('resize',resize);window.addEventListener('mousemove',move,{passive:true});raf=requestAnimationFrame(draw);return()=>{cancelAnimationFrame(raf);window.removeEventListener('resize',resize);window.removeEventListener('mousemove',move)}},[entered,profile?.cursorEffect]);
- if(loading)return <div className="template-profile" style={{display:'grid',placeItems:'center'}}>Loading profile</div>;
- if(!profile)return <div className="template-profile" style={{display:'grid',placeItems:'center',textAlign:'center',padding:24}}><div><h1>This profile isn’t here.</h1><button onClick={()=>navigate('/')} style={{marginTop:18,padding:'10px 16px',borderRadius:20}}>Back to suffer.info</button></div></div>;
- const accent=profile.accentColor||'#acc8ff';const text=profile.textColor||'#fff';const aliases=(profile.aliases||[]).slice(0,2);const cardRadius=Math.max(0,Math.min(85,profile.cardRadius??85));const avatarSize=Math.max(64,Math.min(180,profile.avatarSize??118));const linkRadius=Math.max(0,Math.min(32,profile.linkRadius??14));const linkSpacing=Math.max(4,Math.min(28,profile.linkSpacing??14));const linkOpacity=Math.max(.01,Math.min(.2,profile.linkOpacity??.035));const linkBlur=Math.max(0,Math.min(30,profile.linkBlur??5));const cardOpacity=Math.max(.03,Math.min(1,profile.cardOpacity??.03));const cardBlur=Math.max(0,Math.min(30,profile.cardBlur??5));const bgOpacity=Math.max(.1,Math.min(1,profile.backgroundOpacity??1));const validLinks=profile.links.map(l=>({...l,safeUrl:normalizeLinkUrl(l.url)})).filter(l=>l.safeUrl);
- const reveal=async()=>{setEntered(true);const v=videoRef.current;if(v){v.muted=false;setMuted(false);try{await v.play()}catch{setMuted(true)}}};const toggleSound=async()=>{const v=videoRef.current;if(!v)return;v.muted=!v.muted;setMuted(v.muted);if(v.paused)try{await v.play()}catch{}};const toggleVideo=async()=>{const v=videoRef.current;if(!v)return;if(v.paused){try{await v.play();setIsVideoPlaying(true)}catch{}}else{v.pause();setIsVideoPlaying(false)}};
- const usernameAnimation=usernameEffect==='pulse'?{scale:[1,1.04,1]}:usernameEffect==='float'?{y:[0,-5,0]}:usernameEffect==='shake'?{x:[0,-3,3,-2,2,0]}:usernameEffect==='bounce'?{y:[0,-10,0,-5,0]}:usernameEffect==='tilt'?{rotate:[-2,2,-1,1,0]}:usernameEffect==='zoom'?{scale:[1,1.08,1]}:usernameEffect==='neon'?{textShadow:['0 0 4px #fff,0 0 12px '+accent,'0 0 14px '+accent+',0 0 28px '+accent,'0 0 4px #fff,0 0 12px '+accent]}:{};
- const usernameTransition=usernameEffect==='none'?{}:{duration:2.2,repeat:Infinity,ease:'easeInOut' as const};
- const backgroundClass=backgroundEffect==='aurora'?'animate-pulse':backgroundEffect==='pulse'?'animate-[pulse_4s_ease-in-out_infinite]':backgroundEffect==='drift'?'animate-[float_8s_ease-in-out_infinite]':backgroundEffect==='flicker'?'animate-pulse':'';
- const badgeAnim=(a?:string)=>a==='pulse'?'animate-pulse':a==='float'?'animate-[float_3s_ease-in-out_infinite]':a==='bounce'?'animate-bounce':a==='spin'?'animate-spin':a==='glow'?'animate-[pulse_2s_ease-in-out_infinite]':'';
- const cardBackground=profile.cardStyle==='solid'?'rgba(10,10,12,'+cardOpacity+')':profile.cardStyle==='outline'?'transparent':profile.cardStyle==='floating'?'rgba(200,27,27,'+Math.min(1,cardOpacity+.05)+')':'rgba(200,27,27,'+cardOpacity+')';
- const linkBackground=profile.linkStyle==='solid'?accent+'22':profile.linkStyle==='outline'?'transparent':profile.linkStyle==='minimal'?'transparent':profile.linkStyle==='pill'?accent+'14':'rgba(255,255,255,'+linkOpacity+')';const backgroundGfx=backgroundEffect==='grid'?'bg-[linear-gradient(rgba(239,51,64,.10)_1px,transparent_1px),linear-gradient(90deg,rgba(239,51,64,.10)_1px,transparent_1px)] bg-[size:42px_42px]':backgroundEffect==='vignette'?'bg-[radial-gradient(circle,transparent_35%,rgba(0,0,0,.72)_100%)]':'';
- return <main className={'template-profile '+(cursorEffect==='red'?'cursor-none':'')} style={{backgroundColor:profile.backgroundColor||'#080808',color:text,fontFamily:profile.customFontFamily||profile.fontFamily||'Inter',overflowY:'auto',position:'relative'}}>
-   {profile.customFontUrl&&<style>{'@font-face{font-family:LostCustom;src:url('+JSON.stringify(profile.customFontUrl)+');font-display:swap}'}</style>}
-   {profile.backgroundMedia&&profile.backgroundType==='video'&&<video ref={videoRef} className="template-bg-video" loop playsInline muted={muted} onPlay={()=>setIsVideoPlaying(true)} onPause={()=>setIsVideoPlaying(false)}><source src={profile.backgroundMedia} type="video/mp4"/></video>}
-   {profile.backgroundMedia&&profile.backgroundType==='image'&&<div className="template-bg-video" style={{backgroundImage:'url('+profile.backgroundMedia+')',backgroundSize:'cover',backgroundPosition:'center',opacity:bgOpacity}}/>}
-   <div aria-hidden="true" className={'template-canvas '+backgroundClass+' '+backgroundGfx} style={{opacity:bgOpacity}}/>
-   {entered&&cursorEffect!=='none'&&<canvas ref={cursorRef} className="template-canvas template-cursor"/>}
-   {!entered&&<div className="template-entry" onClick={reveal}><div className="template-entry-symbol">⛧</div></div>}
-   <button className="template-volume" onClick={toggleSound} aria-label="Toggle sound">{muted?'🔇':'🔊'}</button>
-   {profile.backgroundType==='video'&&backgroundMedia&&entered&&<button onClick={toggleVideo} className="absolute right-5 top-16 z-10 rounded-xl border border-white/10 bg-black/55 px-3 py-2 text-xs text-white backdrop-blur-xl">{isVideoPlaying?'Pause motion':'Play motion'}</button>}
-   <motion.section initial={{opacity:0,y:12}} animate={entered?{opacity:1,y:0}:undefined} transition={{duration:.55}} className={'template-card '+(entered?'revealed':'')} style={{maxWidth:profile.profileLayout==='wide'?'58rem':profile.profileLayout==='compact'?'36rem':'44rem',borderRadius:cardRadius,background:cardBackground,backdropFilter:'blur('+cardBlur+'px)',boxShadow:profile.accentGlow?'0 0 '+Math.round(profile.accentGlow*90)+'px '+accent+'22':'none',border:profile.cardStyle==='outline'?'1px solid '+accent+'55':'1px solid rgba(255,255,255,.07)'}}>
-    <div className="template-main">
-      <div className="template-avatar-wrap" style={{width:avatarSize,height:avatarSize}}><img className="template-avatar" src={profilePicture||'/p.png'} alt="avatar"/></div>
-      <div className="template-info"><div className="template-name-row"><div className="template-name-wrap"><motion.span animate={usernameAnimation} transition={usernameTransition} className="template-name" style={{color:accent,textShadow:'0 0 16.5px '+accent,filter:usernameEffect==='noise'?'url(#name-filter)':'none'}}>{name}</motion.span><span className="template-tooltip">{profileUsername}</span></div>{profile.badges?.length?<div className="template-badges">{profile.badges.slice(0,8).map(b=>{const d=profile.badgeDefinitions?.find(x=>x.name===b);return <span key={b} className={'template-badge '+badgeAnim(d?.animation)} title={d?.description||b}>{d?.image?<img src={d.image} alt={b}/>:<BadgeCheck size={22} color={d?.accentColor||accent}/>}<span className="template-badge-tooltip">{b}</span></span>})}</div>:null}</div>{typewriterText?<div className="template-status">{typewriterText}</div>:description?<div className="template-status" style={{fontSize:14}}>{description}</div>:null}</div>
+  const candidate = `https://${value.replace(/^\/\//, '')}`;
+  try {
+    const parsed = new URL(candidate);
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : null;
+  } catch {
+    return null;
+  }
+};
+const getLinkIcon = (url: string) => {
+  const domain = url.toLowerCase();
+  if (domain.includes('x.com')) return X;
+  if (domain.includes('instagram.com')) return Instagram;
+  if (domain.includes('youtube.com')) return Youtube;
+  if (domain.includes('twitch.tv')) return Twitch;
+  if (domain.includes('github.com')) return Github;
+  if (domain.includes('mailto:')) return Mail;
+  if (domain.includes('linkedin')) return Linkedin;
+  return Globe;
+};
+const ProfilePage: React.FC = () => {
+  const navigate = useNavigate();
+  const { username } = useParams<{ username: string }>();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
+  const [typewriterText,setTypewriterText] = useState('');
+  const clickAudioRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(()=>{
+    if(profile?.cursorEffect !== 'red') { setCursorTrail([]); return; }
+    let frame=0; let nextId=0; let points:{x:number;y:number;id:number}[]=[];
+    const move=(e:MouseEvent)=>{points=[...points.slice(-10),{x:e.clientX,y:e.clientY,id:nextId++}];};
+    const tick=()=>{setCursorTrail(points);frame=requestAnimationFrame(tick);};
+    window.addEventListener('mousemove',move,{passive:true}); frame=requestAnimationFrame(tick);
+    return()=>{window.removeEventListener('mousemove',move);cancelAnimationFrame(frame);};
+  },[profile?.cursorEffect]);
+  useEffect(() => {
+    if (!profile) return;
+    document.title = profile.metadataTitle || `${profile.username} | suffer.info`;
+    const desc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (desc) desc.content = profile.metadataDescription || profile.description || '';
+    if (profile.metadataImage) {
+      let og = document.querySelector('meta[property="og:image"]') as HTMLMetaElement | null;
+      if (!og) { og = document.createElement('meta'); og.setAttribute('property','og:image'); document.head.appendChild(og); }
+      og.content = profile.metadataImage;
+    }
+  }, [profile]);
+  useEffect(() => {
+    if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
+    const texts = profile.typewriterTexts || [];
+    let index = 0, cancelled = false, timer: number | undefined;
+    const run = () => { const target = texts[index] || ''; let pos = 0; setTypewriterText(''); const tick = () => { if (cancelled) return; setTypewriterText(target.slice(0,pos++)); if (pos <= target.length) timer = window.setTimeout(tick, Math.max(20, profile.typewriterSpeed || 70)); else if (profile.typewriterLoop !== false) timer = window.setTimeout(() => { index=(index+1)%texts.length; run(); }, 900); }; tick(); };
+    run(); return () => { cancelled=true; if (timer) window.clearTimeout(timer); };
+  }, [profile?.typewriterEnabled, profile?.typewriterTexts, profile?.typewriterSpeed, profile?.typewriterLoop]);
+  useEffect(() => {
+    if (!profile?.pageClickSound) return;
+    clickAudioRef.current = new Audio(profile.pageClickSound);
+    clickAudioRef.current.volume = .3;
+    const onClick = () => { const audio = clickAudioRef.current; if (!audio) return; audio.currentTime=0; void audio.play().catch(()=>{}); };
+    window.addEventListener('click', onClick); return () => window.removeEventListener('click', onClick);
+  }, [profile?.pageClickSound]);
+  useEffect(() => {
+    document.title = `${username} | suffer.info`;
+    let isCurrent = true;
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`${API_URL}/users/${username}`);
+        if (!response.ok) throw new Error('Profile not found');
+        const data: UserProfile = await response.json();
+        if (isCurrent) setProfile(data);
+      } catch {
+        if (isCurrent) toast.error('Failed to load profile');
+      } finally {
+        if (isCurrent) setLoading(false);
+      }
+    };
+    setLoading(true); setProfile(null); void fetchProfile();
+    return () => { isCurrent = false; };
+  }, [username]);
+  if (loading) return (
+    <div className="flex min-h-screen items-center justify-center bg-[#050505] text-sm text-[#a39b9c]">
+      <span className="mr-3 h-2 w-2 animate-pulse rounded-full bg-[#ef3340]" />Loading profile
     </div>
-    {profile.showDiscordPresence&&profile.discordUsername&&<div className="template-discord"><div className="template-discord-avatar"><img src={profile.discordAvatar||'/p.png'} alt="Discord avatar"/></div><div className="template-discord-info"><span className="template-discord-user">{profile.discordUsername}</span><span className="template-discord-activity">Connected to Discord</span></div></div>}
-    <div className="template-links">{validLinks.map(l=>{const I=getLinkIcon(l.url);return <a key={l._id||l.id||l.url} href={l.safeUrl} target="_blank" rel="noopener noreferrer" title={l.title}><I className="template-link-icon" style={{color:accent}}/></a>})}</div>
-    {(aliases.length||profile.role&&profile.role!=='member'||audioUrl||validLinks.length>0)&&<div className="template-extra">
-      {aliases.length>0&&<div style={{display:'flex',justifyContent:'center',gap:8,flexWrap:'wrap',marginBottom:8}}>{aliases.map(a=><a key={a} href={'/'+a} style={{color:accent,textDecoration:'none',fontSize:11}}>@{a}</a>)}</div>}
-      {profile.role&&profile.role!=='member'&&<div style={{textAlign:'center',fontSize:10,color:accent,textTransform:'uppercase',marginBottom:8}}>{profile.roleLabel||profile.role}</div>}
-      {profile.audioUrl&&<div className="template-audio"><audio src={profile.audioUrl} autoPlay={profile.audioAutoplay} controls/></div>}
-      {validLinks.length>0&&<div className="template-extra-links" style={{gap:linkSpacing}}>{validLinks.map(l=><a key={l._id||l.id||l.url} className="template-extra-link" href={l.safeUrl} target="_blank" rel="noopener noreferrer" style={{borderRadius:profile.linkStyle==='pill'?999:linkRadius,background:linkBackground,backdropFilter:'blur('+linkBlur+'px)',border:profile.linkStyle==='outline'?'1px solid '+accent+'55':'1px solid rgba(255,255,255,.06)'}}>{l.title}</a>)}</div>}
-    </div>}
-    <div className="template-footer">{profile.showViews!==false&&<span><Eye size={12}/> {(profile.totalVisit||0).toLocaleString()}</span>}{profile.showLocation&&profile.location&&<span><MapPin size={12}/> {profile.location}</span>}{profile.showBranding!==false&&<span>suffer.info/{profileUsername}</span>}</div>
-   </motion.section>
-   <svg style={{display:'none'}}><defs><filter id="name-filter"><feTurbulence type="turbulence" baseFrequency="0.008 1.1" numOctaves="1" seed={seed}/><feDisplacementMap in="SourceGraphic" scale="6" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
-   {profile.customCss&&<style>{profile.customCss}</style>}
- </main>;
+  );
+  if (!profile) return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#050505] px-5 text-center text-white">
+      <img src={logo} alt="suffer.info" className="mb-5 h-14 w-14 rounded-xl border border-white/10" />
+      <h1 className="text-2xl font-bold">This profile isn’t here.</h1>
+      <p className="mt-2 text-sm text-[#928a8b]">The username may be unavailable or misspelled.</p>
+      <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to suffer.info</button>
+    </div>
+  );
+  const aliases = (profile.aliases || []).slice(0, 2);
+  const cardRadius = Math.max(0, Math.min(48, profile.cardRadius ?? 28));
+  const avatarSize = Math.max(64, Math.min(180, profile.avatarSize ?? 104));
+  const linkRadius = Math.max(0, Math.min(32, profile.linkRadius ?? 16));
+  const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
+  const accentColor = profile.accentColor || '#ef3340';
+  const bgOpacity = Math.max(0.25, Math.min(1, profile.backgroundOpacity ?? 1));
+  const cardOpacity = Math.max(0.25, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
+  const cardBlur = Math.max(0, Math.min(40, profile.cardBlur ?? profile.profileBlur ?? 18));
+  const resolvedFont = customFontFamily || fontFamily || 'Inter';
+  const textColor = profile.textColor || '#f4f0ef';
+  const usernameAnimation = usernameEffect === 'pulse' ? { scale: [1, 1.04, 1] } : usernameEffect === 'float' ? { y: [0, -5, 0] } : usernameEffect === 'shake' ? { x: [0, -3, 3, -2, 2, 0] } : usernameEffect === 'glow' ? { textShadow: ['0 0 0px '+accentColor, '0 0 22px '+accentColor, '0 0 0px '+accentColor] } : usernameEffect === 'bounce' ? { y: [0,-10,0,-5,0] } : usernameEffect === 'tilt' ? { rotate: [-2,2,-1,1,0] } : usernameEffect === 'zoom' ? { scale: [1,1.08,1] } : usernameEffect === 'blur' ? { filter: ['blur(0px)','blur(2px)','blur(0px)'] } : usernameEffect === 'flash' ? { opacity: [1,.45,1] } : usernameEffect === 'swing' ? { rotate: [-4,4,-3,3,0] } : usernameEffect === 'jelly' ? { scaleX: [1,1.08,.94,1.04,1], scaleY: [1,.94,1.06,.98,1] } : usernameEffect === 'heartbeat' ? { scale: [1,1.05,1,1.05,1] } : usernameEffect === 'neon' ? { textShadow: ['0 0 4px #fff, 0 0 12px '+accentColor,'0 0 14px '+accentColor+', 0 0 28px '+accentColor,'0 0 4px #fff, 0 0 12px '+accentColor] } : usernameEffect === 'rainbow' ? { filter: ['hue-rotate(0deg)','hue-rotate(180deg)','hue-rotate(360deg)'] } : {};
+  const usernameAnimationTransition = usernameEffect === 'none' ? {} : { duration: usernameEffect === 'heartbeat' ? 1.1 : 2.2, repeat: Infinity, ease: 'easeInOut' as const };
+  const backgroundClass = backgroundEffect === 'aurora' ? 'animate-pulse' : backgroundEffect === 'pulse' ? 'animate-[pulse_4s_ease-in-out_infinite]' : backgroundEffect === 'scanlines' ? 'opacity-70' : '';
+  const backgroundGfx = backgroundEffect === 'grid' ? 'bg-[linear-gradient(rgba(239,51,64,.10)_1px,transparent_1px),linear-gradient(90deg,rgba(239,51,64,.10)_1px,transparent_1px)] bg-[size:42px_42px] animate-[pulse_3s_ease-in-out_infinite]' : backgroundEffect === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_120%,rgba(239,51,64,.24),transparent_60%)] animate-pulse' : backgroundEffect === 'vignette' ? 'bg-[radial-gradient(circle,transparent_35%,rgba(0,0,0,.72)_100%)]' : backgroundEffect === 'spotlight' ? 'bg-[radial-gradient(circle_at_50%_35%,rgba(239,51,64,.22),transparent_35%)]' : backgroundEffect === 'halo' ? 'bg-[radial-gradient(circle,rgba(239,51,64,.18),transparent_32%)] animate-pulse' : backgroundEffect === 'radar' ? 'bg-[radial-gradient(circle,transparent_0,transparent_24%,rgba(239,51,64,.16)_25%,transparent_26%,transparent_49%,rgba(239,51,64,.12)_50%,transparent_51%)] animate-[spin_10s_linear_infinite]' : backgroundEffect === 'noise' ? 'opacity-20 mix-blend-screen' : '';
+  const backgroundGfxStyle = backgroundEffect === 'flicker' ? { animation: 'pulse 1.15s ease-in-out infinite' } : backgroundEffect === 'drift' ? { animation: 'pulse 6s ease-in-out infinite' } : backgroundEffect === 'breathe' ? { animation: 'pulse 4s ease-in-out infinite' } : backgroundEffect === 'orbit' ? { animation: 'spin 14s linear infinite' } : {};
+  const toggleVideo = async () => {
+    const video = videoRef.current; if (!video) return;
+    if (video.paused) { try { await video.play(); setIsVideoPlaying(true); } catch { setIsVideoPlaying(false); } }
+    else { video.pause(); setIsVideoPlaying(false); }
+  };
+  const validLinks = links.flatMap((link) => {
+    const safeUrl = normalizeLinkUrl(link.url);
+    return safeUrl ? [{ ...link, safeUrl }] : [];
+  });
+  return (
+    <>
+    {customFontUrl && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl)}) format('truetype');font-display:swap;}`}</style>}
+    <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont }}>
+      {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
+      {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
+      {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
+      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
+      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
+      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
+      <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
+        <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#ef3340]/35 bg-[#ef3340]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(239,51,64,.12)]"><AudioLines size={16} /></span>
+        suffer<span className="-ml-2 text-[#ef3340]">.info</span>
+      </motion.a>
+      {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
+        {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
+      </motion.button>}
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden border border-white/[0.10] shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)]" style={{backgroundColor:profile.cardStyle==='solid'?'#0b0b0d':`rgba(8,8,8,${cardOpacity})`,backdropFilter:`blur(${cardBlur}px)`,borderRadius:cardRadius}}>
+        <div className="h-[3px] w-full bg-gradient-to-r from-[#8d1721] via-[#ef3340] to-[#ff6670]" />
+        <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
+          <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
+            <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-5" style={{width:avatarSize,height:avatarSize}}>
+              <span aria-hidden="true" className="absolute -inset-2 rounded-full border border-[#ef3340]/45 shadow-[0_0_35px_rgba(239,51,64,.18)]" /><span aria-hidden="true" className="absolute -inset-4 rounded-full border border-[#ef3340]/10" />
+              <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />
+            </motion.div>
+            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
+            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
+            {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
+            {profile.customEmojis?.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{profile.customEmojis.slice(0,12).map(e=>{const isImage=e.value.startsWith('http')||e.value.startsWith('data:image/');return <span key={e.name} title={`:${e.name}:`} className="grid h-8 min-w-8 place-items-center rounded-lg border border-white/10 bg-white/[.035] px-1.5 transition-transform hover:scale-110">{isImage?<img src={e.value} alt={e.name} className="h-6 w-6 rounded object-contain"/>:<span className="text-[10px] font-semibold text-zinc-300">{e.name}</span>}</span>})}</div> : null}
+            {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
+          </div>
+          {audioUrl && <div className="mx-auto mt-7 max-w-[420px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
+  <audio ref={audioRef} preload="metadata" autoPlay={audioAutoplay} src={audioUrl}>Your browser does not support audio playback.</audio>
+  <div className="p-3.5 sm:p-4">
+    <div className="flex items-center gap-3">
+      <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-md bg-[#202020]">{audioCoverUrl?<img src={audioCoverUrl} alt="" className="h-full w-full object-cover"/>:<Disc3 size={25} className="text-zinc-500"/>}</div>
+      <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{audioTitle || 'Profile music'}</p><p className="mt-0.5 truncate text-[11px] text-zinc-500">@{profileUsername}</p></div>
+      <button type="button" aria-label="Play or pause profile music" onClick={async()=>{const a=audioRef.current;if(!a)return;if(a.paused){try{await a.play();}catch{}}else a.pause();}} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-black transition-transform hover:scale-105"><Play size={17} fill="currentColor"/></button>
+    </div>
+    <div className="mt-4 h-1 rounded-full bg-[#3a3a3a]"><div className="h-full w-[28%] rounded-full bg-white"/></div>
+    <div className="mt-1.5 flex justify-between text-[9px] text-zinc-500"><span>0:00</span><span>—</span></div>
+  </div>
+</div>}
+          <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Eye size={13} /> Views</div>
+              <div className="mt-1 text-sm font-bold" style={{color:textColor}}>{(profile.totalVisit ?? 0).toLocaleString()}</div>
+            </div>
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Sparkles size={13} /> Status</div>
+              <div className="mt-1 flex items-center gap-1.5 text-sm font-bold" style={{color:textColor}}><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.7)]" /> Online</div>
+            </div>
+          </div>
+          {(profile.showDiscordPresence || profile.showLocation) && <div className="mx-auto mt-3 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
+                <MessageCircle size={17} className="shrink-0 text-[#7289da]" />
+                <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}</div></div>
+              </div>}
+              {profile.showLocation && profile.location && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5">
+                <MapPin size={17} className="shrink-0" style={{color:accentColor}} />
+                <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Location</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.location}</div></div>
+              </div>}
+            </div>
+          </div>}
+          {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=><span key={b} className="inline-flex items-center gap-1.5 rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em]" style={{color:textColor}}><BadgeCheck size={12} style={{color:accentColor}} />{b}</span>)}</div> : null}
+          <div className="mx-auto mt-8 max-w-[420px]" style={{display:'flex',flexDirection:'column',gap:linkSpacing}}>
+            {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
+              <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}}>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] bg-black/40 transition-all duration-200 group-hover:border-[#ef3340]/30 group-hover:bg-[#ef3340]/10" style={{ color: accentColor }}><IconComponent size={17} /></span>
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold" style={{ color: textColor }}>{link.title || 'Open link'}</span>
+                <ArrowUpRight size={16} className="shrink-0 text-[#777173] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ff6872]" />
+              </motion.a>
+            ); })}
+          </div>
+          {validLinks.length === 0 && <p className="mt-8 text-center text-xs text-[#746d6e]">No links added yet.</p>}
+          <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span><span>Made with <span style={{ color: accentColor }}>suffer.info</span></span></div>
+        </div>
+      </motion.section>
+    </main>
+    </>
+  );
 };
 export default ProfilePage;
+
+// Production refresh marker: keep Vercel's Git deployment in sync with main.
