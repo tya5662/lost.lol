@@ -19,6 +19,7 @@ const siteSettingsSchema = new mongoose.Schema({
   grid: { type: Boolean, default: true },
   ghostMode: { type: Boolean, default: true },
   featureSection: { type: Boolean, default: true },
+  mediaLayers: { type: [mongoose.Schema.Types.Mixed], default: [] },
   updatedAt: { type: Date, default: Date.now },
 });
 
