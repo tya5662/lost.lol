@@ -51,7 +51,8 @@ router.post('/badges/claim', isAuthenticated, async (req,res,next)=>{
 router.get('/:username', getUserByUsername);
 router.put('/:username', isAuthenticated, upload.fields([
   { name: 'profilePicture', maxCount: 1 },
-  { name: 'backgroundMedia', maxCount: 1 }
+  { name: 'backgroundMedia', maxCount: 1 },
+  { name: 'fontFile', maxCount: 1 }
 ]), updateUser);
 router.patch('/:username/preferences', isAuthenticated, updatePreferences);
 router.post('/:username/media', isAuthenticated, upload.fields([
