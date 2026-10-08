@@ -23,6 +23,7 @@ const defaults = {
   grid: true,
   ghostMode: true,
   featureSection: true,
+  mediaLayers: [],
 };
 
 router.get('/', async (_req, res, next) => {
@@ -46,7 +47,7 @@ router.patch('/', isAuthenticated, async (req, res, next) => {
       if (Object.prototype.hasOwnProperty.call(req.body, key)) update[key] = req.body[key];
     }
 
-    for (const key of ['accentColor','secondaryColor','backgroundColor','panelColor']) {
+    if (update.mediaLayers !== undefined && !Array.isArray(update.mediaLayers)) { res.status(400).json({ message: 'Media layers must be an array.' }); return; }\n\n    for (const key of ['accentColor','secondaryColor','backgroundColor','panelColor']) {
       if (update[key] !== undefined && (typeof update[key] !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(update[key] as string))) {
         res.status(400).json({ message: 'Colors must be six-digit hex values.' });
         return;
