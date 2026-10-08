@@ -143,6 +143,8 @@ const ProfilePage: React.FC = () => {
   const cardRadius = Math.max(0, Math.min(48, profile.cardRadius ?? 28));
   const avatarSize = Math.max(64, Math.min(180, profile.avatarSize ?? 104));
   const linkRadius = Math.max(0, Math.min(32, profile.linkRadius ?? 16));
+  const linkOpacity = Math.max(0, Math.min(0.2, profile.linkOpacity ?? 0.025));
+  const linkBlur = Math.max(0, Math.min(40, profile.linkBlur ?? 0));
   const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
   const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
