@@ -29,7 +29,7 @@ interface UserProfile {
   role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
   profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
   linkRadius?: number; linkSpacing?: number; linkOpacity?: number; linkBlur?: number; avatarSize?: number; avatarShape?: 'circle'|'rounded'|'square'; avatarGlow?: boolean; showViews?: boolean; showStatus?: boolean; showBranding?: boolean; accentGlow?: number;
-  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; clickEffect?: 'ripple'|'flash'|'scale'|'none'; cursorTrailSize?:number; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -73,6 +73,7 @@ const ProfilePage: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
+  const [clickPulse,setClickPulse] = useState(false);
   const [typewriterText,setTypewriterText] = useState('');
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(()=>{
@@ -101,6 +102,11 @@ const ProfilePage: React.FC = () => {
     const run = () => { const target = texts[index] || ''; let pos = 0; setTypewriterText(''); const tick = () => { if (cancelled) return; setTypewriterText(target.slice(0,pos++)); if (pos <= target.length) timer = window.setTimeout(tick, Math.max(20, profile.typewriterSpeed || 70)); else if (profile.typewriterLoop !== false) timer = window.setTimeout(() => { index=(index+1)%texts.length; run(); }, 900); }; tick(); };
     run(); return () => { cancelled=true; if (timer) window.clearTimeout(timer); };
   }, [profile?.typewriterEnabled, profile?.typewriterTexts, profile?.typewriterSpeed, profile?.typewriterLoop]);
+  useEffect(() => {
+    if (!profile) return;
+    const onClick = () => { if (profile.clickEffect && profile.clickEffect !== 'none') { setClickPulse(true); window.setTimeout(() => setClickPulse(false), 320); } };
+    window.addEventListener('click', onClick); return () => window.removeEventListener('click', onClick);
+  }, [profile?.clickEffect]);
   useEffect(() => {
     if (!profile?.pageClickSound) return;
     clickAudioRef.current = new Audio(profile.pageClickSound);
@@ -152,6 +158,8 @@ const ProfilePage: React.FC = () => {
   const resolvedFont = customFontFamily || fontFamily || 'Inter';
   const textColor = profile.textColor || '#f4f0ef';
   const usernameAnimation = usernameEffect === 'pulse' ? { scale: [1, 1.04, 1] } : usernameEffect === 'float' ? { y: [0, -5, 0] } : usernameEffect === 'shake' ? { x: [0, -3, 3, -2, 2, 0] } : usernameEffect === 'glow' ? { textShadow: ['0 0 0px '+accentColor, '0 0 22px '+accentColor, '0 0 0px '+accentColor] } : usernameEffect === 'bounce' ? { y: [0,-10,0,-5,0] } : usernameEffect === 'tilt' ? { rotate: [-2,2,-1,1,0] } : usernameEffect === 'zoom' ? { scale: [1,1.08,1] } : usernameEffect === 'blur' ? { filter: ['blur(0px)','blur(2px)','blur(0px)'] } : usernameEffect === 'flash' ? { opacity: [1,.45,1] } : usernameEffect === 'swing' ? { rotate: [-4,4,-3,3,0] } : usernameEffect === 'jelly' ? { scaleX: [1,1.08,.94,1.04,1], scaleY: [1,.94,1.06,.98,1] } : usernameEffect === 'heartbeat' ? { scale: [1,1.05,1,1.05,1] } : usernameEffect === 'neon' ? { textShadow: ['0 0 4px #fff, 0 0 12px '+accentColor,'0 0 14px '+accentColor+', 0 0 28px '+accentColor,'0 0 4px #fff, 0 0 12px '+accentColor] } : usernameEffect === 'rainbow' ? { filter: ['hue-rotate(0deg)','hue-rotate(180deg)','hue-rotate(360deg)'] } : {};
+  const pageInitial = profile.pageEnterEffect === 'fade' ? {opacity:0} : profile.pageEnterEffect === 'zoom' ? {opacity:0,scale:.94} : profile.pageEnterEffect === 'blur' ? {opacity:0,filter:'blur(14px)'} : profile.pageEnterEffect === 'none' ? {} : {opacity:0,y:22};
+  const pageAnimate = profile.pageEnterEffect === 'fade' ? {opacity:1} : profile.pageEnterEffect === 'zoom' ? {opacity:1,scale:1} : profile.pageEnterEffect === 'blur' ? {opacity:1,filter:'blur(0px)'} : profile.pageEnterEffect === 'none' ? {} : {opacity:1,y:0};
   const usernameAnimationTransition = usernameEffect === 'none' ? {} : { duration: usernameEffect === 'heartbeat' ? 1.1 : 2.2, repeat: Infinity, ease: 'easeInOut' as const };
   const backgroundClass = backgroundEffect === 'aurora' ? 'animate-pulse' : backgroundEffect === 'pulse' ? 'animate-[pulse_4s_ease-in-out_infinite]' : backgroundEffect === 'scanlines' ? 'opacity-70' : '';
   const backgroundGfx = backgroundEffect === 'grid' ? 'bg-[linear-gradient(rgba(239,51,64,.10)_1px,transparent_1px),linear-gradient(90deg,rgba(239,51,64,.10)_1px,transparent_1px)] bg-[size:42px_42px] animate-[pulse_3s_ease-in-out_infinite]' : backgroundEffect === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_120%,rgba(239,51,64,.24),transparent_60%)] animate-pulse' : backgroundEffect === 'vignette' ? 'bg-[radial-gradient(circle,transparent_35%,rgba(0,0,0,.72)_100%)]' : backgroundEffect === 'spotlight' ? 'bg-[radial-gradient(circle_at_50%_35%,rgba(239,51,64,.22),transparent_35%)]' : backgroundEffect === 'halo' ? 'bg-[radial-gradient(circle,rgba(239,51,64,.18),transparent_32%)] animate-pulse' : backgroundEffect === 'radar' ? 'bg-[radial-gradient(circle,transparent_0,transparent_24%,rgba(239,51,64,.16)_25%,transparent_26%,transparent_49%,rgba(239,51,64,.12)_50%,transparent_51%)] animate-[spin_10s_linear_infinite]' : backgroundEffect === 'noise' ? 'opacity-20 mix-blend-screen' : '';
@@ -170,6 +178,7 @@ const ProfilePage: React.FC = () => {
     {customFontUrl && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl)}) format('truetype');font-display:swap;}`}</style>}
     <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont }}>
       {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
+      {profile.particleEffect && profile.particleEffect !== 'none' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">{Array.from({length:18},(_,i)=><span key={i} className="absolute h-1.5 w-1.5 rounded-full bg-[#ef3340]/40 animate-pulse" style={{left:(i*37)%100+'%',top:(i*61)%100+'%',animationDelay:(i%7)*.4+'s'}} />)}</div>}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
       {backgroundMedia && backgroundType === 'video' && <div className="absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full scale-105 object-cover opacity-25 blur-xl"><source src={backgroundMedia} type="video/mp4" /></video></div>}
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
@@ -183,7 +192,8 @@ const ProfilePage: React.FC = () => {
       {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
         {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
       </motion.button>}
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden border border-white/[0.10] shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)]" style={{backgroundColor:profile.cardStyle==='solid'?'#0b0b0d':`rgba(8,8,8,${cardOpacity})`,backdropFilter:`blur(${cardBlur}px)`,borderRadius:cardRadius}}>
+      <motion.section initial={pageInitial} animate={pageAnimate} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden border border-white/[0.10] shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)]" style={{backgroundColor:profile.cardStyle==='solid'?'#0b0b0d':`rgba(8,8,8,${cardOpacity})`,backdropFilter:`blur(${cardBlur}px)`,borderRadius:cardRadius}}>
+        {clickPulse && profile.clickEffect === 'flash' && <div className="pointer-events-none fixed inset-0 z-[90] animate-pulse bg-[#ef3340]/10" />}
         <div className="h-[3px] w-full bg-gradient-to-r from-[#8d1721] via-[#ef3340] to-[#ff6670]" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
