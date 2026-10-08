@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { isAuthenticated } from '../middleware/auth';
 import { User } from '../model/profiles';
+import { Badge } from '../model/badges';
 
 const router = Router();
 const privilegedRoles = new Set(['owner', 'co-owner', 'staff']);
@@ -197,6 +198,37 @@ router.delete('/users/:id/badges/:badge', async (req, res, next) => {
     await target.save();
     res.json({ badges: target.badges });
   } catch (error) { next(error); }
+});
+
+router.get('/badge-definitions', async (_req,res,next)=>{
+  try { res.json(await Badge.find({}).sort({name:1}).lean()); } catch(error){ next(error); }
+});
+
+router.post('/badge-definitions', async (req,res,next)=>{
+  try {
+    const actor=(req as any).actor;
+    if(actor.role!=='owner'){res.status(403).json({message:'Only the owner can create badge definitions.'});return;}
+    const body=req.body||{};
+    const name=typeof body.name==='string'?body.name.trim().slice(0,32):'';
+    if(!name){res.status(400).json({message:'Badge name is required.'});return;}
+    const image=typeof body.image==='string'?body.image.slice(0,200000):'';
+    const fontFamily=typeof body.fontFamily==='string'?body.fontFamily.trim().slice(0,80)||'Inter':'Inter';
+    const textColor=typeof body.textColor==='string'?body.textColor:'#f4f0ef';
+    const accentColor=typeof body.accentColor==='string'?body.accentColor:'#ef3340';
+    const animation=['none','pulse','float','spin','bounce','glow'].includes(body.animation)?body.animation:'none';
+    if(!/^#[0-9a-fA-F]{6}$/.test(textColor)||!/^#[0-9a-fA-F]{6}$/.test(accentColor)){res.status(400).json({message:'Badge colors must be six-digit hex values.'});return;}
+    const badge=await Badge.findOneAndUpdate({name},{name,image,fontFamily,textColor,accentColor,animation,description:typeof body.description==='string'?body.description.slice(0,160):''},{new:true,upsert:true,setDefaultsOnInsert:true});
+    res.json(badge);
+  } catch(error){next(error);}
+});
+
+router.delete('/badge-definitions/:name', async (req,res,next)=>{
+  try {
+    const actor=(req as any).actor;
+    if(actor.role!=='owner'){res.status(403).json({message:'Only the owner can delete badge definitions.'});return;}
+    await Badge.deleteOne({name:decodeURIComponent(req.params.name)});
+    res.json({message:'Badge definition deleted.'});
+  } catch(error){next(error);}
 });
 
 router.get('/badges', async (_req,res,next)=>{try{const users=await User.find({badges:{$exists:true,$ne:[]}}).select('username badges').lean();const names=[...new Set(users.flatMap((u:any)=>u.badges||[]))];res.json(names.map(name=>({name,holders:users.filter((u:any)=>(u.badges||[]).includes(name)).length})));}catch(error){next(error)}});
