@@ -9,7 +9,7 @@ interface AuthResponse { token?: string; otpRequired?: boolean; email?: string; 
 
 const requestJson = async (path:string, init?:RequestInit):Promise<any>=>{
   try{const response=await fetch(`${backendUrl}${path}`,init);const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof data?.message==='string'?data.message:`Request failed (${response.status})`);return data;}
-  catch(error){if(error instanceof TypeError)throw new Error('Unable to reach the lost.lol server. Please try again in a moment.');throw error;}
+  catch(error){if(error instanceof TypeError)throw new Error('Unable to reach the suffer.info server. Please try again in a moment.');throw error;}
 };
 const authHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('token')??''}`});
 const submitAuth=async(path:'register'|'login',details:Record<string,string>):Promise<AuthResponse>=>{const data=await requestJson(`/auth/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;};
