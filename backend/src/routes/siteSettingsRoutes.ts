@@ -25,6 +25,19 @@ const defaults = {
   featureSection: true,
   mediaLayers: [],
   siteAnimations: [],
+  announcement: '',
+  showcaseLabel: 'Showcase',
+  featuresLabel: 'Features',
+  signInLabel: 'Sign in',
+  createLabel: 'Create page',
+  primaryButtonUrl: '/register',
+  secondaryButtonUrl: '#showcase',
+  heroAlignment: 'center',
+  seoTitle: 'suffer.info',
+  seoDescription: 'Create a profile that actually feels like yours.',
+  seoImage: '',
+  footerText: 'Your page. Your links. Your rules.',
+  effectsIntensity: 1,
 };
 
 router.get('/', async (_req, res, next) => {
