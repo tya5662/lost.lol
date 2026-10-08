@@ -5,6 +5,7 @@ import {HomePage} from './components/pages/homepage/HomePage';
 import {AuthPage} from './components/auth/AuthPage';
 import {DashboardHome} from './components/pages/dashboard/DashboardHome';
 import {DashboardSection} from './components/pages/dashboard/DashboardSection';
+import {SiteEditor} from './components/pages/dashboard/SiteEditor';
 import {AdminPanel} from './components/pages/admin/AdminPanel';
 import {AUTH} from './services/api';
 import {User} from './types';
@@ -22,6 +23,7 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
    return <DashboardHome user={user}/>;
  }
  if(parts[0]==='dashboard'&&parts[1]==='premium'&&parts[2])return <DashboardSection user={user} section={`premium-${parts[2]}`}/>;
+ if(parts[0]==='dashboard'&&parts[1]==='site')return <SiteEditor user={user}/>;
  const section=parts[1]||'profile';
  return <DashboardSection user={user} section={section}/>;
 };
