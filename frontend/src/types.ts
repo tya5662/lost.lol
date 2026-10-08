@@ -2,7 +2,15 @@ import { LucideIcon } from "lucide-react";
 
 export type UserRole = 'owner' | 'co-owner' | 'staff' | 'member';
 
-export interface SiteMediaLayer { id:string; type:'image'|'video'; url:string; x:number; y:number; width:number; height:number; opacity:number; blur:number; rotation:number; zIndex:number; objectFit:'cover'|'contain'; autoplay:boolean; loop:boolean; muted:boolean; clickableUrl?:string; }\n\nexport interface SiteSettings {\n  brandName:string; brandTld:string; heroBadge:string; heroTitle:string; heroSubtitle:string; primaryButton:string; secondaryButton:string;\n  accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number;\n  particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean; mediaLayers:SiteMediaLayer[]; siteAnimations:{id:string;target:'site'|'media';mediaId?:string;name:string;duration:number;delay:number;intensity:number;enabled:boolean}[];\n}\n\nexport interface User {
+export interface SiteMediaLayer { id:string; type:'image'|'video'; url:string; x:number; y:number; width:number; height:number; opacity:number; blur:number; rotation:number; zIndex:number; objectFit:'cover'|'contain'; autoplay:boolean; loop:boolean; muted:boolean; clickableUrl?:string; }
+
+export interface SiteSettings {
+  brandName:string; brandTld:string; heroBadge:string; heroTitle:string; heroSubtitle:string; primaryButton:string; secondaryButton:string;
+  accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number;
+  particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean; mediaLayers:SiteMediaLayer[]; siteAnimations:{id:string;target:'site'|'media';mediaId?:string;name:string;duration:number;delay:number;intensity:number;enabled:boolean}[];
+}
+
+export interface User {
   _id: string,
   id: number;
   username: string;
