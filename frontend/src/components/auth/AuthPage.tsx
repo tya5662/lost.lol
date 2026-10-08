@@ -36,10 +36,6 @@ export const AuthPage: React.FC = () => {
           setTurnstileToken('');
           setError('The CAPTCHA expired. Please complete it again.');
         },
-        'timeout-callback': () => {
-          setTurnstileToken('');
-          setError('The CAPTCHA timed out. Please complete it again.');
-        },
         'error-callback': (code?: string) => {
           setTurnstileToken('');
           setError(code ? `CAPTCHA error ${code}. Please refresh and try again.` : 'The CAPTCHA could not load. Please refresh and try again.');
@@ -81,10 +77,8 @@ export const AuthPage: React.FC = () => {
       navigate('/dashboard');
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Unable to authenticate. Please try again.');
-      if (turnstileWidgetId.current !== null && window.turnstile) {
-        window.turnstile.remove(turnstileWidgetId.current); turnstileWidgetId.current = null; setTimeout(renderWidget, 0);
-        setTurnstileToken('');
-      }
+      setTurnstileToken('');
+      turnstileWidgetId.current = null;
     } finally {
       setIsSubmitting(false);
     }
