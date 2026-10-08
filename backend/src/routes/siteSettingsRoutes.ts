@@ -38,6 +38,14 @@ const defaults = {
   seoImage: '',
   footerText: 'Your page. Your links. Your rules.',
   effectsIntensity: 1,
+  navStyle:'glass', heroSize:'fullscreen', heroWidth:'standard', headlineFont:'Inter', headlineWeight:600,
+  headlineSize:8, bodySize:1, pageRadius:22, sectionSpacing:28, noise:false, vignette:true, scanlines:false,
+  animatedGradient:true, mouseGlow:true, hoverLift:true, buttonStyle:'solid', buttonRadius:16, showTrustBar:true,
+  trustText:'Free to start · No design skills needed · Your profile, your rules.',
+  showcaseTitle:'Make it yours', showcaseDescription:'One editor for your profile, links, music, badges, effects and media.',
+  featuresTitle:'Everything important is one tap away.', featuresDescription:'Powerful controls without making you learn code.',
+  featureCards:[],
+  customCss:'',
 };
 
 router.get('/', async (_req, res, next) => {
