@@ -4,7 +4,7 @@ import { User } from '../model/profiles';
 import { isAuthenticated } from '../middleware/auth';
 
 const router = Router();
-const BACKEND_URL = process.env.BACKEND_URL || 'https://lost-lol.onrender.com';
+const backendBaseUrl = process.env.BACKEND_URL || 'https://lost-lol.onrender.com';
 const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://suffer.info').replace(/\/+$/, '');
 
 router.get('/discord/start', isAuthenticated, (req, res) => {
@@ -17,7 +17,7 @@ router.get('/discord/start', isAuthenticated, (req, res) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
-    redirect_uri: `${process.env.DISCORD_REDIRECT_URI || `${BACKEND_URL}/api/connections/discord/callback`}`,
+    redirect_uri: process.env.DISCORD_REDIRECT_URI || `${backendBaseUrl}/api/connections/discord/callback`,
     scope: 'identify',
     state,
     prompt: 'consent',
@@ -45,7 +45,7 @@ router.get('/discord/callback', async (req, res, next) => {
       client_secret: clientSecret,
       grant_type: 'authorization_code',
       code,
-      redirect_uri: process.env.DISCORD_REDIRECT_URI || `${BACKEND_URL}/api/connections/discord/callback`,
+      redirect_uri: process.env.DISCORD_REDIRECT_URI || `${backendBaseUrl}/api/connections/discord/callback`,
     });
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
     const tokenData = await tokenResponse.json() as { access_token?: string };
