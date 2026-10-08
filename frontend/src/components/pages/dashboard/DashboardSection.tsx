@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound, Shield, Plug, Sparkles, Trash2 } from 'lucide-react';
+import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound, Shield, Plug, Sparkles, Trash2, Home } from 'lucide-react';
 import { User, Link as LinkType } from '../../../types';
 import { apiService } from '../../../services/api';
 
@@ -12,6 +12,7 @@ const CURSOR_EFFECTS =[['none','None'],['glow','Glow'],['red','Red trail']] as s
 export const DashboardSection:React.FC<{user:User;section:string}>=({user,section})=>{
  const location=useLocation();
  const nav=[
+  ['Home','/',Home],
   ['Overview','/dashboard',BarChart3],['Analytics','/dashboard/analytics',BarChart3],['Badges','/dashboard/badges',Crown],
   ['Settings','/dashboard/settings',Settings],...(user.role==='owner'?[['Site Editor','/dashboard/site',Palette] as const]:[]),['Customize','/dashboard/appearance',Palette],['Links','/dashboard/links',Link2],
   ['Socials','/dashboard/socials',Share2],['Connections','/dashboard/connections',Plug],['Music','/dashboard/music',Music2],['Widgets','/dashboard/widgets',Boxes],['Templates','/dashboard/templates',Boxes],['Profile','/dashboard/profile',UserRound]
@@ -84,7 +85,7 @@ const LinksEditor=({user,links,setLinks}:{user:User;links:LinkType[];setLinks:Re
    if(platform==='discord'){setSaving(true);try{apiService.connectDiscord();}finally{setSaving(false);}return;}
    const clean=url.trim();if(!clean)return;
    const finalTitle=title.trim()||String(selected[1]);
-   const normalized=/^https?:\\/\\//i.test(clean)?clean:`https://${clean}`;
+   const normalized=/^https?:\/\//i.test(clean)?clean:`https://${clean}`;
    setSaving(true);try{const x=await apiService.createLink({userId:user.id,title:finalTitle,url:normalized});setLinks(v=>[...v,x]);setTitle('');setUrl('');setPlatform('custom');}finally{setSaving(false);}
  };
  return <section className="space-y-5">
