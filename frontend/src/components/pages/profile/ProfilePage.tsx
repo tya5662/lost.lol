@@ -208,7 +208,8 @@ const ProfilePage: React.FC = () => {
         </div>
       </motion.section>
     </main>
-    </>\n  );
+    </>
+  );
 };
 export default ProfilePage;
 
