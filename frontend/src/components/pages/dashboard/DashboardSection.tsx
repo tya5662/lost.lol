@@ -9,14 +9,13 @@ const USERNAME_EFFECTS =[['none','None'],['glow','Glow'],['pulse','Pulse'],['flo
 const BACKGROUND_EFFECTS =[['none','None'],['pulse','Pulse glow'],['aurora','Aurora'],['scanlines','Scanlines'],['vignette','Vignette'],['grid','Grid'],['spotlight','Spotlight'],['breathe','Breathe'],['flicker','Flicker'],['drift','Drift'],['orbit','Orbit'],['waves','Waves'],['noise','Noise'],['halo','Halo'],['radar','Radar']] as string[][];
 const CURSOR_EFFECTS =[['none','None'],['glow','Glow'],['red','Red trail']] as string[][];
 
-const nav=[
+export const DashboardSection:React.FC<{user:User;section:string}>=({user,section})=>{
+ const location=useLocation();
+ const nav=[
   ['Overview','/dashboard',BarChart3],['Analytics','/dashboard/analytics',BarChart3],['Badges','/dashboard/badges',Crown],
   ['Settings','/dashboard/settings',Settings],...(user.role==='owner'?[['Site Editor','/dashboard/site',Palette] as const]:[]),['Customize','/dashboard/appearance',Palette],['Links','/dashboard/links',Link2],
   ['Socials','/dashboard/socials',Share2],['Music','/dashboard/music',Music2],['Widgets','/dashboard/widgets',Boxes],['Profile','/dashboard/profile',UserRound]
-] as const;
-
-export const DashboardSection:React.FC<{user:User;section:string}>=({user,section})=>{
- const location=useLocation();
+ ] as const;
  const [local,setLocal]=React.useState<User>(user);
  const [links,setLinks]=React.useState<LinkType[]>([]);
  const [message,setMessage]=React.useState('');
