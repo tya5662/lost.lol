@@ -16,7 +16,7 @@ router.get('/discord/start', isAuthenticated, (req, res) => {
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
-    redirect_uri: `${process.env.DISCORD_REDIRECT_URI || `${FRONTEND_URL}/api/connections/discord/callback`}`,
+    redirect_uri: `${process.env.DISCORD_REDIRECT_URI || `${BACKEND_URL}/api/connections/discord/callback`}`,
     scope: 'identify',
     state,
     prompt: 'consent',
