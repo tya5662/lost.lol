@@ -6,8 +6,8 @@ import { User } from '../model/profiles';
 const router = Router();
 
 const defaults = {
-  brandName: 'lost',
-  brandTld: '.lol',
+  brandName: 'suffer',
+  brandTld: '.info',
   heroBadge: 'A profile platform built around you',
   heroTitle: 'Your entire online identity, in one place.',
   heroSubtitle: 'Build a profile that actually feels like yours. Links, socials, music, effects, badges, backgrounds and more — all controlled from one easy dashboard.',
@@ -47,7 +47,9 @@ router.patch('/', isAuthenticated, async (req, res, next) => {
       if (Object.prototype.hasOwnProperty.call(req.body, key)) update[key] = req.body[key];
     }
 
-    if (update.mediaLayers !== undefined && !Array.isArray(update.mediaLayers)) { res.status(400).json({ message: 'Media layers must be an array.' }); return; }\n\n    for (const key of ['accentColor','secondaryColor','backgroundColor','panelColor']) {
+    if (update.mediaLayers !== undefined && !Array.isArray(update.mediaLayers)) { res.status(400).json({ message: 'Media layers must be an array.' }); return; }
+
+    for (const key of ['accentColor','secondaryColor','backgroundColor','panelColor']) {
       if (update[key] !== undefined && (typeof update[key] !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(update[key] as string))) {
         res.status(400).json({ message: 'Colors must be six-digit hex values.' });
         return;
