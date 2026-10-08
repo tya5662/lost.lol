@@ -25,6 +25,7 @@ interface UserProfile {
   showDiscordPresence?: boolean;
   discordUsername?: string;
   badges?: string[];
+  aliases?: string[];
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -77,7 +78,7 @@ const ProfilePage: React.FC = () => {
     return()=>{window.removeEventListener('mousemove',move);cancelAnimationFrame(frame);};
   },[profile?.cursorEffect]);
   useEffect(() => {
-    document.title = `${username} | lost.lol`;
+    document.title = `${username} | suffer.info`;
     let isCurrent = true;
     const fetchProfile = async () => {
       try {
@@ -101,12 +102,13 @@ const ProfilePage: React.FC = () => {
   );
   if (!profile) return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#050505] px-5 text-center text-white">
-      <img src={logo} alt="lost.lol" className="mb-5 h-14 w-14 rounded-xl border border-white/10" />
+      <img src={logo} alt="suffer.info" className="mb-5 h-14 w-14 rounded-xl border border-white/10" />
       <h1 className="text-2xl font-bold">This profile isn’t here.</h1>
       <p className="mt-2 text-sm text-[#928a8b]">The username may be unavailable or misspelled.</p>
-      <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to lost.lol</button>
+      <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to suffer.info</button>
     </div>
   );
+  const aliases = (profile.aliases || []).slice(0, 2);
   const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const bgOpacity = Math.max(0.25, Math.min(1, profile.backgroundOpacity ?? 1));
@@ -139,9 +141,9 @@ const ProfilePage: React.FC = () => {
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
-      <motion.a href="/" aria-label="lost.lol home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
+      <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
         <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#ef3340]/35 bg-[#ef3340]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(239,51,64,.12)]"><AudioLines size={16} /></span>
-        lost<span className="-ml-2 text-[#ef3340]">.lol</span>
+        suffer<span className="-ml-2 text-[#ef3340]">.info</span>
       </motion.a>
       {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
         {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
@@ -156,6 +158,7 @@ const ProfilePage: React.FC = () => {
             </motion.div>
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
             <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>
+            {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
             {profile.customEmojis?.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{profile.customEmojis.slice(0,12).map(e=>{const isImage=e.value.startsWith('http')||e.value.startsWith('data:image/');return <span key={e.name} title={`:${e.name}:`} className="grid h-8 min-w-8 place-items-center rounded-lg border border-white/10 bg-white/[.035] px-1.5 transition-transform hover:scale-110">{isImage?<img src={e.value} alt={e.name} className="h-6 w-6 rounded object-contain"/>:<span className="text-[10px] font-semibold text-zinc-300">{e.name}</span>}</span>})}</div> : null}
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
           </div>
@@ -204,7 +207,7 @@ const ProfilePage: React.FC = () => {
             ); })}
           </div>
           {validLinks.length === 0 && <p className="mt-8 text-center text-xs text-[#746d6e]">No links added yet.</p>}
-          <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>lost.lol/{profileUsername}</span><span>Made with <span style={{ color: accentColor }}>lost.lol</span></span></div>
+          <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span><span>Made with <span style={{ color: accentColor }}>suffer.info</span></span></div>
         </div>
       </motion.section>
     </main>
