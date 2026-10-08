@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { apiService } from '../../../services/api';
 import { SiteSettings } from '../../../types';
 
-const fallback:SiteSettings={brandName:'lost',brandTld:'.lol',heroBadge:'A profile platform built around you',heroTitle:'Your entire online identity, in one place.',heroSubtitle:'Build a profile that actually feels like yours. Links, socials, music, effects, badges, backgrounds and more — all controlled from one easy dashboard.',primaryButton:'Create your profile',secondaryButton:'Explore the experience',accentColor:'#ef4444',secondaryColor:'#cbd5e1',backgroundColor:'#050506',panelColor:'#0d0d0f',gridOpacity:.12,glowOpacity:.2,particles:true,grid:true,ghostMode:true,featureSection:true,mediaLayers:[],siteAnimations:[]};
+const fallback:SiteSettings={brandName:'suffer',brandTld:'.info',heroBadge:'A profile platform built around you',heroTitle:'Your entire online identity, in one place.',heroSubtitle:'Build a profile that actually feels like yours. Links, socials, music, effects, badges, backgrounds and more — all controlled from one easy dashboard.',primaryButton:'Create your profile',secondaryButton:'Explore the experience',accentColor:'#ef4444',secondaryColor:'#cbd5e1',backgroundColor:'#050506',panelColor:'#0d0d0f',gridOpacity:.12,glowOpacity:.2,particles:true,grid:true,ghostMode:true,featureSection:true,mediaLayers:[],siteAnimations:[]};
 
 export const HomePage:React.FC=()=>{
  const [site,setSite]=useState<SiteSettings>(fallback);
