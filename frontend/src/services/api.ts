@@ -15,8 +15,8 @@ const authHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('token')??'
 const submitAuth=async(path:'register'|'login',details:Record<string,string>):Promise<AuthResponse>=>{const data=await requestJson(`/auth/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;};
 
 export const apiService={
- registerAccount:(details:{email:string;username:string;password:string})=>submitAuth('register',details),
- loginAccount:(details:{identifier:string;password:string})=>submitAuth('login',details),
+ registerAccount:(details:{email:string;username:string;password:string;turnstileToken:string})=>submitAuth('register',details),
+ loginAccount:(details:{identifier:string;password:string;turnstileToken:string})=>submitAuth('login',details),
  logout:()=>{localStorage.removeItem('token');},
  getUser:async(username:string):Promise<User>=>requestJson(`/api/users/${encodeURIComponent(username)}`),
  getUserLinks:async(userId:number|string):Promise<LinkType[]>=>requestJson(`/api/links/user/${userId}`),
