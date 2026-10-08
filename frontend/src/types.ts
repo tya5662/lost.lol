@@ -2,7 +2,7 @@ import { LucideIcon } from "lucide-react";
 
 export type UserRole = 'owner' | 'co-owner' | 'staff' | 'member';
 
-export interface User {
+export interface SiteSettings {\n  brandName:string; brandTld:string; heroBadge:string; heroTitle:string; heroSubtitle:string; primaryButton:string; secondaryButton:string;\n  accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number;\n  particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean;\n}\n\nexport interface User {
   _id: string,
   id: number;
   username: string;
