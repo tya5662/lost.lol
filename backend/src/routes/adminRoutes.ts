@@ -125,7 +125,11 @@ router.patch('/users/:id/customization', async (req, res, next) => {
     const target = await User.findOne({ id: Number(req.params.id) });
     if (!target) { res.status(404).json({ message: 'User not found.' }); return; }
 
-    if (actor.role === 'staff' && target.role !== 'member') {
+    if (!actor.rootOwner && !actor.canCustomizeUsers) {
+      res.status(403).json({ message: 'You do not have user-customization permission.' });
+      return;
+    }
+    if (!actor.rootOwner && actor.role === 'staff' && target.role !== 'member') {
       res.status(403).json({ message: 'Staff can only customize member accounts.' });
       return;
     }
@@ -182,8 +186,8 @@ router.patch('/users/:id/customization', async (req, res, next) => {
 router.post('/users/:id/badges', async (req, res, next) => {
   try {
     const actor = (req as any).actor;
-    if (actor.role === 'staff') {
-      res.status(403).json({ message: 'Staff accounts cannot manage badges.' });
+    if (!actor.rootOwner && !actor.canManageBadges) {
+      res.status(403).json({ message: 'You do not have badge-management permission.' });
       return;
     }
 
@@ -206,7 +210,7 @@ router.post('/users/:id/badges', async (req, res, next) => {
 router.delete('/users/:id/badges/:badge', async (req, res, next) => {
   try {
     const actor = (req as any).actor;
-    if (actor.role === 'staff') { res.status(403).json({ message: 'Staff accounts cannot manage badges.' }); return; }
+    if (!actor.rootOwner && !actor.canManageBadges) { res.status(403).json({ message: 'You do not have badge-management permission.' }); return; }
     const target = await User.findOne({ id: Number(req.params.id) });
     if (!target) { res.status(404).json({ message: 'User not found.' }); return; }
     const badge = decodeURIComponent(req.params.badge);
