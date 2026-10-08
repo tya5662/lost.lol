@@ -29,7 +29,7 @@ interface UserProfile {
   role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
   profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
   linkRadius?: number; linkSpacing?: number; linkOpacity?: number; linkBlur?: number; avatarSize?: number; avatarShape?: 'circle'|'rounded'|'square'; avatarGlow?: boolean; showViews?: boolean; showStatus?: boolean; showBranding?: boolean; accentGlow?: number;
-  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; clickEffect?: 'ripple'|'flash'|'scale'|'none'; cursorTrailSize?:number; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; clickEffect?: 'ripple'|'flash'|'scale'|'none'; cursorTrailSize?:number; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
