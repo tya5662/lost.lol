@@ -10,7 +10,7 @@ import { mongoDB } from './config/database';
 
 const app=express();
 if(!process.env.JWT_SECRET)console.error('JWT_SECRET is not configured; sign-up and sign-in requests will be unavailable.');
-const frontendOrigins=new Set([process.env.FRONTEND_URL,process.env.FRONTEND_URLS,'https://lost-lol.vercel.app'].filter((v):v is string=>Boolean(v)).flatMap(v=>v.split(',')).map(v=>v.trim().replace(/\/+$/,'')).filter(Boolean));
+const frontendOrigins=new Set([process.env.FRONTEND_URL,process.env.FRONTEND_URLS,'https://lost-lol.vercel.app','https://suffer.info','https://www.suffer.info'].filter((v):v is string=>Boolean(v)).flatMap(v=>v.split(',')).map(v=>v.trim().replace(/\/+$/,'')).filter(Boolean));
 const isAllowedFrontendOrigin=(origin?:string)=>{if(!origin)return true;if(frontendOrigins.has(origin))return true;try{const hostname=new URL(origin).hostname;return hostname==='localhost'||hostname==='127.0.0.1'||hostname==='lost-lol.vercel.app'||hostname.endsWith('.vercel.app')}catch{return false}};
 app.use(cors({origin:(origin,callback)=>callback(null,isAllowedFrontendOrigin(origin)),credentials:true,optionsSuccessStatus:204}));
 app.use(express.json());
