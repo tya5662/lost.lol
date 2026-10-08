@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {Link} from 'react-router-dom';
-import {apiService} from '../../../services/api';
+import {apiService,AUTH} from '../../../services/api';
 import {UserRole} from '../../../types';
 
 type AdminUser={
@@ -27,7 +27,7 @@ export const AdminPanel:React.FC=()=>{
  const [badge,setBadge]=useState(''); const [emojiName,setEmojiName]=useState(''); const [emojiValue,setEmojiValue]=useState('');
  const [saving,setSaving]=useState(false); const [badgeDefs,setBadgeDefs]=useState<any[]>([]); const [me,setMe]=useState<any>(null); const [banReason,setBanReason]=useState(''); const [newBadge,setNewBadge]=useState({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#ef3340',animation:'glow',description:''});
  const load=async()=>{try{setUsers(await apiService.getAdminUsers() as AdminUser[])}catch(e){setError(e instanceof Error?e.message:'Unable to load admin panel')}finally{setLoading(false)}};
- useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([])); fetch('/auth/me',{headers:{Authorization:`Bearer ${localStorage.getItem('token')??''}`}}).then(r=>r.ok?r.json():null).then(setMe).catch(()=>{});},[]);
+ useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([])); fetch(AUTH,{headers:{Authorization:`Bearer ${localStorage.getItem('token')??''}`}}).then(r=>r.ok?r.json():null).then(setMe).catch(()=>{});},[]);
  const target=users.find(u=>u.id===selected)||null; const isRootOwner=!!me?.rootOwner;
  const update=async(id:number,body:{role?:UserRole;premium?:boolean})=>{setError('');try{await apiService.updateAdminUser(id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Update failed')}};
  const customize=async(body:Record<string,unknown>)=>{if(!target)return;setSaving(true);setError('');try{await apiService.updateAdminCustomization(target.id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Customization update failed')}finally{setSaving(false)}};
