@@ -12,7 +12,7 @@ interface UserProfile {
   accentColor?: string; textColor?: string; backgroundColor?: string; backgroundMedia: string | null;
   backgroundType: 'image' | 'video' | null;
   usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
-  fontFamily?: string; customFontFamily?: string; verified?: boolean;
+  fontFamily?: string; customFontFamily?: string; customFontUrl?: string; verified?: boolean;
   customEmojis?: Array<{name:string;value:string}>;
   profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
