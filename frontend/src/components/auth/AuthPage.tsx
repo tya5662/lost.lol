@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, AtSign, LockKeyhole, Mail } from 'lucide-react';
 import { apiService } from '@/services/api';
@@ -14,17 +14,54 @@ export const AuthPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<HTMLDivElement>(null);
   const isEmailTaken = error.toLowerCase().includes('email') && error.toLowerCase().includes('account');
+  const TURNSTILE_SITE_KEY = '0x4AAAAAAFRAyeyXHwm1-O5M';
+
+  useEffect(() => {
+    let cancelled = false;
+    const renderWidget = () => {
+      if (cancelled || !turnstileRef.current || !window.turnstile) return;
+      turnstileRef.current.innerHTML = '';
+      window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'dark',
+        callback: (token: string) => setTurnstileToken(token),
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+      });
+    };
+    if (window.turnstile) renderWidget();
+    else {
+      const existing = document.querySelector('script[data-turnstile]') as HTMLScriptElement | null;
+      if (existing) existing.addEventListener('load', renderWidget, { once: true });
+      else {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.dataset.turnstile = 'true';
+        script.addEventListener('load', renderWidget, { once: true });
+        document.head.appendChild(script);
+      }
+    }
+    return () => { cancelled = true; setTurnstileToken(''); };
+  }, [isRegister]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+    if (!turnstileToken) {
+      setError('Please complete the CAPTCHA first.');
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (isRegister) {
-        await apiService.registerAccount({ email, username, password });
+        await apiService.registerAccount({ email, username, password, turnstileToken });
       } else {
-        await apiService.loginAccount({ identifier, password });
+        await apiService.loginAccount({ identifier, password, turnstileToken });
       }
       navigate('/dashboard');
     } catch (authError) {
@@ -101,7 +138,7 @@ export const AuthPage: React.FC = () => {
               </span>
             </label>
 
-            {error && (
+            <div className="flex justify-center py-1"><div ref={turnstileRef} /></div>\n\n            {error && (
               <div role="alert" className="rounded-[18px] border border-[#8e2c39]/60 bg-[#35171d]/60 px-4 py-4 text-sm leading-6 text-[#ff8392] sm:px-5">
                 <p>{error}</p>
                 {isEmailTaken && <Link to="/login" className="mt-1 inline-flex items-center gap-1 font-semibold text-[#ff9ba7] underline decoration-[#ff9ba7]/40 underline-offset-4 hover:text-white">Sign in instead <ArrowRight size={14} /></Link>}
