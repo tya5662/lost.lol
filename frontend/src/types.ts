@@ -32,6 +32,9 @@ export interface User {
   verified?: boolean;
   customEmojis?: {name:string;value:string}[];
   customFontFamily?: string;
+  customFontName?: string;
+  customFontMime?: string;
+  customFontUrl?: string;
   profileGradient?: boolean;
   monochromeIcons?: boolean;
   animatedTitle?: boolean;
