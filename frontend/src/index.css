@@ -77,3 +77,61 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+@layer base {
+  html, body, #root { min-height: 100%; }
+  body {
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 50% -10%, rgba(255,255,255,.055), transparent 34%),
+      radial-gradient(circle at 15% 70%, rgba(150,170,190,.035), transparent 28%),
+      #050607;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9990;
+    opacity: .28;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.055) 0 1px, transparent 1px),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,.035) 0 1px, transparent 1px);
+    background-size: 140px 140px, 190px 190px;
+    animation: ghost-drift 18s linear infinite;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    width: 420px;
+    height: 420px;
+    left: 50%;
+    top: 48%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+    z-index: 9989;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(205,220,235,.075), rgba(205,220,235,.02) 28%, transparent 70%);
+    filter: blur(12px);
+    animation: ghost-breathe 7s ease-in-out infinite;
+  }
+  @keyframes ghost-drift {
+    from { transform: translate3d(0,0,0); }
+    50% { transform: translate3d(18px,-12px,0); }
+    to { transform: translate3d(0,0,0); }
+  }
+  @keyframes ghost-breathe {
+    0%,100% { opacity: .45; transform: translate(-50%,-50%) scale(.92); }
+    50% { opacity: .85; transform: translate(-50%,-50%) scale(1.08); }
+  }
+  .ghost-float { animation: ghost-float 5s ease-in-out infinite; }
+  @keyframes ghost-float {
+    0%,100% { transform: translateY(0); opacity: .7; }
+    50% { transform: translateY(-8px); opacity: 1; }
+  }
+  .ghost-glow { animation: ghost-glow 3.5s ease-in-out infinite; }
+  @keyframes ghost-glow {
+    0%,100% { filter: drop-shadow(0 0 0 rgba(220,235,245,0)); }
+    50% { filter: drop-shadow(0 0 14px rgba(220,235,245,.18)); }
+  }
+}
