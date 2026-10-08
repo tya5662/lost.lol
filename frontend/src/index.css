@@ -66,3 +66,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer base {
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  button, a { transition: transform .16s cubic-bezier(.22,1,.36,1), filter .16s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease, color .2s ease; }
+  button:active:not(:disabled), a:active { transform: scale(.965); }
+  button:hover:not(:disabled), a:hover { filter: brightness(1.06); }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid rgba(239,51,64,.65); outline-offset: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
