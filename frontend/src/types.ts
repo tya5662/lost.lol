@@ -8,6 +8,31 @@ export interface SiteSettings {
   brandName:string; brandTld:string; heroBadge:string; heroTitle:string; heroSubtitle:string; primaryButton:string; secondaryButton:string;
   accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number;
   particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean; mediaLayers:SiteMediaLayer[]; siteAnimations:{id:string;target:'site'|'media';mediaId?:string;name:string;duration:number;delay:number;intensity:number;enabled:boolean}[]; announcement:string; showcaseLabel:string; featuresLabel:string; signInLabel:string; createLabel:string; primaryButtonUrl:string; secondaryButtonUrl:string; heroAlignment:'left'|'center'|'right'; seoTitle:string; seoDescription:string; seoImage:string; footerText:string; effectsIntensity:number;
+  navStyle?: 'glass'|'solid'|'minimal'|'floating';
+  heroSize?: 'compact'|'standard'|'large'|'fullscreen';
+  heroWidth?: 'narrow'|'standard'|'wide';
+  headlineFont?: string;
+  headlineWeight?: number;
+  headlineSize?: number;
+  bodySize?: number;
+  pageRadius?: number;
+  sectionSpacing?: number;
+  noise?: boolean;
+  vignette?: boolean;
+  scanlines?: boolean;
+  animatedGradient?: boolean;
+  mouseGlow?: boolean;
+  hoverLift?: boolean;
+  buttonStyle?: 'solid'|'glass'|'outline'|'pill';
+  buttonRadius?: number;
+  showTrustBar?: boolean;
+  trustText?: string;
+  showcaseTitle?: string;
+  showcaseDescription?: string;
+  featuresTitle?: string;
+  featuresDescription?: string;
+  featureCards?: {title:string;description:string;icon?:string}[];
+  customCss?: string;
 }
 
 export interface User {
