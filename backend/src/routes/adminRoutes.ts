@@ -26,7 +26,7 @@ router.use(async (req, res, next) => {
 router.get('/users', async (_req, res, next) => {
   try {
     const users = await User.find({})
-      .select('id username name email role premium premiumSince badges verified customEmojis accentColor textColor backgroundColor fontFamily customFontFamily profileOpacity profileBlur usernameEffect backgroundEffect cursorEffect layout createdAt totalVisit')
+      .select('id username name email role rootOwner canBan canDemote canManageRoles canManagePremium canManageBadges canCustomizeUsers banned banReason bannedAt premium premiumSince badges verified customEmojis accentColor textColor backgroundColor fontFamily customFontFamily profileOpacity profileBlur usernameEffect backgroundEffect cursorEffect layout createdAt totalVisit')
       .sort({ createdAt: -1 })
       .lean();
     res.json(users);
@@ -59,33 +59,49 @@ router.patch('/users/:id', async (req, res, next) => {
       return;
     }
 
+    if (target.rootOwner && actor.id !== target.id) {
+      res.status(403).json({ message: 'The primary owner account cannot be modified by delegated staff.' });
+      return;
+    }
+
     if (requestedRole) {
       const rank: Record<string, number> = { member: 0, staff: 1, 'co-owner': 2, owner: 3 };
-      if (actor.role === 'staff') {
-        res.status(403).json({ message: 'Staff accounts cannot change team roles.' });
-        return;
-      }
-      if (actor.role === 'co-owner' && (target.role === 'owner' || target.role === 'co-owner')) {
-        res.status(403).json({ message: 'Co-owners can only manage staff and member roles.' });
-        return;
-      }
-      if (requestedRole === 'owner' && actor.role !== 'owner') {
-        res.status(403).json({ message: 'Only the owner can create another owner.' });
-        return;
-      }
-      if (actor.role !== 'owner' && rank[requestedRole] >= rank[actor.role]) {
-        res.status(403).json({ message: 'You cannot promote an account to your own level or higher.' });
-        return;
+      const currentRank = rank[target.role] ?? 0;
+      const requestedRank = rank[requestedRole] ?? 0;
+      const isDemotion = requestedRank < currentRank;
+      const isPromotion = requestedRank > currentRank;
+      if (actor.rootOwner) {
+        // Primary owner may manage every role except their own account.
+      } else if (isDemotion) {
+        if (!actor.canDemote) {
+          res.status(403).json({ message: 'You do not have demotion permission.' });
+          return;
+        }
+        if (target.role === 'owner' || target.role === 'co-owner' || requestedRole === 'owner') {
+          res.status(403).json({ message: 'Only the primary owner can change owner/co-owner roles.' });
+          return;
+        }
+      } else if (isPromotion) {
+        if (!actor.canManageRoles) {
+          res.status(403).json({ message: 'You do not have role-management permission.' });
+          return;
+        }
+        if (requestedRank >= (rank[actor.role] ?? 0)) {
+          res.status(403).json({ message: 'You cannot promote an account to your own level or higher.' });
+          return;
+        }
       }
     }
 
-    if (premium !== undefined && actor.role === 'staff') {
-      res.status(403).json({ message: 'Staff accounts cannot change premium status.' });
-      return;
-    }
-    if (premium !== undefined && actor.role === 'co-owner' && ['owner', 'co-owner'].includes(target.role)) {
-      res.status(403).json({ message: 'Co-owners cannot change premium status for owners or co-owners.' });
-      return;
+    if (premium !== undefined) {
+      if (!actor.rootOwner && !actor.canManagePremium) {
+        res.status(403).json({ message: 'You do not have premium-management permission.' });
+        return;
+      }
+      if (!actor.rootOwner && ['owner','co-owner'].includes(target.role)) {
+        res.status(403).json({ message: 'Delegated staff cannot change premium status for owners or co-owners.' });
+        return;
+      }
     }
 
     if (requestedRole) target.role = requestedRole;
@@ -198,6 +214,50 @@ router.delete('/users/:id/badges/:badge', async (req, res, next) => {
     await target.save();
     res.json({ badges: target.badges });
   } catch (error) { next(error); }
+});
+
+router.patch('/users/:id/permissions', async (req,res,next)=>{
+  try{
+    const actor=(req as any).actor;
+    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can grant moderation permissions.'});return;}
+    const target=await User.findOne({id:Number(req.params.id)});
+    if(!target){res.status(404).json({message:'User not found.'});return;}
+    if(target.rootOwner){res.status(400).json({message:'The primary owner already has every permission.'});return;}
+    const allowed=['canBan','canDemote','canManageRoles','canManagePremium','canManageBadges','canCustomizeUsers'] as const;
+    for(const key of allowed) if(typeof req.body?.[key]==='boolean') (target as any)[key]=req.body[key];
+    await target.save();
+    res.json({id:target.id,username:target.username,rootOwner:target.rootOwner,canBan:target.canBan,canDemote:target.canDemote,canManageRoles:target.canManageRoles,canManagePremium:target.canManagePremium,canManageBadges:target.canManageBadges,canCustomizeUsers:target.canCustomizeUsers});
+  }catch(error){next(error);}
+});
+
+const canModerateTarget=(actor:any,target:any,kind:'ban'|'unban')=>{
+  if(target.rootOwner) return 'The primary owner account cannot be moderated.';
+  if(actor.rootOwner) return null;
+  if(kind==='ban'&&!actor.canBan) return 'You do not have ban permission.';
+  if(kind==='unban'&&!actor.canBan) return 'You do not have ban permission.';
+  const rank:Record<string,number>={member:0,staff:1,'co-owner':2,owner:3};
+  if((rank[target.role]??0)>=(rank[actor.role]??0)) return 'You can only moderate accounts below your role.';
+  return null;
+};
+
+router.post('/users/:id/ban', async(req,res,next)=>{
+  try{
+    const actor=(req as any).actor; const target=await User.findOne({id:Number(req.params.id)});
+    if(!target){res.status(404).json({message:'User not found.'});return;}
+    const denial=canModerateTarget(actor,target,'ban'); if(denial){res.status(403).json({message:denial});return;}
+    target.banned=true; target.banReason=typeof req.body?.reason==='string'?req.body.reason.trim().slice(0,500):''; target.bannedAt=new Date(); target.bannedBy=actor.id;
+    await target.save(); res.json({id:target.id,username:target.username,banned:true,banReason:target.banReason});
+  }catch(error){next(error);}
+});
+
+router.delete('/users/:id/ban', async(req,res,next)=>{
+  try{
+    const actor=(req as any).actor; const target=await User.findOne({id:Number(req.params.id)});
+    if(!target){res.status(404).json({message:'User not found.'});return;}
+    const denial=canModerateTarget(actor,target,'unban'); if(denial){res.status(403).json({message:denial});return;}
+    target.banned=false; target.banReason=''; target.bannedAt=undefined; target.bannedBy=undefined;
+    await target.save(); res.json({id:target.id,username:target.username,banned:false});
+  }catch(error){next(error);}
 });
 
 router.get('/badge-definitions', async (_req,res,next)=>{
