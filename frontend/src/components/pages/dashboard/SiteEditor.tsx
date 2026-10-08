@@ -3,7 +3,7 @@ import { Eye, Save } from 'lucide-react';
 import { apiService } from '../../../services/api';
 import { SiteMediaLayer, SiteSettings, User } from '../../../types';
 
-const defaults:SiteSettings={brandName:'lost',brandTld:'.lol',heroBadge:'A profile platform built around you',heroTitle:'Your entire online identity, in one place.',heroSubtitle:'Build a profile that actually feels like yours. Links, socials, music, effects, badges, backgrounds and more — all controlled from one easy dashboard.',primaryButton:'Create your profile',secondaryButton:'Explore the experience',mediaLayers:[],siteAnimations:[],accentColor:'#ef4444',secondaryColor:'#cbd5e1',backgroundColor:'#050506',panelColor:'#0d0d0f',gridOpacity:.12,glowOpacity:.2,particles:true,grid:true,ghostMode:true,featureSection:true};
+const defaults:SiteSettings={brandName:'suffer',brandTld:'.info',heroBadge:'A profile platform built around you',heroTitle:'Your entire online identity, in one place.',heroSubtitle:'Build a profile that actually feels like yours. Links, socials, music, effects, badges, backgrounds and more — all controlled from one easy dashboard.',primaryButton:'Create your profile',secondaryButton:'Explore the experience',mediaLayers:[],siteAnimations:[],accentColor:'#ef4444',secondaryColor:'#cbd5e1',backgroundColor:'#050506',panelColor:'#0d0d0f',gridOpacity:.12,glowOpacity:.2,particles:true,grid:true,ghostMode:true,featureSection:true};
 
 export const SiteEditor:React.FC<{user:User}>=({user})=>{
  const [settings,setSettings]=React.useState<SiteSettings>(defaults); const [saving,setSaving]=React.useState(false); const [message,setMessage]=React.useState('');
