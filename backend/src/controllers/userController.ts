@@ -221,7 +221,8 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       'usernameEffect','backgroundEffect','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
       'audioUrl','audioTitle','audioAutoplay','audioCoverUrl','layout','metadataTitle','metadataDescription','metadataImage','aliases','customFontFamily','customEmojis',
-      'secondTab','accentColor','textColor','backgroundColor','customFontFamily'
+      'secondTab','accentColor','textColor','backgroundColor','customFontFamily','customEmojis',
+      'roleLabel','profileLayout','cardStyle','cardRadius','linkStyle','linkRadius','linkOpacity','linkBlur','linkSpacing','avatarSize','avatarShape','avatarGlow','showViews','showStatus','showBranding','accentGlow','pageEnterEffect','clickEffect','cursorTrailSize','backgroundIntensity','particleEffect','typewriterSpeed','typewriterLoop','socialLinks','customCss'
     ] as const;
 
     for (const key of allowed) {
