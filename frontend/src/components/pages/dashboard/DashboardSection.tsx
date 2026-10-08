@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound, Shield } from 'lucide-react';
+import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2, UserRound, Shield, Plug, Sparkles, Trash2 } from 'lucide-react';
 import { User, Link as LinkType } from '../../../types';
 import { apiService } from '../../../services/api';
 
@@ -14,7 +14,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
  const nav=[
   ['Overview','/dashboard',BarChart3],['Analytics','/dashboard/analytics',BarChart3],['Badges','/dashboard/badges',Crown],
   ['Settings','/dashboard/settings',Settings],...(user.role==='owner'?[['Site Editor','/dashboard/site',Palette] as const]:[]),['Customize','/dashboard/appearance',Palette],['Links','/dashboard/links',Link2],
-  ['Socials','/dashboard/socials',Share2],['Music','/dashboard/music',Music2],['Widgets','/dashboard/widgets',Boxes],['Templates','/dashboard/templates',Boxes],['Profile','/dashboard/profile',UserRound]
+  ['Socials','/dashboard/socials',Share2],['Connections','/dashboard/connections',Plug],['Music','/dashboard/music',Music2],['Widgets','/dashboard/widgets',Boxes],['Templates','/dashboard/templates',Boxes],['Profile','/dashboard/profile',UserRound]
  ] as const;
  const [local,setLocal]=React.useState<User>(user);
  const [links,setLinks]=React.useState<LinkType[]>([]);
@@ -37,7 +37,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
  const music=section==='music';
  const widgets=section==='widgets';
  const analytics=section==='analytics';
- const linksPage=section==='links'; const aliasesPage=section==='aliases'; const badgesPage=section==='badges'; const templatesPage=section==='templates';
+ const linksPage=section==='links'; const connectionsPage=section==='connections'; const aliasesPage=section==='aliases'; const badgesPage=section==='badges'; const templatesPage=section==='templates';
 
  return <div className="min-h-screen bg-[#080809] text-white lg:flex">
   {menuOpen&&<button aria-label="Close menu" onClick={()=>setMenuOpen(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden"/>}
@@ -54,7 +54,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
    <div className="mx-auto max-w-5xl px-5 py-7 sm:px-8">
     {message&&<div className="mb-4 rounded-xl border border-orange-500/20 bg-[#ef3340]/5 px-4 py-3 text-sm text-orange-300">{message}</div>}
 
-    {badgesPage?<BadgeCenter/>:templatesPage?<TemplatesEditor user={user} local={local} update={update} save={save} saving={saving}/>:aliasesPage?<AliasesEditor user={user} local={local} update={update} save={save} saving={saving}/>:
+    {badgesPage?<BadgeCenter/>:connectionsPage?<ConnectionsEditor user={user}/>:templatesPage?<TemplatesEditor user={user} local={local} update={update} save={save} saving={saving}/>:aliasesPage?<AliasesEditor user={user} local={local} update={update} save={save} saving={saving}/>:
     linksPage?<LinksEditor user={user} links={links} setLinks={setLinks}/>:
     analytics?<section className="grid gap-4 sm:grid-cols-3"><Stat title="Profile views" value={(user.totalVisit||0).toLocaleString()}/><Stat title="Links" value={links.length.toString()}/><Stat title="Account" value={user.role||'member'}/><div className="sm:col-span-3 rounded-2xl border border-white/[.07] bg-[#0e0e10] p-5"><h2 className="font-semibold">Profile performance</h2><p className="mt-2 text-sm text-zinc-500">Your profile has {user.totalVisit||0} recorded visits. Link-level analytics can be added here without requiring premium.</p></div></section>:
     section.startsWith('premium')?<PremiumEditor section={section} user={user} local={local} update={update} save={save} saving={saving}/>:
@@ -77,11 +77,38 @@ const PremiumEditor=({section,local,update,save,saving}:{section:string;user:Use
 };
 
 const LinksEditor=({user,links,setLinks}:{user:User;links:LinkType[];setLinks:React.Dispatch<React.SetStateAction<LinkType[]>>})=>{
- const [title,setTitle]=React.useState('');const [url,setUrl]=React.useState('');const [saving,setSaving]=React.useState(false);
- const add=async()=>{if(!title||!url)return;setSaving(true);try{const x=await apiService.createLink({userId:user.id,title,url});setLinks(v=>[...v,x]);setTitle('');setUrl('');}finally{setSaving(false);}};
- return <section className="space-y-4"><div className="rounded-2xl border border-white/[.07] bg-[#0e0e10] p-5"><h2 className="font-semibold">Links</h2><p className="mt-1 text-sm text-zinc-500">Manage your profile links here — this is the new dashboard panel.</p><div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="Title" value={title} onChange={setTitle}/><Field label="URL" value={url} onChange={setUrl}/></div><button onClick={add} disabled={saving} className="mt-4 rounded-xl bg-[#ef3340] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving?'Adding…':'Add link'}</button></div><div className="space-y-2">{links.map(l=><div key={l.id} className="flex items-center justify-between rounded-xl border border-white/[.07] bg-[#0e0e10] p-4"><div><p className="font-medium">{l.title}</p><p className="text-xs text-zinc-600">{l.url}</p></div><button onClick={async()=>{await apiService.deleteLink(l.id);setLinks(v=>v.filter(x=>x.id!==l.id));}} className="text-xs text-red-400">Delete</button></div>)}</div></section>
+ const [title,setTitle]=React.useState('');const [url,setUrl]=React.useState('');const [platform,setPlatform]=React.useState('custom');const [saving,setSaving]=React.useState(false);
+ const presets=[['discord','Discord','Connect Discord instead of pasting a link'],['github','GitHub','github.com/username'],['youtube','YouTube','youtube.com/@username'],['twitch','Twitch','twitch.tv/username'],['instagram','Instagram','instagram.com/username'],['x','X','x.com/username'],['spotify','Spotify','open.spotify.com/...'],['website','Website','https://...'],['custom','Custom link','Any URL']];
+ const selected=presets.find(x=>x[0]===platform)||presets[presets.length-1];
+ const add=async()=>{
+   if(platform==='discord'){setSaving(true);try{apiService.connectDiscord();}finally{setSaving(false);}return;}
+   const clean=url.trim();if(!clean)return;
+   const finalTitle=title.trim()||String(selected[1]);
+   const normalized=/^https?:\\/\\//i.test(clean)?clean:`https://${clean}`;
+   setSaving(true);try{const x=await apiService.createLink({userId:user.id,title:finalTitle,url:normalized});setLinks(v=>[...v,x]);setTitle('');setUrl('');setPlatform('custom');}finally{setSaving(false);}
+ };
+ return <section className="space-y-5">
+   <div className="rounded-3xl border border-white/[.08] bg-gradient-to-br from-[#111114] to-[#0b0b0d] p-6">
+    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2 text-[#ef3340]"><Sparkles size={16}/><span className="text-[10px] font-bold uppercase tracking-[.2em]">Smart links</span></div><h2 className="mt-2 text-2xl font-bold">Build your link page</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Choose a service and suffer handles the boring parts. Connected services can be added without making you hunt for profile URLs.</p></div><div className="rounded-2xl border border-white/[.08] bg-white/[.03] px-4 py-3 text-xs text-zinc-400">Drag-and-drop ordering can be added to this same workspace.</div></div>
+    <div className="mt-6 grid gap-2 sm:grid-cols-3 lg:grid-cols-5">{presets.map(([id,name])=><button key={id} type="button" onClick={()=>{setPlatform(id);if(id!=='custom')setTitle(name);}} className={`rounded-2xl border px-3 py-3 text-left transition ${platform===id?'border-[#ef3340]/50 bg-[#ef3340]/10':'border-white/[.07] bg-black/10 hover:bg-white/[.04]'}`}><p className="text-sm font-semibold">{name}</p><p className="mt-1 text-[11px] text-zinc-600">{id==='discord'?'Account connection':'Smart preset'}</p></button>)}</div>
+    {platform==='discord'?<div className="mt-5 flex flex-col gap-4 rounded-2xl border border-[#5865F2]/20 bg-[#5865F2]/5 p-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Connect Discord</p><p className="mt-1 text-sm text-zinc-500">Authorize Discord once. Your connected identity can power your profile without manually pasting a Discord invite or username.</p></div><button disabled={saving} onClick={add} className="rounded-xl bg-[#5865F2] px-5 py-3 text-sm font-bold text-white">Connect Discord</button></div>:<div className="mt-5 grid gap-3 sm:grid-cols-[1fr_1.5fr_auto]"><Field label="Link title" value={title} onChange={setTitle}/><Field label={String(selected[2])} value={url} onChange={setUrl}/><button onClick={add} disabled={saving} className="self-end rounded-xl bg-[#ef3340] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">{saving?'Adding…':'Add link'}</button></div>}
+   </div>
+   <div className="space-y-3">{links.length===0?<div className="rounded-3xl border border-dashed border-white/[.1] p-10 text-center"><Link2 className="mx-auto text-zinc-700" size={28}/><p className="mt-3 font-semibold">Your profile is empty</p><p className="mt-1 text-sm text-zinc-600">Pick a platform above to add your first smart link.</p></div>:links.map(l=><div key={l.id} className="group flex items-center gap-4 rounded-2xl border border-white/[.07] bg-[#0e0e10] p-4"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[.05] text-zinc-400"><Link2 size={18}/></div><div className="min-w-0 flex-1"><p className="font-semibold">{l.title}</p><p className="truncate text-xs text-zinc-600">{l.url}</p></div><button onClick={async()=>{await apiService.deleteLink(l.id);setLinks(v=>v.filter(x=>x.id!==l.id));}} className="rounded-xl p-2 text-zinc-600 hover:bg-red-500/10 hover:text-red-300" aria-label="Delete link"><Trash2 size={17}/></button></div>)}</div>
+ </section>
 };
 
+const ConnectionsEditor=({user}:{user:User})=>{
+ const [discord,setDiscord]=React.useState<{connected:boolean;username?:string;avatar?:string}>({connected:!!user.discordId,username:user.discordUsername,avatar:user.discordAvatar});
+ const [busy,setBusy]=React.useState(false);const [message,setMessage]=React.useState('');
+ React.useEffect(()=>{const params=new URLSearchParams(window.location.search);const result=params.get('discord');if(result==='connected')setMessage('Discord connected successfully.');else if(result==='error')setMessage('Discord could not be connected. Please try again.');else if(result==='not_configured')setMessage('Discord connection is not configured yet.');apiService.getDiscordConnection().then(setDiscord).catch(()=>{});},[]);
+ const disconnect=async()=>{setBusy(true);try{await apiService.disconnectDiscord();setDiscord({connected:false});setMessage('Discord disconnected.');}catch(e){setMessage(e instanceof Error?e.message:'Could not disconnect Discord.');}finally{setBusy(false);}};
+ return <section className="space-y-5">
+  <div className="rounded-3xl border border-white/[.08] bg-[#0e0e10] p-6"><div className="flex items-center gap-2 text-[#ef3340]"><Plug size={16}/><span className="text-[10px] font-bold uppercase tracking-[.2em]">Connections</span></div><h2 className="mt-2 text-2xl font-bold">Connect your accounts</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">Instead of copying profile URLs around, connect supported services once and let suffer use the account identity for your profile.</p>{message&&<div className="mt-4 rounded-xl border border-white/[.08] bg-white/[.03] px-4 py-3 text-sm text-zinc-300">{message}</div>}</div>
+  <div className="rounded-3xl border border-white/[.08] bg-[#0e0e10] p-6"><div className="flex items-center gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5865F2]/15 text-[#8b92ff]"><span className="text-xl font-black">D</span></div><div className="min-w-0 flex-1"><p className="font-bold">Discord</p><p className="mt-1 text-sm text-zinc-500">{discord.connected?`Connected as ${discord.username||'Discord account'}`:'Connect your Discord account to your suffer profile.'}</p></div>{discord.connected?<button disabled={busy} onClick={disconnect} className="rounded-xl border border-white/[.1] px-4 py-2.5 text-sm font-semibold text-zinc-300 hover:border-red-500/30 hover:text-red-300">Disconnect</button>:<button onClick={()=>apiService.connectDiscord()} className="rounded-xl bg-[#5865F2] px-5 py-2.5 text-sm font-bold text-white">Connect</button>}</div>
+  {discord.connected&&<div className="mt-5 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl border border-white/[.07] bg-black/15 p-4"><p className="text-[10px] uppercase tracking-widest text-zinc-600">Identity</p><p className="mt-2 text-sm font-semibold">{discord.username||'Connected'}</p></div><div className="rounded-2xl border border-white/[.07] bg-black/15 p-4"><p className="text-[10px] uppercase tracking-widest text-zinc-600">Profile use</p><p className="mt-2 text-sm font-semibold">Ready</p></div><div className="rounded-2xl border border-white/[.07] bg-black/15 p-4"><p className="text-[10px] uppercase tracking-widest text-zinc-600">Permissions</p><p className="mt-2 text-sm font-semibold">Identity only</p></div></div>}
+  </div>
+ </section>
+};
 const Editor=({title,text,children}:{title:string;text:string;children:React.ReactNode})=><section className="rounded-2xl border border-white/[.07] bg-[#0e0e10] p-6"><h2 className="text-lg font-semibold">{title}</h2><p className="mt-1 text-sm text-zinc-500">{text}</p><div className="mt-6 space-y-4">{children}</div></section>;
 const FileField=({label,accept,onChange}:{label:string;accept:string;onChange:(file:File|null)=>void})=><label className="block"><span className="mb-2 block text-xs text-zinc-500">{label}</span><input type="file" accept={accept} onChange={e=>onChange(e.target.files?.[0]??null)} className="block w-full rounded-xl border border-white/[.08] bg-black/20 px-3 py-2 text-sm text-zinc-300 file:mr-3 file:rounded-lg file:border-0 file:bg-[#ef3340] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black"/></label>;
 const Field=({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void})=><label className="block"><span className="mb-2 block text-xs text-zinc-500">{label}</span><input value={value} onChange={e=>onChange(e.target.value)} className="h-11 w-full rounded-xl border border-white/[.08] bg-black/20 px-3 text-sm outline-none focus:border-[#ef3340]/50"/></label>;
