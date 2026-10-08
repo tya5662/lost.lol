@@ -6,6 +6,7 @@ import linkRoutes from "./routes/linkRoutes";
 import authRoutes from './routes/authRoutes';
 import adminRoutes from './routes/adminRoutes';
 import siteSettingsRoutes from './routes/siteSettingsRoutes';
+import connectionRoutes from './routes/connectionRoutes';
 import { mongoDB } from './config/database';
 
 const app=express();
@@ -19,6 +20,7 @@ app.use('/uploads',express.static(path.join(__dirname,'../uploads')));
 app.use('/auth',authRoutes);
 app.use('/admin',adminRoutes);
 app.use('/api/site-settings',siteSettingsRoutes);
+app.use('/api/connections',connectionRoutes);
 app.use('/api/users',userRoutes);
 app.use('/api/links',linkRoutes);
 app.use((err:Error,_req:express.Request,res:express.Response,_next:express.NextFunction)=>{console.error(err.stack);res.status(500).json({message:'Something broke!'});});
