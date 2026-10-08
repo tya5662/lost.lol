@@ -10,9 +10,27 @@ export const SiteEditor:React.FC<{user:User}>=({user})=>{
  React.useEffect(()=>{apiService.getSiteSettings().then(setSettings).catch(e=>setMessage(e instanceof Error?e.message:'Could not load site settings.'));},[]);
  const update=(key:keyof SiteSettings,value:unknown)=>setSettings(s=>({...s,[key]:value}));
  const mediaUpdate=(index:number,patch:Partial<SiteMediaLayer>)=>update('mediaLayers',settings.mediaLayers.map((m,i)=>i===index?{...m,...patch}:m));
+ const themes=[
+  {name:'Suffer',description:'Signature red / black ghost aesthetic',accentColor:'#ef4444',secondaryColor:'#cbd5e1',backgroundColor:'#050506',panelColor:'#0d0d0f',gridOpacity:.12,glowOpacity:.2,ghostMode:true,particles:true,grid:true,effectsIntensity:1},
+  {name:'Blood Moon',description:'Deep crimson with a dramatic night glow',accentColor:'#b91c1c',secondaryColor:'#fecaca',backgroundColor:'#080303',panelColor:'#160708',gridOpacity:.08,glowOpacity:.3,ghostMode:true,particles:true,grid:false,effectsIntensity:1},
+  {name:'Ghost',description:'Cold monochrome with a spectral atmosphere',accentColor:'#e5e7eb',secondaryColor:'#94a3b8',backgroundColor:'#05070a',panelColor:'#0c1016',gridOpacity:.1,glowOpacity:.25,ghostMode:true,particles:true,grid:true,effectsIntensity:.8},
+  {name:'Void',description:'Minimal black-on-black premium look',accentColor:'#f87171',secondaryColor:'#71717a',backgroundColor:'#020203',panelColor:'#08080a',gridOpacity:.04,glowOpacity:.14,ghostMode:false,particles:false,grid:false,effectsIntensity:.55},
+  {name:'Crimson Glass',description:'Bright red accents with glassy panels',accentColor:'#dc2626',secondaryColor:'#f1f5f9',backgroundColor:'#09090b',panelColor:'#121216',gridOpacity:.16,glowOpacity:.22,ghostMode:true,particles:true,grid:true,effectsIntensity:1},
+  {name:'Winter',description:'Icy silver and dark blue-black',accentColor:'#93c5fd',secondaryColor:'#e0f2fe',backgroundColor:'#030609',panelColor:'#0a1118',gridOpacity:.1,glowOpacity:.2,ghostMode:true,particles:true,grid:true,effectsIntensity:.75},
+ ];
+ const applyTheme=(theme:typeof themes[number])=>setSettings(s=>({...s,...theme}));
  const save=async()=>{setSaving(true);setMessage('');try{setSettings(await apiService.updateSiteSettings(settings));setMessage('Site saved. Your public homepage is updated.');}catch(e){setMessage(e instanceof Error?e.message:'Could not save site.');}finally{setSaving(false);}};
  if(user.role!=='owner')return <section className='rounded-2xl border border-red-500/20 bg-red-500/5 p-6'><h2 className='text-lg font-semibold'>Site Editor</h2><p className='mt-2 text-sm text-zinc-400'>Only the site owner can edit global homepage settings.</p></section>;
  return <div className='space-y-5'>
+  <section className='rounded-2xl border border-white/[.07] bg-[#0e0e10] p-5 sm:p-6'>
+   <div><h2 className='text-lg font-semibold'>Site themes</h2><p className='mt-1 text-sm text-zinc-500'>Start with a complete visual preset, then customize anything you want. Themes only change the homepage appearance.</p></div>
+   <div className='mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+    {themes.map(theme=><button key={theme.name} type='button' onClick={()=>applyTheme(theme)} className='group overflow-hidden rounded-2xl border border-white/10 bg-black/20 text-left transition hover:-translate-y-0.5 hover:border-white/20'>
+     <div className='h-24 p-4' style={{background:'radial-gradient(circle at 70% 20%,'+theme.accentColor+'55,transparent 45%),'+theme.backgroundColor}}><div className='h-full rounded-xl border border-white/10 p-3' style={{backgroundColor:theme.panelColor}}><div className='h-2 w-16 rounded-full' style={{backgroundColor:theme.accentColor}}/><div className='mt-3 h-2 w-28 rounded-full bg-white/10'/><div className='mt-2 h-2 w-20 rounded-full bg-white/10'/></div></div>
+     <div className='p-4'><div className='flex items-center justify-between gap-2'><span className='font-semibold text-white'>{theme.name}</span><span className='text-[10px] font-semibold uppercase tracking-wider' style={{color:theme.accentColor}}>Apply</span></div><p className='mt-1 text-xs leading-5 text-zinc-500'>{theme.description}</p></div>
+    </button>)}
+   </div>
+  </section>
   <section className='rounded-2xl border border-white/[.07] bg-[#0e0e10] p-5 sm:p-6'>
    <div className='flex items-center justify-between gap-3'><div><h2 className='text-lg font-semibold'>Images & videos</h2><p className='mt-1 text-sm text-zinc-500'>Add visual layers anywhere on the homepage without coding.</p></div><button type='button' onClick={()=>update('mediaLayers',[...settings.mediaLayers,{id:crypto.randomUUID(),type:'image',url:'',x:50,y:50,width:70,height:70,opacity:1,blur:0,rotation:0,zIndex:0,objectFit:'cover',autoplay:true,loop:true,muted:true}])} className='rounded-xl bg-red-500 px-4 py-2 text-xs font-semibold'>Add media</button></div>
    <div className='mt-5 space-y-3'>{settings.mediaLayers.map((m,i)=><div key={m.id} className='rounded-2xl border border-white/10 bg-black/20 p-4'>
