@@ -28,6 +28,9 @@ export const AuthPage: React.FC = () => {
       turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
         theme: 'dark',
+        appearance: 'always',
+        execution: 'render',
+        action: 'auth',
         retry: 'auto',
         callback: (token: string) => {
           setTurnstileToken(token);
@@ -101,7 +104,7 @@ export const AuthPage: React.FC = () => {
         <div className="flex items-center justify-between px-5 pt-5 sm:px-10 sm:pt-8">
           <Link to="/" aria-label="Back to suffer.info home" className="inline-flex items-center gap-3 text-sm font-semibold text-[#aaa4a0] transition-colors hover:text-white sm:text-base">
             <ArrowLeft size={19} />
-            <span className="tracking-[-.03em] text-white">lost<span className="text-[#ef3340]">.lol</span></span>
+            <span className="tracking-[-.03em] text-white">suffer<span className="text-[#ef3340]">.info</span></span>
           </Link>
           <span className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/5 px-3 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-[#ef3340] sm:text-[11px]">
             {isRegister ? 'Create account' : 'Member access'}
