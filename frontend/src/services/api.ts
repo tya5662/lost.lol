@@ -1,5 +1,5 @@
 import { backendUrl } from '@/backendUrl';
-import { User, Link as LinkType, UserRole } from '../types';
+import { User, Link as LinkType, UserRole, SiteSettings } from '../types';
 
 export const BURL = backendUrl;
 export const AUTH = `${backendUrl}/auth/me`;
@@ -19,6 +19,8 @@ export const apiService={
  loginAccount:(details:{identifier:string;password:string;turnstileToken:string})=>submitAuth('login',details),
  logout:()=>{localStorage.removeItem('token');},
  getUser:async(username:string):Promise<User>=>requestJson(`/api/users/${encodeURIComponent(username)}`),
+ getSiteSettings:async():Promise<SiteSettings>=>requestJson('/api/site-settings'),
+ updateSiteSettings:async(body:SiteSettings):Promise<SiteSettings>=>requestJson('/api/site-settings',{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  getUserLinks:async(userId:number|string):Promise<LinkType[]>=>requestJson(`/api/links/user/${userId}`),
  createLink:async(link:{userId:number|string;title:string;url:string})=>requestJson('/api/links',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(link)}).then(data=>data.link??data),
  updateLink:async(id:number,link:{title:string;url:string})=>requestJson(`/api/links/${id}`,{method:'PUT',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(link)}).then(data=>data.link??data),
