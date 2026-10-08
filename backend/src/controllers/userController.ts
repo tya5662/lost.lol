@@ -207,7 +207,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
 
     const allowed = [
       'name','location','showLocation','showDiscordPresence','discordUsername',
-      'profileOpacity','profileBlur','profileGradient','monochromeIcons','animatedTitle',
+      'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle',
       'usernameEffect','backgroundEffect','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
       'audioUrl','audioTitle','audioAutoplay','audioCoverUrl','layout','metadataTitle','metadataDescription','metadataImage','aliases','customFontFamily','customEmojis',
@@ -387,7 +387,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
 
     // Find user and increment total visit
     const user = await User.findOneAndUpdate(
-      { username },
+      { $or: [{ username }, { aliases: username }] },
       { $inc: { totalVisit: 1 } },
       { new: true }
     );
@@ -403,6 +403,8 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
     // Prepare user profile response
     const userProfile = {
       ...user.toObject(),
+      username: user.username,
+      aliasMatched: username.toLowerCase() !== user.username.toLowerCase(),
       profilePicture: user.profilePicture
         ? `data:image/jpeg;base64,${user.profilePicture.toString('base64')}`
         : null,
