@@ -211,7 +211,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       'usernameEffect','backgroundEffect','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
       'audioUrl','audioTitle','audioAutoplay','audioCoverUrl','layout','metadataTitle','metadataDescription','metadataImage','aliases','customFontFamily','customEmojis',
-      'secondTab'
+      'secondTab','accentColor','textColor','backgroundColor','customFontFamily'
     ] as const;
 
     for (const key of allowed) {
@@ -411,6 +411,9 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
       backgroundMedia: user.backgroundMedia
         ? `data:${user.backgroundType === 'video' ? 'video/mp4' : 'image/jpeg'};base64,${user.backgroundMedia.toString('base64')}`
         : null,
+      customFontUrl: user.customFontMedia
+        ? `data:${user.customFontMime || 'font/ttf'};base64,${user.customFontMedia.toString('base64')}`
+        : '',
       audioUrl: user.audioMedia
         ? `data:${user.audioMime || 'audio/mpeg'};base64,${user.audioMedia.toString('base64')}`
         : user.audioUrl || '',
@@ -475,6 +478,24 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       }
       user.backgroundMedia = file.buffer;
       user.backgroundType = file.mimetype.startsWith('video/') ? 'video' : 'image';
+    }
+
+    const fontFile = files.fontFile?.[0];
+    if (fontFile) {
+      const allowedFontMimes = ['font/ttf','font/otf','application/x-font-ttf','application/x-font-opentype','application/octet-stream'];
+      const ext = fontFile.originalname.toLowerCase().split('.').pop();
+      if (!['ttf','otf'].includes(ext || '') && !allowedFontMimes.includes(fontFile.mimetype)) {
+        res.status(400).json({ message: 'Custom font must be a .ttf or .otf file.' });
+        return;
+      }
+      if (fontFile.size > 5 * 1024 * 1024) {
+        res.status(400).json({ message: 'Custom font must be 5MB or smaller.' });
+        return;
+      }
+      user.customFontMedia = fontFile.buffer;
+      user.customFontMime = ext === 'otf' ? 'font/otf' : 'font/ttf';
+      user.customFontName = fontFile.originalname.replace(/\.[^/.]+$/, '').slice(0,80);
+      user.customFontFamily = `user-${user.id}-font`;
     }
 
     const audioFile = files.audioFile?.[0];
