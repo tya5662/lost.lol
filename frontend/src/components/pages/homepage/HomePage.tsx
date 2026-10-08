@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, BadgeCheck, BarChart3, Check, CirclePlay, Disc3, Link2, Menu, Palette, Sparkles, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { apiService } from '../../../services/api';
+import { SiteSettings } from '../../../types';
 
 const themes = [
   { name: 'Crimson', accent: '#ef4444', glow: 'rgba(239,68,68,.24)' },
@@ -14,23 +16,23 @@ export const HomePage: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const active = themes[theme];
+  const active = themes[theme];\n  const site = settings ?? {brandName:'lost',brandTld:'.lol',heroBadge:'{site.heroBadge}',heroTitle:'Your entire online identity, in one place.',heroSubtitle:'{site.heroSubtitle}',primaryButton:'Create your profile',secondaryButton:'Explore the experience',accentColor:'#ef4444',secondaryColor:'#cbd5e1',backgroundColor:'#050506',panelColor:'#0d0d0f',gridOpacity:.12,glowOpacity:.2,particles:true,grid:true,ghostMode:true,featureSection:true};
   const particles = useMemo(() => Array.from({ length: 28 }, (_, i) => ({
     left: (i * 41) % 100, top: (i * 67) % 72, delay: (i % 8) * .35,
   })), []);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#050506] text-white">
+    <main className="min-h-screen overflow-hidden text-white">
       <section className="relative isolate min-h-[940px] overflow-hidden border-b border-white/[.06] sm:min-h-[1060px]">
-        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_50%_-5%,rgba(239,68,68,.20),transparent_35%),radial-gradient(circle_at_8%_40%,rgba(116,44,131,.14),transparent_30%),linear-gradient(180deg,#151014,#09090b_52%,#050506)]" />
-        <div className="absolute inset-0 -z-10 opacity-[.12] [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:68px_68px] [mask-image:linear-gradient(to_bottom,black,transparent_74%)]" />
-        {particles.map((p,i)=><motion.span key={i} className="absolute -z-10 h-1 w-1 rounded-full bg-white/50" style={{left:`${p.left}%`,top:`${p.top}%`}} animate={{y:[-8,10,-8],opacity:[.05,.45,.05]}} transition={{duration:4+(i%5),repeat:Infinity,delay:p.delay}} />)}
+        <div className="absolute inset-0 -z-20 style={{background:`radial-gradient(circle at 50% -5%,${site.accentColor}33,transparent 35%),linear-gradient(180deg,${site.panelColor},${site.backgroundColor} 52%,${site.backgroundColor})`}}" />
+        <div className={`absolute inset-0 -z-10 ${site.grid?'':'hidden'}`} [background-image:linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] [background-size:68px_68px] [mask-image:linear-gradient(to_bottom,black,transparent_74%)]" />
+        {site.particles && particles.map((p,i)=><motion.span key={i} className="absolute -z-10 h-1 w-1 rounded-full bg-white/50" style={{left:`${p.left}%`,top:`${p.top}%`}} animate={{y:[-8,10,-8],opacity:[.05,.45,.05]}} transition={{duration:4+(i%5),repeat:Infinity,delay:p.delay}} />)}
 
         <header className="relative z-30 mx-auto max-w-[1320px] px-4 pt-4 sm:px-8 sm:pt-7">
           <nav className="flex h-[70px] items-center justify-between rounded-[22px] border border-white/[.09] bg-black/45 px-4 shadow-[0_20px_80px_rgba(0,0,0,.35)] backdrop-blur-2xl sm:h-[78px] sm:px-6">
             <Link to="/" className="flex items-center gap-2 text-[22px] font-semibold tracking-[-.06em] sm:text-[25px]">
               <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-red-400/30 bg-red-500/10"><span className="h-2 w-2 rounded-full bg-red-400 shadow-[0_0_18px_#ef4444]" /></span>
-              lost<span className="text-red-400">.lol</span>
+              {site.brandName}<span style={{color:site.accentColor}}>{site.brandTld}</span>
             </Link>
             <div className="hidden items-center gap-1 sm:flex">
               <a href="#showcase" className="rounded-xl px-4 py-2.5 text-sm text-zinc-400 hover:bg-white/[.04] hover:text-white">Showcase</a>
@@ -50,11 +52,11 @@ export const HomePage: React.FC = () => {
 
         <div className="relative z-10 mx-auto max-w-5xl px-5 pt-20 text-center sm:pt-28">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-red-400/20 bg-red-500/[.06] px-4 py-2 text-[10px] font-semibold uppercase tracking-[.2em] text-red-200 sm:text-xs"><Sparkles size={13}/> A profile platform built around you</div>
-          <h1 className="mx-auto mt-7 max-w-5xl text-[clamp(3.2rem,8vw,7.4rem)] font-semibold leading-[.91] tracking-[-.075em]">Your entire online<br/><span className="bg-gradient-to-r from-white via-red-100 to-red-300 bg-clip-text text-transparent">identity, in one place.</span></h1>
+          <h1 className="mx-auto mt-7 max-w-5xl text-[clamp(3.2rem,8vw,7.4rem)] font-semibold leading-[.91] tracking-[-.075em]">{site.heroTitle}</h1>
           <p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-zinc-400 sm:text-xl sm:leading-8">Build a profile that actually feels like yours. Links, socials, music, effects, badges, backgrounds and more — all controlled from one easy dashboard.</p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link to="/register" className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-red-400/40 bg-red-500/15 px-7 text-sm font-semibold shadow-[0_0_40px_rgba(239,68,68,.12)] hover:-translate-y-0.5 hover:bg-red-500/25">Create your profile <ArrowRight size={17} className="transition-transform group-hover:translate-x-1"/></Link>
-            <a href="#showcase" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[.03] px-7 text-sm font-medium text-zinc-200 hover:bg-white/[.06]">Explore the experience <ArrowUpRight size={17}/></a>
+            <Link to="/register" className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-red-400/40 bg-red-500/15 px-7 text-sm font-semibold shadow-[0_0_40px_rgba(239,68,68,.12)] hover:-translate-y-0.5 hover:bg-red-500/25">{site.primaryButton} <ArrowRight size={17} className="transition-transform group-hover:translate-x-1"/></Link>
+            <a href="#showcase" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[.03] px-7 text-sm font-medium text-zinc-200 hover:bg-white/[.06]">{site.secondaryButton} <ArrowUpRight size={17}/></a>
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-zinc-600"><span className="inline-flex items-center gap-1.5"><Check size={13} className="text-emerald-400"/> Free to start</span><span>•</span><span>No design skills needed</span><span>•</span><span>Your profile, your rules</span></div>
         </div>
@@ -91,7 +93,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      <section id="features" className="border-b border-white/[.06] bg-[#080809] px-5 py-20 sm:px-8 sm:py-28">
+      <section id="features" className={site.featureSection?'border-b border-white/[.06] bg-[#080809] px-5 py-20 sm:px-8 sm:py-28':'hidden'} >
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl"><p className="text-[10px] font-semibold uppercase tracking-[.2em] text-red-300">Built for profiles, not templates</p><h2 className="mt-4 text-3xl font-semibold tracking-[-.06em] sm:text-5xl">Everything important is one tap away.</h2><p className="mt-4 text-sm leading-6 text-zinc-500 sm:text-base">The dashboard is organized into simple sections, so you can customize one thing without digging through a giant settings page.</p></div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -126,7 +128,7 @@ export const HomePage: React.FC = () => {
           <div className="mt-16 flex flex-col items-center justify-between gap-5 rounded-[26px] border border-red-400/10 bg-[radial-gradient(ellipse_at_50%_120%,rgba(239,68,68,.12),transparent_65%),#0d0d0f] px-6 py-9 text-center sm:flex-row sm:px-10 sm:text-left"><div><p className="text-[10px] uppercase tracking-[.18em] text-red-300">Ready when you are</p><h2 className="mt-2 text-2xl font-semibold tracking-[-.04em]">Make your corner of the internet.</h2></div><Link to="/register" className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-red-400/30 bg-red-500/15 px-5 text-sm font-semibold hover:bg-red-500/25">Create free profile <ArrowRight size={16}/></Link></div>
         </div>
       </section>
-      <footer className="bg-[#050506] px-5 py-8 sm:px-8"><div className="mx-auto flex max-w-6xl flex-col gap-3 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between"><Link to="/" className="text-base font-semibold text-white">lost<span className="text-red-400">.lol</span></Link><span>Your page. Your links. Your rules.</span><Link to="/login" className="text-zinc-400 hover:text-white">Member sign in <ArrowUpRight size={12} className="inline"/></Link></div></footer>
+      <footer className="bg-[#050506] px-5 py-8 sm:px-8"><div className="mx-auto flex max-w-6xl flex-col gap-3 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between"><Link to="/" className="text-base font-semibold text-white">lost<span className="" style={{color:site.accentColor}}>{site.brandTld}</span></Link><span>Your page. Your links. Your rules.</span><Link to="/login" className="text-zinc-400 hover:text-white">Member sign in <ArrowUpRight size={12} className="inline"/></Link></div></footer>
     </main>
   );
 };
