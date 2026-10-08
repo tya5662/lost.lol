@@ -3,6 +3,7 @@ import { createUser, getUserByUsername, updateUser, deleteUser, setUsername, upd
 import { upload } from '../middleware/uploadMiddleware';
 import { isAuthenticated } from '../middleware/auth';
 import { User } from '../model/profiles';
+import { Badge } from '../model/badges';
 
 const router = Router();
 
@@ -14,39 +15,33 @@ router.get('/badges', isAuthenticated, async (req, res, next) => {
   try {
     const actor = await User.findOne({ id: (req.user as any).id });
     if (!actor) { res.status(401).json({ message: 'Authentication required.' }); return; }
+    const definitions = await Badge.find({}).sort({name:1}).lean();
     const holders = await User.find({ badges: { $exists: true, $ne: [] } }).select('badges').lean();
-    const existing = [...new Set(holders.flatMap((u: any) => u.badges || []))];
-    const builtIn = ['Premium','Explorer','Early'];
-    const names = [...new Set([...existing, ...builtIn])];
-    const eligible = (name:string) =>
-      name === 'Premium' ? !!actor.premium :
-      name === 'Explorer' ? (actor.totalVisit || 0) >= 10 :
-      name === 'Early' ? !!actor.createdAt && new Date(actor.createdAt).getTime() <= Date.now() : false;
-    res.json(names.map(name => ({
-      name,
-      holders: holders.filter((u:any)=>(u.badges||[]).includes(name)).length,
-      claimed: actor.badges.includes(name),
-      eligible: eligible(name),
-      claimable: builtIn.includes(name)
+    const rank:Record<string,number>={member:0,staff:1,'co-owner':2,owner:3};
+    res.json(definitions.map((b:any)=>({
+      ...b,
+      holders: holders.filter((u:any)=>(u.badges||[]).includes(b.name)).length,
+      claimed: actor.badges.includes(b.name),
+      eligible: (!b.requiredPremium || !!actor.premium) && (rank[actor.role]??0)>=(rank[b.requiredRole||'member']??0),
+      claimable: !!b.selfClaimable
     })));
   } catch (error) { next(error); }
 });
 router.post('/badges/claim', isAuthenticated, async (req,res,next)=>{
   try {
     const actor = await User.findOne({ id: (req.user as any).id });
-    const badge = typeof req.body?.badge === 'string' ? req.body.badge.trim() : '';
-    if (!actor || !['Premium','Explorer','Early'].includes(badge)) {
-      res.status(400).json({ message: 'That badge is not self-claimable.' }); return;
-    }
-    const eligible =
-      (badge === 'Premium' && !!actor.premium) ||
-      (badge === 'Explorer' && (actor.totalVisit || 0) >= 10) ||
-      (badge === 'Early' && !!actor.createdAt && new Date(actor.createdAt).getTime() <= new Date('2026-10-01T00:00:00Z').getTime());
-    if (!eligible) { res.status(403).json({ message: 'You do not meet the eligibility requirements for this badge.' }); return; }
-    if (!actor.badges.includes(badge)) actor.badges.push(badge);
+    const badgeName = typeof req.body?.badge === 'string' ? req.body.badge.trim() : '';
+    const badge:any = await Badge.findOne({name:badgeName}).lean();
+    if (!actor || !badge || !badge.selfClaimable) { res.status(400).json({message:'That badge is not self-claimable.'}); return; }
+    const rank:Record<string,number>={member:0,staff:1,'co-owner':2,owner:3};
+    const eligible=(!badge.requiredPremium||!!actor.premium)&&(rank[actor.role]??0)>=(rank[badge.requiredRole||'member']??0);
+    if(!eligible){res.status(403).json({message:'You do not meet this badge eligibility requirement.'});return;}
+    const holders=await User.countDocuments({badges:badge.name});
+    if(badge.maxHolders>0&&holders>=badge.maxHolders&&!actor.badges.includes(badge.name)){res.status(409).json({message:'This badge has reached its holder limit.'});return;}
+    if(!actor.badges.includes(badge.name)) actor.badges.push(badge.name);
     await actor.save();
-    res.json({ badges: actor.badges });
-  } catch(error){ next(error); }
+    res.json({badges:actor.badges});
+  } catch(error){next(error);}
 });
 router.get('/:username', getUserByUsername);
 router.put('/:username', isAuthenticated, upload.fields([
