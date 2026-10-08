@@ -69,6 +69,32 @@ export interface User {
     title?: string;
     widgets?: unknown[];
   };
+  // Enhanced profile controls — available across Free and Premium tiers.
+  roleLabel?: string;
+  profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split';
+  cardStyle?: 'glass'|'solid'|'outline'|'floating';
+  cardRadius?: number;
+  linkStyle?: 'glass'|'solid'|'outline'|'minimal'|'pill';
+  linkRadius?: number;
+  linkOpacity?: number;
+  linkBlur?: number;
+  linkSpacing?: number;
+  avatarSize?: number;
+  avatarShape?: 'circle'|'rounded'|'square';
+  avatarGlow?: boolean;
+  showViews?: boolean;
+  showStatus?: boolean;
+  showBranding?: boolean;
+  accentGlow?: number;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none';
+  clickEffect?: 'ripple'|'flash'|'scale'|'none';
+  cursorTrailSize?: number;
+  backgroundIntensity?: number;
+  particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts';
+  typewriterSpeed?: number;
+  typewriterLoop?: boolean;
+  socialLinks?: {platform:string;url:string;label?:string}[];
+  customCss?: string;
 }
 
 export interface Link {
