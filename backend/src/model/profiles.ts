@@ -78,7 +78,7 @@ const userSchema = new mongoose.Schema({
   metadataTitle: { type: String, default: '' },
   metadataDescription: { type: String, default: '' },
   metadataImage: { type: String, default: '' },
-  aliases: { type: [String], default: [] },
+  aliases: { type: [String], default: [], validate: { validator: (value: string[]) => value.length <= 2, message: 'A premium profile can have at most 2 extra aliases.' } },
   secondTab: {
     enabled: { type: Boolean, default: false },
     title: { type: String, default: 'More' },
