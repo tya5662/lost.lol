@@ -26,6 +26,10 @@ interface UserProfile {
   discordUsername?: string;
   badges?: string[];
   aliases?: string[];
+  role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
+  profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
+  linkRadius?: number; linkSpacing?: number; linkOpacity?: number; linkBlur?: number; avatarSize?: number; avatarShape?: 'circle'|'rounded'|'square'; avatarGlow?: boolean; showViews?: boolean; showStatus?: boolean; showBranding?: boolean; accentGlow?: number;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -69,6 +73,8 @@ const ProfilePage: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
+  const [typewriterText,setTypewriterText] = useState('');
+  const clickAudioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(()=>{
     if(profile?.cursorEffect !== 'red') { setCursorTrail([]); return; }
     let frame=0; let nextId=0; let points:{x:number;y:number;id:number}[]=[];
@@ -77,6 +83,31 @@ const ProfilePage: React.FC = () => {
     window.addEventListener('mousemove',move,{passive:true}); frame=requestAnimationFrame(tick);
     return()=>{window.removeEventListener('mousemove',move);cancelAnimationFrame(frame);};
   },[profile?.cursorEffect]);
+  useEffect(() => {
+    if (!profile) return;
+    document.title = profile.metadataTitle || `${profile.username} | suffer.info`;
+    const desc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (desc) desc.content = profile.metadataDescription || profile.description || '';
+    if (profile.metadataImage) {
+      let og = document.querySelector('meta[property="og:image"]') as HTMLMetaElement | null;
+      if (!og) { og = document.createElement('meta'); og.setAttribute('property','og:image'); document.head.appendChild(og); }
+      og.content = profile.metadataImage;
+    }
+  }, [profile]);
+  useEffect(() => {
+    if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
+    const texts = profile.typewriterTexts || [];
+    let index = 0, cancelled = false, timer: number | undefined;
+    const run = () => { const target = texts[index] || ''; let pos = 0; setTypewriterText(''); const tick = () => { if (cancelled) return; setTypewriterText(target.slice(0,pos++)); if (pos <= target.length) timer = window.setTimeout(tick, Math.max(20, profile.typewriterSpeed || 70)); else if (profile.typewriterLoop !== false) timer = window.setTimeout(() => { index=(index+1)%texts.length; run(); }, 900); }; tick(); };
+    run(); return () => { cancelled=true; if (timer) window.clearTimeout(timer); };
+  }, [profile?.typewriterEnabled, profile?.typewriterTexts, profile?.typewriterSpeed, profile?.typewriterLoop]);
+  useEffect(() => {
+    if (!profile?.pageClickSound) return;
+    clickAudioRef.current = new Audio(profile.pageClickSound);
+    clickAudioRef.current.volume = .3;
+    const onClick = () => { const audio = clickAudioRef.current; if (!audio) return; audio.currentTime=0; void audio.play().catch(()=>{}); };
+    window.addEventListener('click', onClick); return () => window.removeEventListener('click', onClick);
+  }, [profile?.pageClickSound]);
   useEffect(() => {
     document.title = `${username} | suffer.info`;
     let isCurrent = true;
@@ -109,6 +140,10 @@ const ProfilePage: React.FC = () => {
     </div>
   );
   const aliases = (profile.aliases || []).slice(0, 2);
+  const cardRadius = Math.max(0, Math.min(48, profile.cardRadius ?? 28));
+  const avatarSize = Math.max(64, Math.min(180, profile.avatarSize ?? 104));
+  const linkRadius = Math.max(0, Math.min(32, profile.linkRadius ?? 16));
+  const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
   const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const bgOpacity = Math.max(0.25, Math.min(1, profile.backgroundOpacity ?? 1));
@@ -148,16 +183,16 @@ const ProfilePage: React.FC = () => {
       {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
         {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
       </motion.button>}
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/[0.10] shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)]" style={{backgroundColor:`rgba(8,8,8,${cardOpacity})`,backdropFilter:`blur(${cardBlur}px)`}}>
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden" border border-white/[0.10] shadow-[0_35px_120px_rgba(0,0,0,.72),0_0_70px_rgba(239,51,64,.08)]" style={{backgroundColor:profile.cardStyle==='solid'?'#0b0b0d':`rgba(8,8,8,${cardOpacity})`,backdropFilter:`blur(${cardBlur}px)`,borderRadius:cardRadius}}>
         <div className="h-[3px] w-full bg-gradient-to-r from-[#8d1721] via-[#ef3340] to-[#ff6670]" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
-            <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-5 h-[104px] w-[104px]">
+            <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-5" style={{width:avatarSize,height:avatarSize}}>
               <span aria-hidden="true" className="absolute -inset-2 rounded-full border border-[#ef3340]/45 shadow-[0_0_35px_rgba(239,51,64,.18)]" /><span aria-hidden="true" className="absolute -inset-4 rounded-full border border-[#ef3340]/10" />
-              <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full rounded-full border border-white/15 bg-[#120708] object-cover" />
+              <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />
             </motion.div>
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>
+            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
             {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
             {profile.customEmojis?.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{profile.customEmojis.slice(0,12).map(e=>{const isImage=e.value.startsWith('http')||e.value.startsWith('data:image/');return <span key={e.name} title={`:${e.name}:`} className="grid h-8 min-w-8 place-items-center rounded-lg border border-white/10 bg-white/[.035] px-1.5 transition-transform hover:scale-110">{isImage?<img src={e.value} alt={e.name} className="h-6 w-6 rounded object-contain"/>:<span className="text-[10px] font-semibold text-zinc-300">{e.name}</span>}</span>})}</div> : null}
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
@@ -197,9 +232,9 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>}
           {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=><span key={b} className="inline-flex items-center gap-1.5 rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em]" style={{color:textColor}}><BadgeCheck size={12} style={{color:accentColor}} />{b}</span>)}</div> : null}
-          <div className="mx-auto mt-8 max-w-[420px] space-y-3">
+          <div className="mx-auto mt-8 max-w-[420px]" style={{display:'flex',flexDirection:'column',gap:linkSpacing}}>
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
-              <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">
+              <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}} transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] bg-black/40 transition-all duration-200 group-hover:border-[#ef3340]/30 group-hover:bg-[#ef3340]/10" style={{ color: accentColor }}><IconComponent size={17} /></span>
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold" style={{ color: textColor }}>{link.title || 'Open link'}</span>
                 <ArrowUpRight size={16} className="shrink-0 text-[#777173] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ff6872]" />
