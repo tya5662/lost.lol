@@ -162,7 +162,7 @@ router.patch('/users/:id/customization', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/users/:id/badges', async (req, res, next) =>
+router.post('/users/:id/badges', async (req, res, next) => {
   try {
     const actor = (req as any).actor;
     if (actor.role === 'staff') {
