@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, Menu, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Menu, Sparkles, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../../../services/api';
 import { SiteSettings } from '../../../types';
