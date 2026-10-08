@@ -107,7 +107,7 @@ const ProfilePage: React.FC = () => {
       <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to lost.lol</button>
     </div>
   );
-  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '' } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const bgOpacity = Math.max(0.25, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0.25, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
@@ -129,6 +129,8 @@ const ProfilePage: React.FC = () => {
     return safeUrl ? [{ ...link, safeUrl }] : [];
   });
   return (
+    <>
+    {customFontUrl && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl)}) format('truetype');font-display:swap;}`}</style>}
     <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont }}>
       {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="absolute inset-0 -z-10 scale-110 bg-cover bg-center opacity-25 blur-3xl" style={{ backgroundImage: `url(${backgroundMedia})` }} />}
@@ -206,7 +208,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </motion.section>
     </main>
-  );
+    </>\n  );
 };
 export default ProfilePage;
 
