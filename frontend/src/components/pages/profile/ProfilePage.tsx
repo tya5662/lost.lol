@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaDiscord, FaGithub, FaInstagram, FaSpotify, FaTiktok, FaTwitch, FaYoutube, FaXTwitter } from 'react-icons/fa6';
-import { Globe, Linkedin, Mail, BadgeCheck, Disc3, Eye, MapPin, MessageCircle, Sparkles, AudioLines, ArrowUpRight, Pause, Play } from 'lucide-react';
+import { Globe, Linkedin, Mail, BadgeCheck, Eye, MapPin } from 'lucide-react';
 import { API_URL } from '@/services/api';
 import './template.css';
 
