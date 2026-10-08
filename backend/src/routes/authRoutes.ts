@@ -40,19 +40,22 @@ const issueToken = (id: number, email: string, username: string): string => {
 };
 
 
-const verifyTurnstile = async (token: string, remoteip?: string): Promise<boolean> => {
+const verifyTurnstile = async (token: string, remoteip?: string): Promise<{ok:boolean; codes:string[]}> => {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret || !token) return false;
+  if (!secret || !token) return { ok: false, codes: [secret ? 'missing-token' : 'missing-secret'] };
   try {
     const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ secret, response: token, ...(remoteip ? { remoteip } : {}) }),
     });
-    const result = await response.json() as { success?: boolean };
-    return result.success === true;
-  } catch {
-    return false;
+    const result = await response.json() as { success?: boolean; 'error-codes'?: string[] };
+    const codes = Array.isArray(result['error-codes']) ? result['error-codes'] : [];
+    if (!result.success) console.warn('Turnstile verification rejected:', codes.join(',') || 'unknown');
+    return { ok: result.success === true, codes };
+  } catch (error) {
+    console.error('Turnstile verification request failed:', error instanceof Error ? error.message : 'unknown error');
+    return { ok: false, codes: ['verification-request-failed'] };
   }
 };
 
@@ -85,8 +88,9 @@ router.post('/register', async (req, res, next) => {
     res.status(503).json({ message: 'Sign-up is temporarily unavailable. CAPTCHA is not configured yet.' });
     return;
   }
-  if (!(await verifyTurnstile(turnstileToken, req.ip))) {
-    res.status(400).json({ message: 'Please complete the CAPTCHA and try again.' });
+  const turnstile = await verifyTurnstile(turnstileToken, req.ip);
+  if (!turnstile.ok) {
+    res.status(400).json({ message: turnstile.codes.includes('missing-secret') ? 'CAPTCHA is not configured on the server yet.' : `CAPTCHA verification failed${turnstile.codes.length ? ` (${turnstile.codes.join(', ')})` : ''}. Please complete it again.` });
     return;
   }
 
