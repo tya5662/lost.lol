@@ -43,6 +43,9 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
   customFontFamily: { type: String, default: '' },
+  customFontName: { type: String, default: '' },
+  customFontMime: { type: String, default: '' },
+  customFontMedia: { type: Buffer },
 
   // Profile customization
   location: { type: String, default: '' },
