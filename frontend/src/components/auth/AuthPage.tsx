@@ -28,10 +28,6 @@ export const AuthPage: React.FC = () => {
       turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
         theme: 'dark',
-        appearance: 'always',
-        execution: 'render',
-        action: 'auth',
-        retry: 'auto',
         callback: (token: string) => {
           setTurnstileToken(token);
           setError('');
@@ -86,7 +82,7 @@ export const AuthPage: React.FC = () => {
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Unable to authenticate. Please try again.');
       if (turnstileWidgetId.current !== null && window.turnstile) {
-        window.turnstile.reset(turnstileWidgetId.current);
+        window.turnstile.remove(turnstileWidgetId.current); turnstileWidgetId.current = null; setTimeout(renderWidget, 0);
         setTurnstileToken('');
       }
     } finally {
