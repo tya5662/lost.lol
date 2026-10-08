@@ -39,6 +39,23 @@ const issueToken = (id: number, email: string, username: string): string => {
   return jwt.sign({ id, email, username }, secret, { expiresIn: '30d' });
 };
 
+
+const verifyTurnstile = async (token: string, remoteip?: string): Promise<boolean> => {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret || !token) return false;
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret, response: token, ...(remoteip ? { remoteip } : {}) }),
+    });
+    const result = await response.json() as { success?: boolean };
+    return result.success === true;
+  } catch {
+    return false;
+  }
+};
+
 const duplicateAccountMessage = (error: unknown): string | undefined => {
   if (typeof error !== 'object' || error === null || !('code' in error) || error.code !== 11000) {
     return undefined;
@@ -62,6 +79,16 @@ router.post('/register', async (req, res, next) => {
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : '';
   const password = typeof body.password === 'string' ? body.password : '';
+  const turnstileToken = typeof body.turnstileToken === 'string' ? body.turnstileToken : '';
+
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    res.status(503).json({ message: 'Sign-up is temporarily unavailable. CAPTCHA is not configured yet.' });
+    return;
+  }
+  if (!(await verifyTurnstile(turnstileToken, req.ip))) {
+    res.status(400).json({ message: 'Please complete the CAPTCHA and try again.' });
+    return;
+  }
 
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ message: 'Enter a valid email address.' });
@@ -121,6 +148,16 @@ router.post('/register', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
   const identifier = typeof req.body.identifier === 'string' ? req.body.identifier.trim().toLowerCase() : '';
   const password = typeof req.body.password === 'string' ? req.body.password : '';
+  const turnstileToken = typeof req.body.turnstileToken === 'string' ? req.body.turnstileToken : '';
+
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    res.status(503).json({ message: 'Sign-in is temporarily unavailable. CAPTCHA is not configured yet.' });
+    return;
+  }
+  if (!(await verifyTurnstile(turnstileToken, req.ip))) {
+    res.status(400).json({ message: 'Please complete the CAPTCHA and try again.' });
+    return;
+  }
 
   if (!identifier || !password || password.length > 128) {
     res.status(400).json({ message: 'Enter your email or username and password.' });
