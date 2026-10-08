@@ -32,6 +32,9 @@ export interface User {
   showLocation?: boolean;
   showDiscordPresence?: boolean;
   discordUsername?: string;
+  discordId?: string;
+  discordAvatar?: string;
+  discordConnectedAt?: string;
   profileOpacity?: number;
   backgroundOpacity?: number;
   cardOpacity?: number;
