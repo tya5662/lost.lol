@@ -7,7 +7,7 @@ export interface SiteMediaLayer { id:string; type:'image'|'video'; url:string; x
 export interface SiteSettings {
   brandName:string; brandTld:string; heroBadge:string; heroTitle:string; heroSubtitle:string; primaryButton:string; secondaryButton:string;
   accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number;
-  particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean; mediaLayers:SiteMediaLayer[]; siteAnimations:{id:string;target:'site'|'media';mediaId?:string;name:string;duration:number;delay:number;intensity:number;enabled:boolean}[];
+  particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean; mediaLayers:SiteMediaLayer[]; siteAnimations:{id:string;target:'site'|'media';mediaId?:string;name:string;duration:number;delay:number;intensity:number;enabled:boolean}[]; announcement:string; showcaseLabel:string; featuresLabel:string; signInLabel:string; createLabel:string; primaryButtonUrl:string; secondaryButtonUrl:string; heroAlignment:'left'|'center'|'right'; seoTitle:string; seoDescription:string; seoImage:string; footerText:string; effectsIntensity:number;
 }
 
 export interface User {
