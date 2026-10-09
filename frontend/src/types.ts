@@ -127,6 +127,8 @@ export interface User {
   pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none';
   clickEffect?: 'ripple'|'flash'|'scale'|'none';
   cursorTrailSize?: number;
+  cursorTrailCount?: number;
+  cursorTrailGlow?: number;
   backgroundIntensity?: number;
   particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts';
   particleColor?: string;
