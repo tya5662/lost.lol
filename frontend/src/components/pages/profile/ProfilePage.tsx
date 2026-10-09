@@ -145,7 +145,7 @@ const ProfilePage: React.FC = () => {
     attemptPlay();
     audio.addEventListener('canplay', attemptPlay);
     return () => audio.removeEventListener('canplay', attemptPlay);
-  }, [profile?.audioUrl, profile?.audioAutoplay]);
+  }, [profile?.audioUrl]);
 
   useEffect(() => {
     if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
