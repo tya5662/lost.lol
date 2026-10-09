@@ -88,7 +88,19 @@ const ProfilePage: React.FC = () => {
   },[profile?.cursorEffect]);
   useEffect(() => {
     if (!profile) return;
-    document.title = profile.metadataTitle || `${profile.username} | suffer.info`;
+    const baseTitle = profile.metadataTitle || `${profile.username} | suffer.info`;
+    document.title = baseTitle;
+    let titleTimer: number | undefined;
+    if (profile.animatedTitle) {
+      let position = 0, deleting = false;
+      const tick = () => {
+        if (!deleting) { position++; if (position >= baseTitle.length) { position = baseTitle.length; deleting = true; titleTimer = window.setTimeout(tick, 1100); return; } }
+        else { position--; if (position <= 0) { position = 0; deleting = false; } }
+        document.title = baseTitle.slice(0, position) || 'suffer.info';
+        titleTimer = window.setTimeout(tick, deleting ? 55 : 95);
+      };
+      titleTimer = window.setTimeout(tick, 350);
+    }
     const desc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (desc) desc.content = profile.metadataDescription || profile.description || '';
     if (profile.metadataImage) {
@@ -96,6 +108,7 @@ const ProfilePage: React.FC = () => {
       if (!og) { og = document.createElement('meta'); og.setAttribute('property','og:image'); document.head.appendChild(og); }
       og.content = profile.metadataImage;
     }
+    return () => { if (titleTimer) window.clearTimeout(titleTimer); };
   }, [profile]);
   useEffect(() => {
     const audio = audioRef.current;
@@ -221,6 +234,8 @@ const ProfilePage: React.FC = () => {
 @keyframes suffer-flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.45}}
 @keyframes suffer-wave{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes suffer-radar{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes suffer-name-noise{0%,100%{text-shadow:0 0 0 transparent;transform:translateX(0)}20%{text-shadow:-2px 0 rgba(239,51,64,.9),2px 0 rgba(255,255,255,.35);transform:translateX(-.5px)}40%{text-shadow:2px 0 rgba(239,51,64,.8),-1px 0 rgba(255,255,255,.35);transform:translateX(.5px)}60%{text-shadow:0 0 9px rgba(239,51,64,.7);transform:translateX(0)}80%{text-shadow:-1px 0 rgba(255,255,255,.35),1px 0 rgba(239,51,64,.8)}}
+.suffer-name-noise{animation:suffer-name-noise .22s steps(2,end) infinite;}
 .suffer-bg-effect-aurora{background:linear-gradient(125deg,rgba(239,51,64,.20),rgba(92,40,130,.12),rgba(20,90,120,.13),rgba(239,51,64,.18));background-size:250% 250%;animation:suffer-wave 9s ease-in-out infinite,suffer-aurora 12s ease-in-out infinite}
 .suffer-bg-effect-pulse{animation:pulse 4s ease-in-out infinite}
 .suffer-bg-effect-scanlines{background:repeating-linear-gradient(to bottom,rgba(255,255,255,.055) 0px,rgba(255,255,255,.055) 1px,transparent 2px,transparent 5px);mix-blend-mode:screen}
@@ -265,7 +280,7 @@ const ProfilePage: React.FC = () => {
             </motion.div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
+            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className={`mt-2 text-3xl font-bold tracking-tight sm:text-4xl ${usernameEffect === 'noise' || usernameEffect === 'glitch' ? 'suffer-name-noise' : ''}`} style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
             {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
             
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
