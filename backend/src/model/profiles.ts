@@ -133,6 +133,7 @@ const userSchema = new mongoose.Schema({
   cursorTrailGlow: { type: Number, default: 10, min: 0, max: 24 },
   backgroundIntensity: { type: Number, default: 1, min: 0, max: 1 },
   particleEffect: { type: String, enum: ['none','dust','rain','embers','stars','ghosts'], default: 'none' },
+  iconGlowColor: { type: String, default: '#ffd1d1' },
   particleColor: { type: String, default: '#b31f1f' },
   particleCount: { type: Number, default: 70, min: 0, max: 180 },
   typewriterSpeed: { type: Number, default: 70, min: 20, max: 200 },
