@@ -89,6 +89,7 @@ const userSchema = new mongoose.Schema({
   typewriterEnabled: { type: Boolean, default: false },
   typewriterTexts: { type: [String], default: [] },
   pageEnterText: { type: String, default: '' },
+  pageEnterSymbol: { type: String, default: '⛧' }
   pageClickSound: { type: String, default: '' },
   audioUrl: { type: String, default: '' },
   audioTitle: { type: String, default: '' },
