@@ -180,20 +180,41 @@ const ProfilePage: React.FC = () => {
     <>
     {customFontUrl && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl)}) format('truetype');font-display:swap;}`}</style>}
     <main className={`suffer-template-profile relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont }}>
+      <style>{`
+@keyframes suffer-aurora{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(35deg);transform:scale(1.08)}}
+@keyframes suffer-drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(22px,-16px,0)}}
+@keyframes suffer-orbit{from{transform:rotate(0deg) scale(1.15)}to{transform:rotate(360deg) scale(1.15)}}
+@keyframes suffer-flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.45}}
+@keyframes suffer-wave{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes suffer-radar{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.suffer-bg-effect-aurora{background:linear-gradient(125deg,rgba(239,51,64,.20),rgba(92,40,130,.12),rgba(20,90,120,.13),rgba(239,51,64,.18));background-size:250% 250%;animation:suffer-wave 9s ease-in-out infinite,suffer-aurora 12s ease-in-out infinite}
+.suffer-bg-effect-pulse{animation:pulse 4s ease-in-out infinite}
+.suffer-bg-effect-scanlines{background:repeating-linear-gradient(to bottom,rgba(255,255,255,.055) 0px,rgba(255,255,255,.055) 1px,transparent 2px,transparent 5px);mix-blend-mode:screen}
+.suffer-bg-effect-vignette{background:radial-gradient(circle,transparent 30%,rgba(0,0,0,.78) 100%)}
+.suffer-bg-effect-spotlight{background:radial-gradient(circle at 50% 35%,rgba(239,51,64,.30),transparent 42%)}
+.suffer-bg-effect-breathe{animation:pulse 4s ease-in-out infinite}
+.suffer-bg-effect-flicker{animation:suffer-flicker 3.2s steps(1,end) infinite}
+.suffer-bg-effect-drift{animation:suffer-drift 9s ease-in-out infinite}
+.suffer-bg-effect-orbit{animation:suffer-orbit 18s linear infinite}
+.suffer-bg-effect-waves{background:linear-gradient(120deg,rgba(239,51,64,.18),transparent 35%,rgba(239,51,64,.13),transparent 75%);background-size:250% 250%;animation:suffer-wave 8s ease-in-out infinite}
+.suffer-bg-effect-halo{background:radial-gradient(circle,rgba(239,51,64,.24),transparent 40%);animation:pulse 4s ease-in-out infinite}
+.suffer-bg-effect-radar{background:repeating-radial-gradient(circle,transparent 0 32px,rgba(239,51,64,.15) 33px 34px,transparent 35px 62px);animation:suffer-radar 18s linear infinite}
+.suffer-bg-effect-noise{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
+`}</style>
       {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundMedia})`, opacity: bgOpacity }} />}
       {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"><video ref={backgroundVideoRef} autoPlay muted={!backgroundSoundEnabled} loop playsInline className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} /></video></div>}
-      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
-      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
+      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
+      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 suffer-bg-effect-${backgroundEffect} ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
+      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
       {backgroundMedia && backgroundType === 'video' && <button type="button" onClick={async()=>{const video=backgroundVideoRef.current;if(!video)return;const enable=!backgroundSoundEnabled;setBackgroundSoundEnabled(enable);video.muted=!enable;if(enable){try{await video.play();}catch{setBackgroundSoundEnabled(false);video.muted=true;}}}} aria-label={backgroundSoundEnabled?'Mute background sound':'Enable background sound'} title={backgroundSoundEnabled?'Mute background sound':'Enable background sound'} className="absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-black/55 text-white backdrop-blur-md transition hover:bg-black/75"><span className="sr-only">{backgroundSoundEnabled?'Mute background sound':'Enable background sound'}</span>{backgroundSoundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>}</button>}
-      <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
+      <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
         <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#ef3340]/35 bg-[#ef3340]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(239,51,64,.12)]"><AudioLines size={16} /></span>
         suffer<span className="-ml-2 text-[#ef3340]">.info</span>
       </motion.a>
       
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} className={`suffer-template-card w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} className={`suffer-template-card relative z-10 w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
         {cardOpacity <= 0 && <style>{`.profile-card-transparent [class*="bg-"] { background: transparent !important; background-color: transparent !important; }
 .profile-card-transparent [class*="border-"] { border-color: transparent !important; }
 .profile-card-transparent [class*="shadow-"] { box-shadow: none !important; }
