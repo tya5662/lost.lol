@@ -217,7 +217,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
 
     const allowed = [
       'name','location','showLocation','showDiscordPresence','discordUsername','nameTooltip','avatarDecoration','customCursorHotspot','cardTiltIntensity','cardTiltPerspective','backgroundMediaUrl','backgroundType',
-      'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle',
+      'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle','tabTitle',
       'usernameEffect','backgroundEffect','syncToBackground','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
       'audioUrl','audioTitle','audioAutoplay','audioCoverUrl','layout','metadataTitle','metadataDescription','metadataImage','aliases','customFontFamily','customEmojis',
