@@ -92,6 +92,7 @@ const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [templateEntered, setTemplateEntered] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const backgroundVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -267,6 +268,7 @@ const ProfilePage: React.FC = () => {
   return (
     <>
     {(customFontUrl || fontFamily === 'template' || fontFamily === 'fuente') && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl || '/gunslol-template/assets/fonts/fuente.otf')});font-display:swap;}`}</style>}
+    {profile.pageEnterText && !templateEntered && <button type="button" onClick={() => { setTemplateEntered(true); const audio = audioRef.current; const video = backgroundVideoRef.current; if (audio) void audio.play().catch(() => {}); if (video) { video.muted = false; void video.play().catch(() => { video.muted = true; }); } }} className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-4 bg-black/90 px-6 text-center text-white backdrop-blur-md transition-opacity duration-500" aria-label="Enter profile"><span className="text-4xl text-[#ef3340]">⛧</span><span className="text-xs font-semibold uppercase tracking-[.35em]">{profile.pageEnterText}</span><span className="mt-2 animate-pulse text-[10px] uppercase tracking-[.22em] text-white/45">Click to enter</span></button>}
     <main className={`suffer-template-profile relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont, cursor: cursorEffect === 'template' || cursorEffect === 'custom' ? "url('/gunslol-template/assets/cursor.png') 0 0, auto" : undefined }}>
       <style>{`
 @keyframes suffer-aurora{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(35deg);transform:scale(1.08)}}
