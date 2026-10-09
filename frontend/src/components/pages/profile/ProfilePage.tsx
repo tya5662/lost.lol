@@ -175,9 +175,7 @@ const ProfilePage: React.FC = () => {
         <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#ef3340]/35 bg-[#ef3340]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(239,51,64,.12)]"><AudioLines size={16} /></span>
         suffer<span className="-ml-2 text-[#ef3340]">.info</span>
       </motion.a>
-      {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
-        {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
-      </motion.button>}
+      
       <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden" animate={profile.syncToBackground ? syncedMotion : undefined} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : undefined} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
         <div className="hidden" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
