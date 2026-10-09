@@ -23,6 +23,9 @@ interface UserProfile {
   showLocation?: boolean;
   showDiscordPresence?: boolean;
   discordUsername?: string;
+  discordActivity?: string;
+  nameTooltip?: string;
+  avatarDecoration?: string;
   badges?: string[];
   aliases?: string[];
   role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
@@ -276,11 +279,11 @@ const ProfilePage: React.FC = () => {
           <div className="mx-auto flex max-w-[560px] flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:text-left">
             <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-1 shrink-0 sm:mb-0" style={{width:avatarSize,height:avatarSize}}>
               
-              <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />
+              <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />{profile.avatarDecoration && <img src={profile.avatarDecoration} alt="" aria-hidden="true" className="pointer-events-none absolute -inset-[12%] h-[124%] w-[124%] object-contain" />}
             </motion.div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
-            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className={`mt-2 text-3xl font-bold tracking-tight sm:text-4xl ${usernameEffect === 'noise' || usernameEffect === 'glitch' ? 'suffer-name-noise' : ''}`} style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
+            <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className={`mt-2 text-3xl font-bold tracking-tight sm:text-4xl ${usernameEffect === 'noise' || usernameEffect === 'glitch' ? 'suffer-name-noise' : ''}`} style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}{profile.nameTooltip ? <span title={profile.nameTooltip} aria-label={profile.nameTooltip} className="ml-2 inline-flex align-middle cursor-help text-xs font-medium opacity-55">ⓘ</span> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
             {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
             
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
@@ -312,7 +315,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex flex-wrap items-center gap-2">
               {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
                 <MessageCircle size={17} className="shrink-0 text-[#7289da]" />
-                <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}</div></div>
+                <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}{profile.discordActivity ? <div className="truncate text-[10px] text-zinc-400">{profile.discordActivity}</div> : null}</div></div>
               </div>}
               {profile.showLocation && profile.location && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5">
                 <MapPin size={17} className="shrink-0" style={{color:accentColor}} />
