@@ -24,6 +24,8 @@ interface UserProfile {
   showDiscordPresence?: boolean;
   discordUsername?: string;
   discordActivity?: string;
+  discordAvatar?: string;
+  discordPresenceStatus?: 'online'|'idle'|'dnd'|'offline';
   nameTooltip?: string;
   avatarDecoration?: string;
   badges?: string[];
@@ -333,7 +335,10 @@ const ProfilePage: React.FC = () => {
           {(profile.showDiscordPresence || profile.showLocation) && <div className="mx-auto mt-3 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3">
             <div className="flex flex-wrap items-center gap-2">
               {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
-                <MessageCircle size={17} className="shrink-0 text-[#7289da]" />
+                <div className="relative h-9 w-9 shrink-0">
+                  {profile.discordAvatar ? <img src={profile.discordAvatar} alt="" loading="lazy" className="h-9 w-9 rounded-full object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5865f2]/15"><MessageCircle size={17} className="text-[#7289da]" /></div>}
+                  <span title={profile.discordPresenceStatus || 'offline'} className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#101012]" style={{backgroundColor:profile.discordPresenceStatus==='online'?'#23a55a':profile.discordPresenceStatus==='idle'?'#f0b232':profile.discordPresenceStatus==='dnd'?'#f23f43':'#80848e'}} />
+                </div>
                 <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}{profile.discordActivity ? <div className="truncate text-[10px] text-zinc-400">{profile.discordActivity}</div> : null}</div></div>
               </div>}
               {profile.showLocation && profile.location && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5">
