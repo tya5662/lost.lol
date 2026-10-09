@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles,
+  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles, Volume2, VolumeX,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_URL } from '@/services/api';
@@ -70,6 +70,8 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const backgroundVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [backgroundSoundEnabled, setBackgroundSoundEnabled] = useState(false);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
   const [typewriterText,setTypewriterText] = useState('');
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -167,11 +169,12 @@ const ProfilePage: React.FC = () => {
     <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont }}>
       {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundMedia})`, opacity: bgOpacity }} />}
-      {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"><video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} type="video/mp4" /></video></div>}
+      {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"><video ref={backgroundVideoRef} autoPlay muted={!backgroundSoundEnabled} loop playsInline className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} /></video></div>}
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
+      {backgroundMedia && backgroundType === 'video' && <button type="button" onClick={async()=>{const video=backgroundVideoRef.current;if(!video)return;const enable=!backgroundSoundEnabled;setBackgroundSoundEnabled(enable);video.muted=!enable;if(enable){try{await video.play();}catch{setBackgroundSoundEnabled(false);video.muted=true;}}}} aria-label={backgroundSoundEnabled?'Mute background sound':'Enable background sound'} title={backgroundSoundEnabled?'Mute background sound':'Enable background sound'} className="absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-black/55 text-white backdrop-blur-md transition hover:bg-black/75"><span className="sr-only">{backgroundSoundEnabled?'Mute background sound':'Enable background sound'}</span>{backgroundSoundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>}</button>}
       <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
         <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#ef3340]/35 bg-[#ef3340]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(239,51,64,.12)]"><AudioLines size={16} /></span>
         suffer<span className="-ml-2 text-[#ef3340]">.info</span>
