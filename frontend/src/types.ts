@@ -76,6 +76,7 @@ export interface User {
   profileGradient?: boolean;
   monochromeIcons?: boolean;
   animatedTitle?: boolean;
+  tabTitle?: string;
   nameTooltip?: string;
   avatarDecoration?: string;
   customCursorHotspot?: string;
