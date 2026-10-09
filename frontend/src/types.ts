@@ -44,6 +44,8 @@ export interface User {
   email: string;
   profilePicture?: string
   backgroundImage?: string;
+  backgroundMediaUrl?: string;
+  backgroundType?: 'image'|'video';
   accentColor?: string;
   textColor?: string;
   backgroundColor?: string;
