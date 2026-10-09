@@ -235,7 +235,7 @@ const ProfilePage: React.FC = () => {
   const bgOpacity = Math.max(0, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
   const cardBlur = Math.max(0, Math.min(40, profile.cardBlur ?? profile.profileBlur ?? 0));
-  const resolvedFont = customFontFamily || fontFamily || 'Inter';
+  const resolvedFont = customFontFamily || (fontFamily === 'template' || fontFamily === 'fuente' ? 'LostCustom' : fontFamily) || 'Inter';
   const textColor = profile.textColor || '#f4f0ef';
   const syncedMotion = profile.syncToBackground ? (backgroundEffect === 'pulse' || backgroundEffect === 'aurora' || backgroundEffect === 'halo' || backgroundEffect === 'breathe' ? { opacity: [1, .78, 1], scale: [1, 1.015, 1] } : backgroundEffect === 'drift' || backgroundEffect === 'waves' ? { y: [0, -4, 0] } : backgroundEffect === 'orbit' || backgroundEffect === 'radar' ? { rotate: [0, 1.5, -1.5, 0] } : {}) : {};
   const usernameAnimation = profile.syncToBackground ? syncedMotion : usernameEffect === 'pulse' ? { scale: [1, 1.04, 1] } : usernameEffect === 'float' ? { y: [0, -5, 0] } : usernameEffect === 'shake' ? { x: [0, -3, 3, -2, 2, 0] } : usernameEffect === 'glow' ? { textShadow: ['0 0 0px '+accentColor, '0 0 22px '+accentColor, '0 0 0px '+accentColor] } : usernameEffect === 'bounce' ? { y: [0,-10,0,-5,0] } : usernameEffect === 'tilt' ? { rotate: [-2,2,-1,1,0] } : usernameEffect === 'zoom' ? { scale: [1,1.08,1] } : usernameEffect === 'blur' ? { filter: ['blur(0px)','blur(2px)','blur(0px)'] } : usernameEffect === 'flash' ? { opacity: [1,.45,1] } : usernameEffect === 'swing' ? { rotate: [-4,4,-3,3,0] } : usernameEffect === 'jelly' ? { scaleX: [1,1.08,.94,1.04,1], scaleY: [1,.94,1.06,.98,1] } : usernameEffect === 'heartbeat' ? { scale: [1,1.05,1,1.05,1] } : usernameEffect === 'neon' ? { textShadow: ['0 0 4px #fff, 0 0 12px '+accentColor,'0 0 14px '+accentColor+', 0 0 28px '+accentColor,'0 0 4px #fff, 0 0 12px '+accentColor] } : usernameEffect === 'rainbow' ? { filter: ['hue-rotate(0deg)','hue-rotate(180deg)','hue-rotate(360deg)'] } : {};
@@ -249,7 +249,7 @@ const ProfilePage: React.FC = () => {
   });
   return (
     <>
-    {customFontUrl && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl)}) format('truetype');font-display:swap;}`}</style>}
+    {(customFontUrl || fontFamily === 'template' || fontFamily === 'fuente') && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl || 'https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/fonts/fuente.otf')});font-display:swap;}`}</style>}
     <main className={`suffer-template-profile relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont, cursor: cursorEffect === 'template' || cursorEffect === 'custom' ? "url('https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/cursor.png') 0 0, auto" : undefined }}>
       <style>{`
 @keyframes suffer-aurora{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(35deg);transform:scale(1.08)}}
@@ -337,7 +337,7 @@ const ProfilePage: React.FC = () => {
               {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
                 <div className="relative h-9 w-9 shrink-0">
                   {profile.discordAvatar ? <img src={profile.discordAvatar} alt="" loading="lazy" className="h-9 w-9 rounded-full object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5865f2]/15"><MessageCircle size={17} className="text-[#7289da]" /></div>}
-                  <span title={profile.discordPresenceStatus || 'offline'} className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#101012]" style={{backgroundColor:profile.discordPresenceStatus==='online'?'#23a55a':profile.discordPresenceStatus==='idle'?'#f0b232':profile.discordPresenceStatus==='dnd'?'#f23f43':'#80848e'}} />
+                  <img title={profile.discordPresenceStatus || 'offline'} alt={profile.discordPresenceStatus || 'offline'} src={`https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/icons/status/${profile.discordPresenceStatus==='online'?'online':profile.discordPresenceStatus==='idle'?'inactive':profile.discordPresenceStatus==='dnd'?'busy':'offline'}.png`} className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#101012] object-contain" loading="lazy" />
                 </div>
                 <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}{profile.discordActivity ? <div className="truncate text-[10px] text-zinc-400">{profile.discordActivity}</div> : null}</div></div>
               </div>}
