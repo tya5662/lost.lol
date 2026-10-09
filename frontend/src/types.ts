@@ -132,6 +132,7 @@ export interface User {
   cursorTrailGlow?: number;
   backgroundIntensity?: number;
   particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts';
+  iconGlowColor?: string;
   particleColor?: string;
   particleCount?: number;
   typewriterSpeed?: number;
