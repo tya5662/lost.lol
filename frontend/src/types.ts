@@ -74,6 +74,11 @@ export interface User {
   profileGradient?: boolean;
   monochromeIcons?: boolean;
   animatedTitle?: boolean;
+  nameTooltip?: string;
+  avatarDecoration?: string;
+  customCursorHotspot?: string;
+  cardTiltIntensity?: number;
+  cardTiltPerspective?: number;
   usernameEffect?: string;
   backgroundEffect?: string;
   syncToBackground?: boolean;
@@ -119,7 +124,7 @@ export interface User {
   clickEffect?: 'ripple'|'flash'|'scale'|'none';
   cursorTrailSize?: number;
   backgroundIntensity?: number;
-  particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts';
+  particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts';
   typewriterSpeed?: number;
   typewriterLoop?: boolean;
   socialLinks?: {platform:string;url:string;label?:string}[];
