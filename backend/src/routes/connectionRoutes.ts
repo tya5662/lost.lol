@@ -7,6 +7,26 @@ const router = Router();
 const backendBaseUrl = process.env.BACKEND_URL || 'https://lost-lol.onrender.com';
 const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://suffer.info').replace(/\/+$/, '');
 
+
+router.post('/discord/start-url', isAuthenticated, (req, res) => {
+  const clientId = process.env.DISCORD_CLIENT_ID;
+  if (!clientId || !process.env.JWT_SECRET) {
+    res.status(503).json({ message: 'Discord connection is not configured yet. Set DISCORD_CLIENT_ID and JWT_SECRET on the backend.' });
+    return;
+  }
+  const redirectUri = process.env.DISCORD_REDIRECT_URI || `${backendBaseUrl}/api/connections/discord/callback`;
+  const state = jwt.sign({ userId: (req.user as any).id, purpose: 'discord-connect' }, process.env.JWT_SECRET, { expiresIn: '10m' });
+  const params = new URLSearchParams({
+    client_id: clientId,
+    response_type: 'code',
+    redirect_uri: redirectUri,
+    scope: 'identify',
+    state,
+    prompt: 'consent',
+  });
+  res.json({ url: `https://discord.com/oauth2/authorize?${params.toString()}` });
+});
+
 router.get('/discord/start', isAuthenticated, (req, res) => {
   const clientId = process.env.DISCORD_CLIENT_ID;
   if (!clientId || !process.env.JWT_SECRET) {
