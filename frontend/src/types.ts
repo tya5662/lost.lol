@@ -129,6 +129,8 @@ export interface User {
   cursorTrailSize?: number;
   backgroundIntensity?: number;
   particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts';
+  particleColor?: string;
+  particleCount?: number;
   typewriterSpeed?: number;
   typewriterLoop?: boolean;
   socialLinks?: {platform:string;url:string;label?:string}[];
