@@ -17,9 +17,9 @@ const CONFIG = {
   // ----------------------------------------------------------
   // FILES — place them in assets/ with these exact names
   // ----------------------------------------------------------
-  avatar:              "assets/avatar.jpg",
+  avatar:              "/gunslol-template/assets/avatar.jpg",
   backgroundVideo:     "https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/background.mp4",
-  customCursor:        "assets/cursor.png",
+  customCursor:        "/gunslol-template/assets/cursor.png",
   customCursorHotspot: "0 0",    // "0 0" = tip of the cursor (top-left corner)
 
   // ----------------------------------------------------------
@@ -34,10 +34,10 @@ const CONFIG = {
   // Add, remove or reorder. "icon" = path inside assets/badges/
   // ----------------------------------------------------------
   badges: [
-    { icon: "assets/badges/owner.png",    label: "Owner"    },
-    { icon: "assets/badges/verified.png", label: "Verified" },
-    { icon: "assets/badges/partner.png",  label: "Partner"  },
-    { icon: "assets/badges/hate.gif",     label: "hate"     },
+    { icon: "/gunslol-template/assets/badges/owner.png",    label: "Owner"    },
+    { icon: "/gunslol-template/assets/badges/verified.png", label: "Verified" },
+    { icon: "/gunslol-template/assets/badges/partner.png",  label: "Partner"  },
+    { icon: "/gunslol-template/assets/badges/hate.gif",     label: "hate"     },
   ],
   badgeSize:                "22px",
   badgeContainerBackground: "rgba(172, 200, 255, 0.08)",
@@ -48,7 +48,7 @@ const CONFIG = {
   // ----------------------------------------------------------
   discordUsername: "Jofagg_",
   discordStatus:   "acalme-se vadia...",
-  discordAvatar:   "assets/discord-avatar.jpg",
+  discordAvatar:   "/gunslol-template/assets/discord-avatar.jpg",
   discordAvatarSize:   "74px",
   discordAvatarBorder: "2px solid rgba(200, 27, 27, 0.15)",
   // status: "online" | "idle" | "dnd" | "offline"
@@ -59,11 +59,11 @@ const CONFIG = {
   // Add, remove or reorder. "icon" = path inside assets/icons/
   // ----------------------------------------------------------
   socialLinks: [
-    { name: "Instagram", url: "https://instagram.com/user",         icon: "assets/icons/instagram.png" },
-    { name: "Spotify",   url: "https://open.spotify.com/user", icon: "assets/icons/spotify.png"   },
-    { name: "TikTok",    url: "https://www.tiktok.com/user",           icon: "assets/icons/tiktok.png"    },
-    { name: "OnlyFans",  url: "https://onlyfans.com/user",          icon: "assets/icons/onlyfans.png"  },
-    { name: "Github",  url: "https://github.com/user",          icon: "assets/icons/github.png"  },
+    { name: "Instagram", url: "https://instagram.com/user",         icon: "/gunslol-template/assets/icons/instagram.png" },
+    { name: "Spotify",   url: "https://open.spotify.com/user", icon: "/gunslol-template/assets/icons/spotify.png"   },
+    { name: "TikTok",    url: "https://www.tiktok.com/user",           icon: "/gunslol-template/assets/icons/tiktok.png"    },
+    { name: "OnlyFans",  url: "https://onlyfans.com/user",          icon: "/gunslol-template/assets/icons/onlyfans.png"  },
+    { name: "Github",  url: "https://github.com/user",          icon: "/gunslol-template/assets/icons/github.png"  },
   ],
   iconSize:         "36px",
   iconBorderRadius: "8px",
