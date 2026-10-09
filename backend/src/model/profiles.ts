@@ -90,6 +90,7 @@ const userSchema = new mongoose.Schema({
   typewriterTexts: { type: [String], default: [] },
   pageEnterText: { type: String, default: '' },
   pageEnterSymbol: { type: String, default: '⛧' },
+  cardRevealDelay: { type: Number, default: 300, min: 0, max: 3000 },
   pageClickSound: { type: String, default: '' },
   audioUrl: { type: String, default: '' },
   audioTitle: { type: String, default: '' },
