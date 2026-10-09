@@ -95,6 +95,19 @@ const ProfilePage: React.FC = () => {
     }
   }, [profile]);
   useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !profile?.audioUrl) return;
+    audio.loop = true;
+    audio.autoplay = true;
+    const attemptPlay = () => { void audio.play().catch(() => {
+      // Browsers may block sound autoplay until the visitor interacts with the page.
+    }); };
+    attemptPlay();
+    audio.addEventListener('canplay', attemptPlay);
+    return () => audio.removeEventListener('canplay', attemptPlay);
+  }, [profile?.audioUrl, profile?.audioAutoplay]);
+
+  useEffect(() => {
     if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
     const texts = profile.typewriterTexts || [];
     let index = 0, cancelled = false, timer: number | undefined;
@@ -202,12 +215,12 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           {audioUrl && <div className="mx-auto mt-7 max-w-[560px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
-  <audio ref={audioRef} preload="metadata" autoPlay={audioAutoplay} src={audioUrl}>Your browser does not support audio playback.</audio>
+  <audio ref={audioRef} preload="auto" autoPlay loop src={audioUrl}>Your browser does not support audio playback.</audio>
   <div className="p-3.5 sm:p-4">
     <div className="flex items-center gap-3">
       <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-md bg-[#202020]">{audioCoverUrl?<img src={audioCoverUrl} alt="" className="h-full w-full object-cover"/>:<Disc3 size={25} className="text-zinc-500"/>}</div>
       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{audioTitle || 'Profile music'}</p><p className="mt-0.5 truncate text-[11px] text-zinc-500">@{profileUsername}</p></div>
-      <button type="button" aria-label="Play or pause profile music" onClick={async()=>{const a=audioRef.current;if(!a)return;if(a.paused){try{await a.play();}catch{}}else a.pause();}} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-black transition-transform hover:scale-105"><Play size={17} fill="currentColor"/></button>
+      
     </div>
     <div className="mt-4 h-1 rounded-full bg-[#3a3a3a]"><div className="h-full w-[28%] rounded-full bg-white"/></div>
     <div className="mt-1.5 flex justify-between text-[9px] text-zinc-500"><span>0:00</span><span>—</span></div>
