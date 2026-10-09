@@ -91,7 +91,6 @@ export interface User {
   typewriterTexts?: string[];
   pageEnterText?: string;
   pageEnterSymbol?: string;
-  pageEnterSymbol?: string;
   pageClickSound?: string;
   audioUrl?: string;
   audioTitle?: string;
