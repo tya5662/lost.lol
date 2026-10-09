@@ -76,6 +76,7 @@ export interface User {
   animatedTitle?: boolean;
   usernameEffect?: string;
   backgroundEffect?: string;
+  syncToBackground?: boolean;
   cursorEffect?: string;
   fontFamily?: string;
   typewriterEnabled?: boolean;
