@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles, Volume2, VolumeX,
+  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles, Volume2, VolumeX,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_URL } from '@/services/api';
@@ -159,7 +159,7 @@ const ProfilePage: React.FC = () => {
   const linkOpacity = Math.max(0, Math.min(0.2, profile.linkOpacity ?? 0.025));
   const linkBlur = Math.max(0, Math.min(40, profile.linkBlur ?? 0));
   const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
-  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioAutoplay = false, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#ef3340';
   const bgOpacity = Math.max(0, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
