@@ -187,7 +187,7 @@ const ProfilePage: React.FC = () => {
 .profile-card-transparent [style*="background-color"] { background-color: transparent !important; }
 .profile-card-transparent [style*="backdrop-filter"] { backdrop-filter: none !important; }`}</style>}
         <div className="hidden" />
-        <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
+        <style>{'.suffer-template-profile .suffer-template-card:not(.profile-card-transparent){box-shadow:0 28px 100px rgba(0,0,0,.32),0 0 70px rgba(239,51,64,.055)!important;transition:background-color .25s ease,box-shadow .25s ease}.suffer-template-profile .suffer-template-card a{transition:transform .18s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease}.suffer-template-profile .suffer-template-card a:focus-visible{outline:2px solid #ef3340;outline-offset:3px}.suffer-template-profile .suffer-template-card a:hover{box-shadow:0 8px 28px rgba(239,51,64,.10)}.suffer-template-profile .suffer-template-card img{image-rendering:auto}@media(max-width:640px){.suffer-template-profile{padding-left:14px;padding-right:14px;padding-top:72px;padding-bottom:32px}.suffer-template-profile .suffer-template-card{border-radius:24px!important}.suffer-template-profile .suffer-template-card [class*=px-6]{padding-left:18px;padding-right:18px}}'} </style><div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
             <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-5" style={{width:avatarSize,height:avatarSize}}>
               
