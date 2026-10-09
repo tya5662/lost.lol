@@ -112,7 +112,7 @@ const ProfilePage: React.FC = () => {
   },[profile?.cursorEffect]);
   useEffect(() => {
     if (!profile) return;
-    const baseTitle = profile.metadataTitle || `${profile.username} | suffer.info`;
+    const baseTitle = profile.tabTitle || profile.metadataTitle || `${profile.username} | suffer.info`;
     document.title = baseTitle;
     let titleTimer: number | undefined;
     if (profile.animatedTitle) {
