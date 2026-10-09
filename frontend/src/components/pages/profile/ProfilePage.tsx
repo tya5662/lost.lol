@@ -188,18 +188,20 @@ const ProfilePage: React.FC = () => {
 .profile-card-transparent [style*="backdrop-filter"] { backdrop-filter: none !important; }`}</style>}
         <div className="hidden" />
         <style>{'.suffer-template-profile .suffer-template-card:not(.profile-card-transparent){box-shadow:0 28px 100px rgba(0,0,0,.32),0 0 70px rgba(239,51,64,.055)!important;transition:background-color .25s ease,box-shadow .25s ease}.suffer-template-profile .suffer-template-card a{transition:transform .18s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease}.suffer-template-profile .suffer-template-card a:focus-visible{outline:2px solid #ef3340;outline-offset:3px}.suffer-template-profile .suffer-template-card a:hover{box-shadow:0 8px 28px rgba(239,51,64,.10)}.suffer-template-profile .suffer-template-card img{image-rendering:auto}@media(max-width:640px){.suffer-template-profile{padding-left:14px;padding-right:14px;padding-top:72px;padding-bottom:32px}.suffer-template-profile .suffer-template-card{border-radius:24px!important}.suffer-template-profile .suffer-template-card [class*=px-6]{padding-left:18px;padding-right:18px}}'} </style><div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
-          <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
-            <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-5" style={{width:avatarSize,height:avatarSize}}>
+          <div className="mx-auto flex max-w-[560px] flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:text-left">
+            <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-1 shrink-0 sm:mb-0" style={{width:avatarSize,height:avatarSize}}>
               
               <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />
             </motion.div>
+            <div className="min-w-0 flex-1 text-center sm:text-left">
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
             <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
             {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
             
-            {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
+            {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
+            </div>
           </div>
-          {audioUrl && <div className="mx-auto mt-7 max-w-[420px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
+          {audioUrl && <div className="mx-auto mt-7 max-w-[560px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
   <audio ref={audioRef} preload="metadata" autoPlay={audioAutoplay} src={audioUrl}>Your browser does not support audio playback.</audio>
   <div className="p-3.5 sm:p-4">
     <div className="flex items-center gap-3">
