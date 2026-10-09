@@ -33,7 +33,7 @@ interface UserProfile {
   role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
   profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
   linkRadius?: number; linkSpacing?: number; linkOpacity?: number; linkBlur?: number; avatarSize?: number; avatarShape?: 'circle'|'rounded'|'square'; avatarGlow?: boolean; showViews?: boolean; showStatus?: boolean; showBranding?: boolean; accentGlow?: number;
-  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageEnterSymbol?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; tabTitle?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string; cardTiltIntensity?: number; cardTiltPerspective?: number; customCursorHotspot?: string;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageEnterSymbol?: string; particleColor?: string; particleCount?: number; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; tabTitle?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string; cardTiltIntensity?: number; cardTiltPerspective?: number; customCursorHotspot?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -178,8 +178,8 @@ const ProfilePage: React.FC = () => {
     if (!context) return;
     let frame = 0;
     let width = 0, height = 0;
-    const accent = profile.accentColor || '#ef3340';
-    const amount = profile.particleEffect === 'embers' ? 46 : profile.particleEffect === 'stars' ? 60 : profile.particleEffect === 'ghosts' ? 22 : profile.particleEffect === 'rain' ? 90 : 54;
+    const accent = profile.particleColor || profile.accentColor || '#ef3340';
+    const amount = Math.max(0, Math.min(180, profile.particleCount ?? (profile.particleEffect === 'embers' ? 46 : profile.particleEffect === 'stars' ? 60 : profile.particleEffect === 'ghosts' ? 22 : profile.particleEffect === 'rain' ? 90 : 54)));
     const particles = Array.from({length: amount}, () => ({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:profile.particleEffect==='stars'?Math.random()*1.8+.3:Math.random()*2+0.6,v:Math.random()*.65+.2,a:Math.random()*.65+.2,phase:Math.random()*Math.PI*2}));
     let pointerX = 0, pointerY = 0;
     const movePointer = (event: MouseEvent) => { pointerX = (event.clientX / Math.max(1, window.innerWidth) - .5) * 24; pointerY = (event.clientY / Math.max(1, window.innerHeight) - .5) * 24; };
