@@ -130,6 +130,8 @@ const userSchema = new mongoose.Schema({
   cursorTrailSize: { type: Number, default: 12, min: 4, max: 30 },
   backgroundIntensity: { type: Number, default: 1, min: 0, max: 1 },
   particleEffect: { type: String, enum: ['none','dust','rain','embers','stars','ghosts'], default: 'none' },
+  particleColor: { type: String, default: '#b31f1f' },
+  particleCount: { type: Number, default: 70, min: 0, max: 180 },
   typewriterSpeed: { type: Number, default: 70, min: 20, max: 200 },
   typewriterLoop: { type: Boolean, default: true },
   socialLinks: { type: [mongoose.Schema.Types.Mixed], default: [] },
