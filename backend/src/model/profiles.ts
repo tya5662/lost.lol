@@ -76,6 +76,7 @@ const userSchema = new mongoose.Schema({
   animatedTitle: { type: Boolean, default: false },
   usernameEffect: { type: String, default: 'none' },
   backgroundEffect: { type: String, default: 'none' },
+  syncToBackground: { type: Boolean, default: false },
   cursorEffect: { type: String, default: 'none' },
   fontFamily: { type: String, default: 'Inter' },
   typewriterEnabled: { type: Boolean, default: false },
