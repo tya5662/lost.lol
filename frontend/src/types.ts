@@ -90,6 +90,7 @@ export interface User {
   typewriterEnabled?: boolean;
   typewriterTexts?: string[];
   pageEnterText?: string;
+  pageEnterSymbol?: string;
   pageClickSound?: string;
   audioUrl?: string;
   audioTitle?: string;
