@@ -43,7 +43,7 @@ export const DashboardHome: React.FC<{user:User}> = ({user}) => {
     {privileged&&<Link to="/admin" className="mt-6 flex items-center gap-3 rounded-xl border border-red-500/10 bg-red-500/[.04] px-3 py-2.5 text-sm text-red-300"><Shield size={17}/>Admin Panel</Link>}
     <div className="sticky bottom-0 mt-auto bg-[#0b0b0c] pt-4"><Link to={`/${user.username}`} target="_blank" className="flex items-center justify-center gap-2 rounded-xl border border-white/[.08] bg-white/[.03] px-3 py-2.5 text-sm hover:bg-white/[.06]"><Eye size={16}/>View profile</Link></div>
   </aside>;
-  return <div className="min-h-screen bg-[#080809] text-white lg:flex">
+  return <div className="suffer-template-dashboard min-h-screen bg-[#080809] text-white lg:flex">
     {open&&<button aria-label="Close menu" onClick={()=>setOpen(false)} className="fixed inset-0 z-40 bg-black/60 lg:hidden"/>}<Sidebar/>
     <section className="min-w-0 flex-1">
       <header className="sticky top-0 z-30 border-b border-white/[.06] bg-[#080809]/90 backdrop-blur-xl"><div className="flex h-16 items-center justify-between px-4 sm:px-7">
