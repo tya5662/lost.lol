@@ -55,6 +55,15 @@ const normalizeLinkUrl = (rawUrl: string): string | null => {
     return null;
   }
 };
+const getTemplateBadge = (label: string): { src: string; title: string } | null => {
+  const value = label.trim().toLowerCase().replace(/[_-]+/g, ' ');
+  const base = 'https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/badges/';
+  if (value === 'owner' || value === 'founder') return { src: base + 'owner.png', title: 'Owner' };
+  if (value === 'verified' || value === 'verification') return { src: base + 'verified.png', title: 'Verified' };
+  if (value === 'partner' || value === 'partnered') return { src: base + 'partner.png', title: 'Partner' };
+  if (value === 'hate') return { src: base + 'hate.gif', title: 'hate' };
+  return null;
+};
 const getTemplateSocialIcon = (url: string): string | null => {
   const value = url.toLowerCase();
   const base = 'https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/icons/';
@@ -333,7 +342,7 @@ const ProfilePage: React.FC = () => {
               </div>}
             </div>
           </div>}
-          {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=>{const isImage=/^https?:\/\//i.test(b)&&/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(b);return <span key={b} title={isImage ? "Custom badge" : b} className="inline-flex items-center gap-1.5 rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#ef3340]/50" style={{color:textColor}}>{isImage?<img src={b} alt="Badge" loading="lazy" className="h-5 w-5 rounded object-contain" />:<><BadgeCheck size={12} style={{color:accentColor}} />{b}</>}</span>})}</div> : null}
+          {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=>{const isImage=/^https?:\/\//i.test(b)&&/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(b);const templateBadge=getTemplateBadge(b);const badgeImage=isImage?b:templateBadge?.src;const badgeTitle=isImage?"Custom badge":(templateBadge?.title||b);return <span key={b} title={badgeTitle} className="inline-flex items-center gap-1.5 rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#ef3340]/50" style={{color:textColor}}>{badgeImage?<img src={badgeImage} alt={badgeTitle} loading="lazy" className="h-5 w-5 rounded object-contain" />:<><BadgeCheck size={12} style={{color:accentColor}} />{b}</>}</span>})}</div> : null}
           <div className="mx-auto mt-8 max-w-[420px]" style={{display:'flex',flexDirection:'column',gap:linkSpacing}}>
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
               <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}}>
