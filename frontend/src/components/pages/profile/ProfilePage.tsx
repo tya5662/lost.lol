@@ -33,7 +33,7 @@ interface UserProfile {
   role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
   profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
   linkRadius?: number; linkSpacing?: number; linkOpacity?: number; linkBlur?: number; avatarSize?: number; avatarShape?: 'circle'|'rounded'|'square'; avatarGlow?: boolean; showViews?: boolean; showStatus?: boolean; showBranding?: boolean; accentGlow?: number;
-  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
+  pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none'; particleEffect?: 'none'|'dust'|'rain'|'embers'|'stars'|'ghosts'; typewriterEnabled?: boolean; typewriterTexts?: string[]; typewriterSpeed?: number; typewriterLoop?: boolean; pageEnterText?: string; pageClickSound?: string; metadataTitle?: string; metadataDescription?: string; metadataImage?: string; animatedTitle?: boolean; monochromeIcons?: boolean; customCss?: string;
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
@@ -59,7 +59,7 @@ const normalizeLinkUrl = (rawUrl: string): string | null => {
 };
 const getTemplateBadge = (label: string): { src: string; title: string } | null => {
   const value = label.trim().toLowerCase().replace(/[_-]+/g, ' ');
-  const base = 'https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/badges/';
+  const base = '/gunslol-template/assets/badges/';
   if (value === 'owner' || value === 'founder') return { src: base + 'owner.png', title: 'Owner' };
   if (value === 'verified' || value === 'verification') return { src: base + 'verified.png', title: 'Verified' };
   if (value === 'partner' || value === 'partnered') return { src: base + 'partner.png', title: 'Partner' };
@@ -68,7 +68,7 @@ const getTemplateBadge = (label: string): { src: string; title: string } | null 
 };
 const getTemplateSocialIcon = (url: string): string | null => {
   const value = url.toLowerCase();
-  const base = 'https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/icons/';
+  const base = '/gunslol-template/assets/icons/';
   if (value.includes('instagram.com')) return base + 'instagram.png';
   if (value.includes('spotify.com')) return base + 'spotify.png';
   if (value.includes('tiktok.com')) return base + 'tiktok.png';
@@ -264,8 +264,8 @@ const ProfilePage: React.FC = () => {
   });
   return (
     <>
-    {(customFontUrl || fontFamily === 'template' || fontFamily === 'fuente') && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl || 'https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/fonts/fuente.otf')});font-display:swap;}`}</style>}
-    <main className={`suffer-template-profile relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont, cursor: cursorEffect === 'template' || cursorEffect === 'custom' ? "url('https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/cursor.png') 0 0, auto" : undefined }}>
+    {(customFontUrl || fontFamily === 'template' || fontFamily === 'fuente') && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl || '/gunslol-template/assets/fonts/fuente.otf')});font-display:swap;}`}</style>}
+    <main className={`suffer-template-profile relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont, cursor: cursorEffect === 'template' || cursorEffect === 'custom' ? "url('/gunslol-template/assets/cursor.png') 0 0, auto" : undefined }}>
       <style>{`
 @keyframes suffer-aurora{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(35deg);transform:scale(1.08)}}
 @keyframes suffer-drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(22px,-16px,0)}}
@@ -351,7 +351,7 @@ const ProfilePage: React.FC = () => {
               {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
                 <div className="relative h-9 w-9 shrink-0">
                   {profile.discordAvatar ? <img src={profile.discordAvatar} alt="" loading="lazy" className="h-9 w-9 rounded-full object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5865f2]/15"><MessageCircle size={17} className="text-[#7289da]" /></div>}
-                  <img title={profile.discordPresenceStatus || 'offline'} alt={profile.discordPresenceStatus || 'offline'} src={`https://raw.githubusercontent.com/jefersc/gunslol-template/main/assets/icons/status/${profile.discordPresenceStatus==='online'?'online':profile.discordPresenceStatus==='idle'?'inactive':profile.discordPresenceStatus==='dnd'?'busy':'offline'}.png`} className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#101012] object-contain" loading="lazy" />
+                  <img title={profile.discordPresenceStatus || 'offline'} alt={profile.discordPresenceStatus || 'offline'} src={`/gunslol-template/assets/icons/status/${profile.discordPresenceStatus==='online'?'online':profile.discordPresenceStatus==='idle'?'inactive':profile.discordPresenceStatus==='dnd'?'busy':'offline'}.png`} className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#101012] object-contain" loading="lazy" />
                 </div>
                 <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}{profile.discordActivity ? <div className="truncate text-[10px] text-zinc-400">{profile.discordActivity}</div> : null}</div></div>
               </div>}
