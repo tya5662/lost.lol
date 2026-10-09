@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Pause, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles,
+  ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, Play, X, Disc3, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { API_URL } from '@/services/api';
@@ -11,7 +11,7 @@ interface UserProfile {
   id: number; username: string; name: string; description: string | null; profilePicture: string | null;
   accentColor?: string; textColor?: string; backgroundColor?: string; backgroundMedia: string | null;
   backgroundType: 'image' | 'video' | null;
-  usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
+  usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string; syncToBackground?: boolean;
   fontFamily?: string; customFontFamily?: string; customFontUrl?: string; verified?: boolean;
   profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
@@ -68,9 +68,8 @@ const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
   const [typewriterText,setTypewriterText] = useState('');
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -152,16 +151,11 @@ const ProfilePage: React.FC = () => {
   const cardBlur = Math.max(0, Math.min(40, profile.cardBlur ?? profile.profileBlur ?? 0));
   const resolvedFont = customFontFamily || fontFamily || 'Inter';
   const textColor = profile.textColor || '#f4f0ef';
-  const usernameAnimation = usernameEffect === 'pulse' ? { scale: [1, 1.04, 1] } : usernameEffect === 'float' ? { y: [0, -5, 0] } : usernameEffect === 'shake' ? { x: [0, -3, 3, -2, 2, 0] } : usernameEffect === 'glow' ? { textShadow: ['0 0 0px '+accentColor, '0 0 22px '+accentColor, '0 0 0px '+accentColor] } : usernameEffect === 'bounce' ? { y: [0,-10,0,-5,0] } : usernameEffect === 'tilt' ? { rotate: [-2,2,-1,1,0] } : usernameEffect === 'zoom' ? { scale: [1,1.08,1] } : usernameEffect === 'blur' ? { filter: ['blur(0px)','blur(2px)','blur(0px)'] } : usernameEffect === 'flash' ? { opacity: [1,.45,1] } : usernameEffect === 'swing' ? { rotate: [-4,4,-3,3,0] } : usernameEffect === 'jelly' ? { scaleX: [1,1.08,.94,1.04,1], scaleY: [1,.94,1.06,.98,1] } : usernameEffect === 'heartbeat' ? { scale: [1,1.05,1,1.05,1] } : usernameEffect === 'neon' ? { textShadow: ['0 0 4px #fff, 0 0 12px '+accentColor,'0 0 14px '+accentColor+', 0 0 28px '+accentColor,'0 0 4px #fff, 0 0 12px '+accentColor] } : usernameEffect === 'rainbow' ? { filter: ['hue-rotate(0deg)','hue-rotate(180deg)','hue-rotate(360deg)'] } : {};
+  const syncedMotion = profile.syncToBackground ? (backgroundEffect === 'pulse' || backgroundEffect === 'aurora' || backgroundEffect === 'halo' || backgroundEffect === 'breathe' ? { opacity: [1, .78, 1], scale: [1, 1.015, 1] } : backgroundEffect === 'drift' || backgroundEffect === 'waves' ? { y: [0, -4, 0] } : backgroundEffect === 'orbit' || backgroundEffect === 'radar' ? { rotate: [0, 1.5, -1.5, 0] } : {}) : {};\n  const usernameAnimation = profile.syncToBackground ? syncedMotion : usernameEffect === 'pulse' ? { scale: [1, 1.04, 1] } : usernameEffect === 'float' ? { y: [0, -5, 0] } : usernameEffect === 'shake' ? { x: [0, -3, 3, -2, 2, 0] } : usernameEffect === 'glow' ? { textShadow: ['0 0 0px '+accentColor, '0 0 22px '+accentColor, '0 0 0px '+accentColor] } : usernameEffect === 'bounce' ? { y: [0,-10,0,-5,0] } : usernameEffect === 'tilt' ? { rotate: [-2,2,-1,1,0] } : usernameEffect === 'zoom' ? { scale: [1,1.08,1] } : usernameEffect === 'blur' ? { filter: ['blur(0px)','blur(2px)','blur(0px)'] } : usernameEffect === 'flash' ? { opacity: [1,.45,1] } : usernameEffect === 'swing' ? { rotate: [-4,4,-3,3,0] } : usernameEffect === 'jelly' ? { scaleX: [1,1.08,.94,1.04,1], scaleY: [1,.94,1.06,.98,1] } : usernameEffect === 'heartbeat' ? { scale: [1,1.05,1,1.05,1] } : usernameEffect === 'neon' ? { textShadow: ['0 0 4px #fff, 0 0 12px '+accentColor,'0 0 14px '+accentColor+', 0 0 28px '+accentColor,'0 0 4px #fff, 0 0 12px '+accentColor] } : usernameEffect === 'rainbow' ? { filter: ['hue-rotate(0deg)','hue-rotate(180deg)','hue-rotate(360deg)'] } : {};
   const usernameAnimationTransition = usernameEffect === 'none' ? {} : { duration: usernameEffect === 'heartbeat' ? 1.1 : 2.2, repeat: Infinity, ease: 'easeInOut' as const };
   const backgroundClass = backgroundEffect === 'aurora' ? 'animate-pulse' : backgroundEffect === 'pulse' ? 'animate-[pulse_4s_ease-in-out_infinite]' : backgroundEffect === 'scanlines' ? 'opacity-70' : '';
   const backgroundGfx = backgroundEffect === 'grid' ? 'bg-[linear-gradient(rgba(239,51,64,.10)_1px,transparent_1px),linear-gradient(90deg,rgba(239,51,64,.10)_1px,transparent_1px)] bg-[size:42px_42px] animate-[pulse_3s_ease-in-out_infinite]' : backgroundEffect === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_120%,rgba(239,51,64,.24),transparent_60%)] animate-pulse' : backgroundEffect === 'vignette' ? 'bg-[radial-gradient(circle,transparent_35%,rgba(0,0,0,.72)_100%)]' : backgroundEffect === 'spotlight' ? 'bg-[radial-gradient(circle_at_50%_35%,rgba(239,51,64,.22),transparent_35%)]' : backgroundEffect === 'halo' ? 'bg-[radial-gradient(circle,rgba(239,51,64,.18),transparent_32%)] animate-pulse' : backgroundEffect === 'radar' ? 'bg-[radial-gradient(circle,transparent_0,transparent_24%,rgba(239,51,64,.16)_25%,transparent_26%,transparent_49%,rgba(239,51,64,.12)_50%,transparent_51%)] animate-[spin_10s_linear_infinite]' : backgroundEffect === 'noise' ? 'opacity-20 mix-blend-screen' : '';
   const backgroundGfxStyle = backgroundEffect === 'flicker' ? { animation: 'pulse 1.15s ease-in-out infinite' } : backgroundEffect === 'drift' ? { animation: 'pulse 6s ease-in-out infinite' } : backgroundEffect === 'breathe' ? { animation: 'pulse 4s ease-in-out infinite' } : backgroundEffect === 'orbit' ? { animation: 'spin 14s linear infinite' } : {};
-  const toggleVideo = async () => {
-    const video = videoRef.current; if (!video) return;
-    if (video.paused) { try { await video.play(); setIsVideoPlaying(true); } catch { setIsVideoPlaying(false); } }
-    else { video.pause(); setIsVideoPlaying(false); }
-  };
   const validLinks = links.flatMap((link) => {
     const safeUrl = normalizeLinkUrl(link.url);
     return safeUrl ? [{ ...link, safeUrl }] : [];
@@ -172,7 +166,7 @@ const ProfilePage: React.FC = () => {
     <main className={`relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont }}>
       {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundMedia})`, opacity: bgOpacity }} />}
-      {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"><video ref={videoRef} autoPlay loop playsInline onPlay={() => setIsVideoPlaying(true)} onPause={() => setIsVideoPlaying(false)} className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} type="video/mp4" /></video></div>}
+      {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"><video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} type="video/mp4" /></video></div>}
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 -z-10 ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
@@ -184,7 +178,7 @@ const ProfilePage: React.FC = () => {
       {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
         {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
       </motion.button>}
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden" style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden" animate={profile.syncToBackground ? syncedMotion : undefined} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : undefined} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
         <div className="hidden" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
