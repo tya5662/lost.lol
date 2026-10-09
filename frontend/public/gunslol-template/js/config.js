@@ -64,7 +64,6 @@ const CONFIG = {
     { name: "TikTok",    url: "https://www.tiktok.com/user",           icon: "assets/icons/tiktok.png"    },
     { name: "OnlyFans",  url: "https://onlyfans.com/user",          icon: "assets/icons/onlyfans.png"  },
     { name: "Github",  url: "https://github.com/user",          icon: "assets/icons/github.png"  },
-,
   ],
   iconSize:         "36px",
   iconBorderRadius: "8px",
