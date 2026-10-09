@@ -74,6 +74,9 @@ const ProfilePage: React.FC = () => {
   const [backgroundSoundEnabled, setBackgroundSoundEnabled] = useState(false);
   const [cursorTrail,setCursorTrail] = useState<{x:number;y:number;id:number}[]>([]);
   const [typewriterText,setTypewriterText] = useState('');
+  const [cardTilt,setCardTilt] = useState({x:0,y:0});
+  const backgroundCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cursorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(()=>{
     if(profile?.cursorEffect !== 'red') { setCursorTrail([]); return; }
@@ -114,6 +117,37 @@ const ProfilePage: React.FC = () => {
     const run = () => { const target = texts[index] || ''; let pos = 0; setTypewriterText(''); const tick = () => { if (cancelled) return; setTypewriterText(target.slice(0,pos++)); if (pos <= target.length) timer = window.setTimeout(tick, Math.max(20, profile.typewriterSpeed || 70)); else if (profile.typewriterLoop !== false) timer = window.setTimeout(() => { index=(index+1)%texts.length; run(); }, 900); }; tick(); };
     run(); return () => { cancelled=true; if (timer) window.clearTimeout(timer); };
   }, [profile?.typewriterEnabled, profile?.typewriterTexts, profile?.typewriterSpeed, profile?.typewriterLoop]);
+  useEffect(() => {
+    if (!profile) return;
+    const canvas = backgroundCanvasRef.current;
+    if (!canvas || profile.particleEffect === 'none') return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    let frame = 0;
+    let width = 0, height = 0;
+    const accent = profile.accentColor || '#ef3340';
+    const amount = profile.particleEffect === 'embers' ? 46 : profile.particleEffect === 'stars' ? 60 : profile.particleEffect === 'ghosts' ? 22 : 54;
+    const particles = Array.from({length: amount}, () => ({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:profile.particleEffect==='stars'?Math.random()*1.8+.3:Math.random()*2+0.6,v:Math.random()*.65+.2,a:Math.random()*.65+.2,phase:Math.random()*Math.PI*2}));
+    const resize = () => { const dpr = Math.min(window.devicePixelRatio || 1, 2); width = window.innerWidth; height = window.innerHeight; canvas.width = Math.floor(width*dpr); canvas.height = Math.floor(height*dpr); canvas.style.width = `${width}px`; canvas.style.height = `${height}px`; context.setTransform(dpr,0,0,dpr,0,0); };
+    const draw = () => { context.clearRect(0,0,width,height); particles.forEach(p => { p.y += p.v; p.x += Math.sin(performance.now()*.0006+p.phase)*.22; if(p.y>height+8){p.y=-8;p.x=Math.random()*width;} if(p.x>width+8)p.x=-8; if(p.x< -8)p.x=width+8; context.globalAlpha=p.a*(.65+.35*Math.sin(performance.now()*.002+p.phase)); context.fillStyle=accent; context.shadowColor=accent; context.shadowBlur=profile.particleEffect==='embers'?12:6; context.beginPath(); if(profile.particleEffect==='ghosts'){context.arc(p.x,p.y,p.r*2.2,0,Math.PI*2);} else {context.arc(p.x,p.y,p.r,0,Math.PI*2);} context.fill(); }); context.globalAlpha=1; context.shadowBlur=0; frame=requestAnimationFrame(draw); };
+    resize(); window.addEventListener('resize',resize); frame=requestAnimationFrame(draw);
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',resize);context.clearRect(0,0,width,height);};
+  },[profile?.particleEffect,profile?.accentColor]);
+  useEffect(() => {
+    const canvas = cursorCanvasRef.current;
+    if (!canvas || profile?.cursorEffect !== 'sparkle') return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    let frame = 0, width = 0, height = 0;
+    let mouseX = -999, mouseY = -999, lastX = -999, lastY = -999;
+    const accent = profile.accentColor || '#ef3340';
+    let sparks: {x:number;y:number;vx:number;vy:number;life:number;size:number;rotation:number;spin:number}[] = [];
+    const resize=()=>{const dpr=Math.min(window.devicePixelRatio||1,2);width=window.innerWidth;height=window.innerHeight;canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;context.setTransform(dpr,0,0,dpr,0,0);};
+    const move=(event:MouseEvent)=>{mouseX=event.clientX;mouseY=event.clientY;};
+    const draw=()=>{context.clearRect(0,0,width,height);if(mouseX!==lastX||mouseY!==lastY){for(let i=0;i<3;i++)sparks.push({x:mouseX,y:mouseY,vx:(Math.random()-.5)*1.4,vy:(Math.random()-.5)*1.4,life:1,size:2+Math.random()*3,rotation:Math.random()*Math.PI,spin:(Math.random()-.5)*.12});lastX=mouseX;lastY=mouseY;}sparks.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy*=.97;p.life-=.035;p.rotation+=p.spin;context.save();context.translate(p.x,p.y);context.rotate(p.rotation);context.globalAlpha=Math.max(0,p.life);context.fillStyle=accent;context.shadowColor=accent;context.shadowBlur=10;context.beginPath();context.moveTo(0,-p.size);context.lineTo(p.size*.35,0);context.lineTo(0,p.size);context.lineTo(-p.size*.35,0);context.closePath();context.fill();context.restore();});sparks=sparks.filter(p=>p.life>0);frame=requestAnimationFrame(draw);};
+    resize();window.addEventListener('resize',resize);window.addEventListener('mousemove',move,{passive:true});frame=requestAnimationFrame(draw);
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener('resize',resize);window.removeEventListener('mousemove',move);context.clearRect(0,0,width,height);};
+  },[profile?.cursorEffect,profile?.accentColor]);
   useEffect(() => {
     if (!profile?.pageClickSound) return;
     clickAudioRef.current = new Audio(profile.pageClickSound);
@@ -206,6 +240,8 @@ const ProfilePage: React.FC = () => {
       {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden"><video ref={backgroundVideoRef} autoPlay muted={!backgroundSoundEnabled} loop playsInline className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} /></video></div>}
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
       <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 suffer-bg-effect-${backgroundEffect} ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
+      <canvas ref={backgroundCanvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1]" style={{opacity:bgOpacity}} />
+      {cursorEffect === 'sparkle' && <canvas ref={cursorCanvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[100]" />}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
       {backgroundMedia && backgroundType === 'video' && <button type="button" onClick={async()=>{const video=backgroundVideoRef.current;if(!video)return;const enable=!backgroundSoundEnabled;setBackgroundSoundEnabled(enable);video.muted=!enable;if(enable){try{await video.play();}catch{setBackgroundSoundEnabled(false);video.muted=true;}}}} aria-label={backgroundSoundEnabled?'Mute background sound':'Enable background sound'} title={backgroundSoundEnabled?'Mute background sound':'Enable background sound'} className="absolute right-5 top-5 z-20 grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-black/55 text-white backdrop-blur-md transition hover:bg-black/75"><span className="sr-only">{backgroundSoundEnabled?'Mute background sound':'Enable background sound'}</span>{backgroundSoundEnabled?<Volume2 size={16}/>:<VolumeX size={16}/>}</button>}
@@ -214,7 +250,7 @@ const ProfilePage: React.FC = () => {
         suffer<span className="-ml-2 text-[#ef3340]">.info</span>
       </motion.a>
       
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} className={`suffer-template-card relative z-10 w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} onPointerMove={(event)=>{const rect=event.currentTarget.getBoundingClientRect();setCardTilt({x:-((event.clientY-rect.top)/rect.height-.5)*10,y:((event.clientX-rect.left)/rect.width-.5)*10});}} onPointerLeave={()=>setCardTilt({x:0,y:0})} className={`suffer-template-card relative z-10 w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none',transform:`perspective(1000px) rotateX(${cardTilt.x}deg) rotateY(${cardTilt.y}deg)`,transition:'transform 180ms ease-out, background-color 250ms ease, box-shadow 250ms ease'}}>
         {cardOpacity <= 0 && <style>{`.profile-card-transparent [class*="bg-"] { background: transparent !important; background-color: transparent !important; }
 .profile-card-transparent [class*="border-"] { border-color: transparent !important; }
 .profile-card-transparent [class*="shadow-"] { box-shadow: none !important; }
