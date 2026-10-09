@@ -13,7 +13,6 @@ interface UserProfile {
   backgroundType: 'image' | 'video' | null;
   usernameEffect?: string; backgroundEffect?: string; cursorEffect?: string;
   fontFamily?: string; customFontFamily?: string; customFontUrl?: string; verified?: boolean;
-  customEmojis?: Array<{name:string;value:string}>;
   profileOpacity?: number; profileBlur?: number; backgroundOpacity?: number; cardOpacity?: number; cardBlur?: number;
   audioUrl?: string;
   audioTitle?: string;
@@ -185,18 +184,18 @@ const ProfilePage: React.FC = () => {
       {backgroundType === 'video' && backgroundMedia && <motion.button whileTap={{ scale: .94 }} onClick={toggleVideo} aria-label={isVideoPlaying ? 'Pause background video' : 'Play background video'} className="absolute right-5 top-5 z-10 inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-xl transition-all hover:border-[#ef3340]/50 hover:bg-[#170a0c] hover:shadow-[0_0_25px_rgba(239,51,64,.14)] sm:right-8 sm:top-7">
         {isVideoPlaying ? <Pause size={14} /> : <Play size={14} />}{isVideoPlaying ? 'Pause motion' : 'Play motion'}
       </motion.button>}
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden" style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border:cardOpacity > 0 ? '1px solid rgba(255,255,255,.10)' : '1px solid transparent',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
-        <div className="h-[3px] w-full" style={{background:cardOpacity > 0 ? 'linear-gradient(90deg,#8d1721,#ef3340,#ff6670)' : 'transparent'}} />
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[560px] overflow-hidden" style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
+        <div className="hidden" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
             <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-5" style={{width:avatarSize,height:avatarSize}}>
-              <span aria-hidden="true" className="absolute -inset-2 rounded-full border border-[#ef3340]/45 shadow-[0_0_35px_rgba(239,51,64,.18)]" /><span aria-hidden="true" className="absolute -inset-4 rounded-full border border-[#ef3340]/10" />
+              
               <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />
             </motion.div>
             <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold uppercase tracking-[.2em]" style={{ color: accentColor }}>@{profileUsername}</motion.span>
             <motion.h1 initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
             {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
-            {profile.customEmojis?.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{profile.customEmojis.slice(0,12).map(e=>{const isImage=e.value.startsWith('http')||e.value.startsWith('data:image/');return <span key={e.name} title={`:${e.name}:`} className="grid h-8 min-w-8 place-items-center rounded-lg border border-white/10 bg-white/[.035] px-1.5 transition-transform hover:scale-110">{isImage?<img src={e.value} alt={e.name} className="h-6 w-6 rounded object-contain"/>:<span className="text-[10px] font-semibold text-zinc-300">{e.name}</span>}</span>})}</div> : null}
+            
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[360px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
           </div>
           {audioUrl && <div className="mx-auto mt-7 max-w-[420px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
