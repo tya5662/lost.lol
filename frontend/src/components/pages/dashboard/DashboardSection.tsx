@@ -4,10 +4,10 @@ import { BarChart3, Boxes, Crown, Link2, Music2, Palette, Save, Settings, Share2
 import { User, Link as LinkType } from '../../../types';
 import { apiService } from '../../../services/api';
 
-const FONT_OPTIONS =[['Inter','Inter'],['Arial','Arial'],['Georgia','Georgia'],['Courier New','Courier New'],['Trebuchet MS','Trebuchet MS'],['Verdana','Verdana'],['Times New Roman','Times New Roman'],['Impact','Impact'],['monospace','Monospace'],['serif','Serif'],['sans-serif','Sans Serif']] as string[][];
+const FONT_OPTIONS =[['Inter','Inter'],['Arial','Arial'],['Georgia','Georgia'],['Courier New','Courier New'],['Trebuchet MS','Trebuchet MS'],['Verdana','Verdana'],['Times New Roman','Times New Roman'],['Impact','Impact'],['monospace','Monospace'],['serif','Serif'],['sans-serif','Sans Serif'],['template','Original template font']] as string[][];
 const USERNAME_EFFECTS =[['none','None'],['glow','Glow'],['pulse','Pulse'],['float','Float'],['shake','Shake'],['bounce','Bounce'],['tilt','Tilt'],['zoom','Zoom'],['blur','Blur'],['flash','Flash'],['swing','Swing'],['jelly','Jelly'],['heartbeat','Heartbeat'],['neon','Neon'],['rainbow','Rainbow'],['noise','TV interference']] as string[][];
 const BACKGROUND_EFFECTS =[['none','None'],['pulse','Pulse glow'],['aurora','Aurora'],['scanlines','Scanlines'],['vignette','Vignette'],['grid','Grid'],['spotlight','Spotlight'],['breathe','Breathe'],['flicker','Flicker'],['drift','Drift'],['orbit','Orbit'],['waves','Waves'],['noise','Noise'],['halo','Halo'],['radar','Radar']] as string[][];
-const CURSOR_EFFECTS =[['none','None'],['glow','Glow'],['red','Red trail'],['sparkle','Sparkle trail']] as string[][];
+const CURSOR_EFFECTS =[['none','None'],['glow','Glow'],['red','Red trail'],['sparkle','Sparkle trail'],['template','Original template cursor']] as string[][];
 
 export const DashboardSection:React.FC<{user:User;section:string}>=({user,section})=>{
  const location=useLocation();
