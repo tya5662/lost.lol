@@ -45,7 +45,7 @@ export const apiService={
  uploadProfileMedia:async(username:string,formData:FormData)=>requestJson(`/api/users/${encodeURIComponent(username)}/media`,{method:'POST',headers:authHeaders(),body:formData}),
  updateProfilePreferences:async(username:string,body:Record<string,unknown>)=>requestJson(`/api/users/${encodeURIComponent(username)}/preferences`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  setUsername:async(username:string)=>requestJson('/api/users/username',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({username})}),
- connectDiscord:()=>{window.location.href=`${backendUrl}/api/connections/discord/start`;},
+ connectDiscord:async()=>{const data=await requestJson('/api/connections/discord/start-url',{method:'POST',headers:authHeaders()});if(typeof data.url!=='string'||!data.url.startsWith('https://discord.com/oauth2/authorize?'))throw new Error('The server returned an invalid Discord authorization link.');window.location.href=data.url;},
  getDiscordConnection:async()=>requestJson('/api/connections/discord/status',{headers:authHeaders()}),
  disconnectDiscord:async()=>requestJson('/api/connections/discord',{method:'DELETE',headers:authHeaders()}),
 };
