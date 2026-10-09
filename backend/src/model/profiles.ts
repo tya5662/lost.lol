@@ -75,6 +75,7 @@ const userSchema = new mongoose.Schema({
   profileGradient: { type: Boolean, default: true },
   monochromeIcons: { type: Boolean, default: false },
   animatedTitle: { type: Boolean, default: false },
+  tabTitle: { type: String, default: '' },
   nameTooltip: { type: String, default: '' },
   avatarDecoration: { type: String, default: '' },
   customCursorHotspot: { type: String, default: '0 0' },
