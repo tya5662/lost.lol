@@ -216,7 +216,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
     }
 
     const allowed = [
-      'name','location','showLocation','showDiscordPresence','discordUsername',
+      'name','location','showLocation','showDiscordPresence','discordUsername','nameTooltip','avatarDecoration','customCursorHotspot','cardTiltIntensity','cardTiltPerspective','backgroundMediaUrl','backgroundType',
       'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle',
       'usernameEffect','backgroundEffect','syncToBackground','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
@@ -423,7 +423,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
         : null,
       backgroundMedia: user.backgroundMedia
         ? `data:${user.backgroundType === 'video' ? 'video/mp4' : 'image/jpeg'};base64,${user.backgroundMedia.toString('base64')}`
-        : null,
+        : (user as any).backgroundMediaUrl || null,
       customFontUrl: user.customFontMedia
         ? `data:${user.customFontMime || 'font/ttf'};base64,${user.customFontMedia.toString('base64')}`
         : '',
