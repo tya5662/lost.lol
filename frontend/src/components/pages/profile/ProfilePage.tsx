@@ -180,7 +180,12 @@ const ProfilePage: React.FC = () => {
         suffer<span className="-ml-2 text-[#ef3340]">.info</span>
       </motion.a>
       
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} className="w-full max-w-[560px] overflow-hidden" animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} className={`w-full max-w-[560px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none'}}>
+        {cardOpacity <= 0 && <style>{`.profile-card-transparent [class*="bg-"] { background: transparent !important; background-color: transparent !important; }
+.profile-card-transparent [class*="border-"] { border-color: transparent !important; }
+.profile-card-transparent [class*="shadow-"] { box-shadow: none !important; }
+.profile-card-transparent [style*="background-color"] { background-color: transparent !important; }
+.profile-card-transparent [style*="backdrop-filter"] { backdrop-filter: none !important; }`}</style>}
         <div className="hidden" />
         <div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
