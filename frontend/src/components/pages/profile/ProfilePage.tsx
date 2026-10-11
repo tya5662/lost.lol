@@ -37,7 +37,7 @@ interface UserProfile {
   links: Array<{ _id?: string; id?: number; title: string; url: string; }>;
 }
 const normalizeLinkUrl = (rawUrl: string): string | null => {
-  const value = rawUrl.trim().replace(/^\\/+/, '').replace(/^(https?:\\/\\/)\\s*(https?:\\/\\/)/i, '$2');
+  const value = rawUrl.trim().replace(/^\/+/, '').replace(/^(https?:\/\/)\s*(https?:\/\/)/i, '$2');
   if (!value) return null;
   if (/^mailto:/i.test(value)) return value;
   if (/^(https?:\/\/)/i.test(value)) {
