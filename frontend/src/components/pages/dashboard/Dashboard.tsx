@@ -95,12 +95,12 @@ export const Dashboard: React.FC = () => {
     window.location.href ="/dashboard"
   };
 
-  const handleDeleteLink = async (id: number) => {
+  const handleDeleteLink = async (id: string | number) => {
     setIsLoading(true);
 
     try {
       await apiService.deleteLink(id);
-      setLinks(links.filter(link => link.id !== id));
+      setLinks(links.filter(link => String(link._id || link.id) !== String(id)));
       toast({
         title: "Success",
         description: "Link deleted successfully"
@@ -119,11 +119,11 @@ export const Dashboard: React.FC = () => {
     window.location.href = '/dashboard'
   };
 
-  const handleUpdateLink = async (id: number, linkData: LinkFormData) => {
+  const handleUpdateLink = async (id: string | number, linkData: LinkFormData) => {
     try {
       setIsLoading(true)
       const updatedLink = await apiService.updateLink(id, linkData);
-      setLinks(links.map(link => link.id === id ? updatedLink : link));
+      setLinks(links.map(link => String(link._id || link.id) === String(id) ? updatedLink : link));
       toast({
         title: "Success",
         description: "Link updated successfully"
@@ -151,7 +151,7 @@ export const Dashboard: React.FC = () => {
     setLinks(newLinks);
 
     try {
-      await apiService.reorderLinks(user!.id, newLinks.map(link => link.id));
+      await apiService.reorderLinks(user!._id, newLinks.map(link => String(link._id || link.id)));
     } catch (error) {
       toast({
         title: "Error",
@@ -429,8 +429,8 @@ export const Dashboard: React.FC = () => {
 
                       {links.map((link, index) => (
                         <Draggable
-                          key={link.id}
-                          draggableId={link._id.toString()}
+                          key={link._id || link.id}
+                          draggableId={String(link._id || link.id)}
                           index={index}
                         >
                           {(provided) => (
