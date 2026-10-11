@@ -142,9 +142,9 @@ export interface User {
 }
 
 export interface Link {
-  _id: number,
+  _id: string,
   id: number;
-  userId?: number;
+  userId?: string;
   title: string;
   url: string;
   platform: string;
