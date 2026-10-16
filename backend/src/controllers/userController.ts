@@ -580,10 +580,10 @@ export const setUsername = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Username regex validation
-    const usernameRegex = /^[a-z0-9._]{1,3}$/;
+    const usernameRegex = /^[a-z0-9._]{1,20}$/;
     if (!usernameRegex.test(username)) {
       res.status(400).json({
-        message: "Username must be 1-3 characters using lowercase letters, numbers, periods, or underscores.",
+        message: "Username must be 1-20 characters using lowercase letters, numbers, periods, or underscores.",
       });
       return;
     }
