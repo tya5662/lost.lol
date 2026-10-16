@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { randomBytes, scrypt, timingSafeEqual } from 'crypto';
+import { createHmac, randomBytes, randomInt, scrypt, timingSafeEqual } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { isAuthenticated } from '../middleware/auth';
 import { User } from '../model/profiles';
@@ -36,7 +36,7 @@ const verifyPassword = async (password: string, passwordHash: string): Promise<b
 const issueToken = (id: number, email: string, username: string): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error('JWT_SECRET environment variable is required');
-  return jwt.sign({ id, email, username }, secret, { expiresIn: '90d' });
+  return jwt.sign({ id, email, username }, secret, { expiresIn: '30d' });
 };
 
 
@@ -56,6 +56,42 @@ const verifyTurnstile = async (token: string, remoteip?: string): Promise<{ok:bo
   } catch (error) {
     console.error('Turnstile verification request failed:', error instanceof Error ? error.message : 'unknown error');
     return { ok: false, codes: ['verification-request-failed'] };
+  }
+};
+
+const currentIpHash = (ip: string): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET environment variable is required');
+  return createHmac('sha256', secret).update(ip || 'unknown').digest('hex');
+};
+
+const createOtp = (): string => String(randomInt(0, 1_000_000)).padStart(6, '0');
+const hashOtp = (email: string, code: string): string => createHmac('sha256', process.env.JWT_SECRET || 'missing-secret').update(`${email}:${code}`).digest('hex');
+
+const sendOtpEmail = async (email: string, code: string, reason: 'verify your email' | 'sign in from a new location'): Promise<boolean> => {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey || !from) {
+    console.error('OTP email unavailable: configure RESEND_API_KEY and RESEND_FROM_EMAIL on the backend.');
+    return false;
+  }
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to: [email],
+        subject: 'Your suffer.info verification code',
+        text: `Your suffer.info code is ${code}. Use it to ${reason}. It expires in 10 minutes. If you did not request this, you can ignore this email.`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:28px;background:#101010;color:#f4f0ef;border-radius:16px"><h1 style="margin-top:0">suffer.info</h1><p>Your verification code to ${reason}:</p><p style="font-size:32px;letter-spacing:8px;font-weight:700">${code}</p><p>This code expires in 10 minutes. If you did not request this, you can ignore this email.</p></div>`,
+      }),
+    });
+    if (!response.ok) console.error('OTP email provider rejected request:', response.status, (await response.text()).slice(0, 300));
+    return response.ok;
+  } catch (error) {
+    console.error('OTP email request failed:', error instanceof Error ? error.message : 'unknown error');
+    return false;
   }
 };
 
@@ -98,25 +134,24 @@ router.post('/register', async (req, res, next) => {
     res.status(400).json({ message: 'Enter a valid email address.' });
     return;
   }
-
-  if (!/^[a-z0-9._]{1,20}$/.test(username)) {
-    res.status(400).json({ message: 'Username must be 1-20 characters using lowercase letters, numbers, periods, or underscores.' });
+  if (!/^[a-z0-9._]{3}$/.test(username)) {
+    res.status(400).json({ message: 'Username must be exactly 3 characters using lowercase letters, numbers, periods, or underscores.' });
     return;
   }
   if (reservedUsernames.has(username)) {
     res.status(400).json({ message: 'That username is reserved.' });
     return;
   }
-
   if (password.length < 7 || password.length > 128) {
     res.status(400).json({ message: 'Password must be between 7 and 128 characters.' });
     return;
   }
-
   if (!process.env.JWT_SECRET) {
-    res.status(503).json({
-      message: 'Sign-up is temporarily unavailable. The server administrator must configure JWT_SECRET.',
-    });
+    res.status(503).json({ message: 'Sign-up is temporarily unavailable. The server administrator must configure JWT_SECRET.' });
+    return;
+  }
+  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+    res.status(503).json({ message: 'Email verification is not configured yet. Please try again later.' });
     return;
   }
 
@@ -130,15 +165,24 @@ router.post('/register', async (req, res, next) => {
       return;
     }
 
+    const code = createOtp();
     const user = new User({
-      email,
-      username,
-      name: username,
+      email, username, name: username,
       passwordHash: await hashPassword(password),
-      emailVerified: true,
+      emailVerified: false,
+      otpHash: hashOtp(email, code),
+      otpExpiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      otpAttempts: 0,
+      trustedIpHashes: [],
     });
     await user.save();
-    res.status(201).json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 90, user: { id: user.id, username, name: user.name, email: user.email } });
+    const sent = await sendOtpEmail(email, code, 'verify your email');
+    if (!sent) {
+      await User.deleteOne({ _id: user._id });
+      res.status(502).json({ message: 'We could not send your verification email. Please try again later.' });
+      return;
+    }
+    res.status(200).json({ otpRequired: true, email, message: 'Check your email for a 6-digit verification code.' });
   } catch (error) {
     const message = duplicateAccountMessage(error);
     if (message) {
@@ -162,22 +206,22 @@ router.post('/login', async (req, res, next) => {
     res.status(400).json({ message: 'Please complete the CAPTCHA and try again.' });
     return;
   }
-
   if (!identifier || !password || password.length > 128) {
     res.status(400).json({ message: 'Enter your email or username and password.' });
     return;
   }
-
   if (!process.env.JWT_SECRET) {
-    res.status(503).json({
-      message: 'Sign-in is temporarily unavailable. The server administrator must configure JWT_SECRET.',
-    });
+    res.status(503).json({ message: 'Sign-in is temporarily unavailable. The server administrator must configure JWT_SECRET.' });
     return;
   }
 
   try {
-    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash');
-    if (user && user.username === 'pain') {
+    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts');
+    if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+      res.status(401).json({ message: 'Incorrect email/username or password.' });
+      return;
+    }
+    if (user.username === 'pain') {
       let changed = false;
       if (user.role !== 'owner') { user.role = 'owner'; changed = true; }
       if (!user.rootOwner) { user.rootOwner = true; changed = true; }
@@ -185,12 +229,67 @@ router.post('/login', async (req, res, next) => {
       if (changed) await user.save();
     }
 
-    if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
-      res.status(401).json({ message: 'Incorrect email/username or password.' });
+    const ipHash = currentIpHash(req.ip || '');
+    const trusted = Array.isArray(user.trustedIpHashes) && user.trustedIpHashes.includes(ipHash);
+    if (!user.emailVerified || !trusted) {
+      if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+        res.status(503).json({ message: 'Email verification is not configured yet. Please try again later.' });
+        return;
+      }
+      const code = createOtp();
+      user.otpHash = hashOtp(user.email, code);
+      user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      user.otpAttempts = 0;
+      await user.save();
+      const sent = await sendOtpEmail(user.email, code, user.emailVerified ? 'sign in from a new location' : 'verify your email');
+      if (!sent) {
+        res.status(502).json({ message: 'We could not send your verification email. Please try again later.' });
+        return;
+      }
+      res.json({ otpRequired: true, email: user.email, message: user.emailVerified ? 'New location detected. Check your email for a sign-in code.' : 'Verify your email to finish signing in.' });
       return;
     }
 
-    res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 90, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
+    res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 30, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/verify-otp', async (req, res, next) => {
+  const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const code = typeof req.body.code === 'string' ? req.body.code.trim() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6}$/.test(code)) {
+    res.status(400).json({ message: 'Enter the email address and 6-digit code.' });
+    return;
+  }
+  try {
+    const user = await User.findOne({ email }).select('+otpHash +otpExpiresAt +otpAttempts');
+    if (!user || !user.otpHash || !user.otpExpiresAt || user.otpExpiresAt.getTime() < Date.now()) {
+      res.status(400).json({ message: 'That code expired. Sign in or register again to get a new one.' });
+      return;
+    }
+    if ((user.otpAttempts || 0) >= 5) {
+      res.status(429).json({ message: 'Too many incorrect codes. Request a new code by signing in again.' });
+      return;
+    }
+    const supplied = Buffer.from(hashOtp(email, code), 'hex');
+    const expected = Buffer.from(user.otpHash, 'hex');
+    if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
+      user.otpAttempts = (user.otpAttempts || 0) + 1;
+      await user.save();
+      res.status(400).json({ message: 'That verification code is incorrect.' });
+      return;
+    }
+    user.emailVerified = true;
+    user.otpHash = undefined;
+    user.otpExpiresAt = undefined;
+    user.otpAttempts = 0;
+    const ipHash = currentIpHash(req.ip || '');
+    const trusted = Array.isArray(user.trustedIpHashes) ? user.trustedIpHashes.filter((value: string) => value !== ipHash) : [];
+    user.trustedIpHashes = [...trusted, ipHash].slice(-10);
+    await user.save();
+    res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 30, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
   } catch (error) {
     next(error);
   }
