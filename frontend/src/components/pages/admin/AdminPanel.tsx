@@ -25,12 +25,15 @@ const Select=({label,value,onChange,options}:{label:string;value:string;onChange
 
 export const AdminPanel:React.FC=()=>{
  const [users,setUsers]=useState<AdminUser[]>([]); const [error,setError]=useState(''); const [loading,setLoading]=useState(true);
+ const [activeTab,setActiveTab]=useState<'users'|'maintenance'>('users');
+ const [maintenance,setMaintenance]=useState({maintenanceMode:false,maintenanceTitle:'We’ll be back soon',maintenanceMessage:'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:''}); const [maintenanceSaving,setMaintenanceSaving]=useState(false);
  const [query,setQuery]=useState(''); const [selected,setSelected]=useState<number|null>(null);
  const [badge,setBadge]=useState(''); const [emojiName,setEmojiName]=useState(''); const [emojiValue,setEmojiValue]=useState('');
  const [saving,setSaving]=useState(false); const [badgeDefs,setBadgeDefs]=useState<any[]>([]); const [me,setMe]=useState<any>(null); const [banReason,setBanReason]=useState(''); const [newBadge,setNewBadge]=useState({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#ef3340',animation:'glow',description:'',selfClaimable:false,requiredPremium:false,requiredRole:'member',maxHolders:0});
  const load=async()=>{try{setUsers(await apiService.getAdminUsers() as AdminUser[])}catch(e){setError(e instanceof Error?e.message:'Unable to load admin panel')}finally{setLoading(false)}};
- useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([])); fetch(AUTH,{headers:{Authorization:`Bearer ${localStorage.getItem('token')??''}`}}).then(r=>r.ok?r.json():null).then(setMe).catch(()=>{});},[]);
+ useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([])); apiService.getSiteSettings().then(s=>setMaintenance({maintenanceMode:!!s.maintenanceMode,maintenanceTitle:s.maintenanceTitle||'We’ll be back soon',maintenanceMessage:s.maintenanceMessage||'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:s.maintenanceEta||''})).catch(()=>{}); fetch(AUTH,{headers:{Authorization:`Bearer ${localStorage.getItem('token')??''}`}}).then(r=>r.ok?r.json():null).then(setMe).catch(()=>{});},[]);
  const target=users.find(u=>u.id===selected)||null; const isRootOwner=!!me?.rootOwner;
+ const saveMaintenance=async(next=maintenance)=>{setMaintenanceSaving(true);setError('');try{const saved=await apiService.updateSiteSettings({...await apiService.getSiteSettings(),...next} as any);setMaintenance({maintenanceMode:!!saved.maintenanceMode,maintenanceTitle:saved.maintenanceTitle||next.maintenanceTitle,maintenanceMessage:saved.maintenanceMessage||next.maintenanceMessage,maintenanceEta:saved.maintenanceEta||''});}catch(e){setError(e instanceof Error?e.message:'Could not save maintenance settings')}finally{setMaintenanceSaving(false)}};
  const update=async(id:number,body:{role?:UserRole;premium?:boolean})=>{setError('');try{await apiService.updateAdminUser(id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Update failed')}};
  const customize=async(body:Record<string,unknown>)=>{if(!target)return;setSaving(true);setError('');try{await apiService.updateAdminCustomization(target.id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Customization update failed')}finally{setSaving(false)}};
  const addBadge=async()=>{if(!target||!badge.trim())return;try{await apiService.addAdminBadge(target.id,badge.trim());setBadge('');await load()}catch(e){setError(e instanceof Error?e.message:'Badge update failed')}};
@@ -50,6 +53,11 @@ export const AdminPanel:React.FC=()=>{
    <Link to="/dashboard" className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5">Dashboard</Link>
   </div></header>
   <main className="mx-auto max-w-7xl px-5 py-7">
+   <div className="mb-5 flex flex-wrap gap-2 rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-2">
+    <button onClick={()=>setActiveTab('users')} className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${activeTab==='users'?'bg-red-500 text-white':'text-zinc-400 hover:bg-white/5'}`}>Users & roles</button>
+    <button onClick={()=>setActiveTab('maintenance')} className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${activeTab==='maintenance'?'bg-red-500 text-white':'text-zinc-400 hover:bg-white/5'}`}>Maintenance</button>
+   </div>
+   {activeTab==='users'&&<>
    <div className="mb-6 grid gap-3 sm:grid-cols-4">
     {[['Accounts',users.length],['Premium',users.filter(u=>u.premium).length],['Team',users.filter(u=>u.role!=='member').length],['Verified',users.filter(u=>u.verified).length]].map(([k,v])=><div key={String(k)} className="rounded-2xl border border-white/[.07] bg-[#0d0d0f] p-5"><p className="text-xs text-zinc-500">{k}</p><p className="mt-2 text-2xl font-bold">{v}</p></div>)}
    </div>
@@ -97,7 +105,13 @@ export const AdminPanel:React.FC=()=>{
       <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h3 className="font-semibold">Custom emojis</h3><div className="mt-3 grid gap-2 sm:grid-cols-2"><Field label="Name" value={emojiName} onChange={setEmojiName}/><Field label="Value / emoji" value={emojiValue} onChange={setEmojiValue}/></div><button disabled={saving} onClick={addEmoji} className="mt-3 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold disabled:opacity-50">Add emoji</button><div className="mt-3 space-y-2">{(target.customEmojis||[]).map((e,i)=><div key={`${e.name}-${i}`} className="flex items-center justify-between rounded-xl bg-black/20 px-3 py-2 text-sm"><span>:{e.name}: <span className="text-zinc-500">{e.value}</span></span><button onClick={()=>customize({customEmojis:(target.customEmojis||[]).filter((_,j)=>j!==i)})} className="text-xs text-red-400">Remove</button></div>)}</div></div>
      </>}
     </section>
-   </div>
+   </div></>}
+   {activeTab==='maintenance'&&<section className="mx-auto max-w-3xl rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5 sm:p-7">
+    <div className="flex items-start justify-between gap-4"><div><h2 className="text-lg font-bold">Maintenance mode</h2><p className="mt-1 text-sm text-zinc-500">Temporarily show visitors a maintenance screen while you work on the site.</p></div><span className={`rounded-full px-3 py-1 text-xs font-semibold ${maintenance.maintenanceMode?'bg-amber-500/10 text-amber-300':'bg-emerald-500/10 text-emerald-300'}`}>{maintenance.maintenanceMode?'Enabled':'Disabled'}</span></div>
+    <div className="mt-6 space-y-4"><Toggle label="Enable maintenance mode" value={maintenance.maintenanceMode} onChange={v=>setMaintenance(s=>({...s,maintenanceMode:v}))}/><Field label="Maintenance page title" value={maintenance.maintenanceTitle} onChange={v=>setMaintenance(s=>({...s,maintenanceTitle:v.slice(0,100)}))}/><label className="block"><span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Visitor message</span><textarea value={maintenance.maintenanceMessage} maxLength={500} onChange={e=>setMaintenance(s=>({...s,maintenanceMessage:e.target.value}))} rows={4} className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-3 text-sm outline-none focus:border-red-500/50"/></label><Field label="Estimated return (optional)" value={maintenance.maintenanceEta} onChange={v=>setMaintenance(s=>({...s,maintenanceEta:v.slice(0,100)}))} placeholder="e.g. Back shortly"/></div>
+    <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4"><div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Preview</div><h3 className="mt-3 text-xl font-black">{maintenance.maintenanceTitle||'We’ll be back soon'}</h3><p className="mt-2 whitespace-pre-wrap text-sm text-zinc-400">{maintenance.maintenanceMessage}</p>{maintenance.maintenanceEta&&<p className="mt-3 text-xs text-red-300">{maintenance.maintenanceEta}</p>}</div>
+    <button disabled={maintenanceSaving||!isRootOwner} onClick={()=>saveMaintenance()} className="mt-5 rounded-xl bg-red-500 px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{maintenanceSaving?'Saving…':'Save maintenance settings'}</button>{!isRootOwner&&<p className="mt-2 text-xs text-zinc-500">Only the primary owner can change global maintenance settings.</p>}
+   </section>}
   </main>
  </div>;
 };
