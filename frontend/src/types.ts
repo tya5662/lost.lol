@@ -33,6 +33,10 @@ export interface SiteSettings {
   featuresDescription?: string;
   featureCards?: {title:string;description:string;icon?:string}[];
   customCss?: string;
+  maintenanceMode?: boolean;
+  maintenanceTitle?: string;
+  maintenanceMessage?: string;
+  maintenanceEta?: string;
 }
 
 export interface User {
