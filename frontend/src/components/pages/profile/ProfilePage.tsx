@@ -138,12 +138,12 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const audio = audioRef.current;
     const video = backgroundVideoRef.current;
-    if (audio && profile?.audioUrl) {
+    if (audio && profile?.audioUrl && profile?.audioAutoplay === true) {
       audio.loop = true;
       audio.autoplay = true;
     }
     const attemptMediaPlayback = () => {
-      if (audio && profile?.audioUrl) void audio.play().catch(() => {});
+      if (audio && profile?.audioUrl && profile?.audioAutoplay === true) void audio.play().catch(() => {});
       if (video && profile?.backgroundType === 'video') {
         video.muted = false;
         void video.play().catch(() => { video.muted = true; });
@@ -162,7 +162,7 @@ const ProfilePage: React.FC = () => {
       window.removeEventListener('pointerdown', attemptMediaPlayback);
       window.removeEventListener('keydown', attemptMediaPlayback);
     };
-  }, [profile?.audioUrl, profile?.backgroundType, profile?.backgroundMedia]);
+  }, [profile?.audioUrl, profile?.audioAutoplay, profile?.backgroundType, profile?.backgroundMedia]);
 
   useEffect(() => {
     if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
@@ -179,7 +179,7 @@ const ProfilePage: React.FC = () => {
     if (!context) return;
     let frame = 0;
     let width = 0, height = 0;
-    const accent = profile.particleColor || profile.accentColor || '#ef3340';
+    const accent = profile.particleColor || profile.accentColor || '#c15bd7';
     const amount = Math.max(0, Math.min(180, profile.particleCount ?? (profile.particleEffect === 'embers' ? 46 : profile.particleEffect === 'stars' ? 60 : profile.particleEffect === 'ghosts' ? 22 : profile.particleEffect === 'rain' ? 90 : 54)));
     const particles = Array.from({length: amount}, () => ({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:profile.particleEffect==='stars'?Math.random()*1.8+.3:Math.random()*2+0.6,v:Math.random()*.65+.2,a:Math.random()*.65+.2,phase:Math.random()*Math.PI*2}));
     let pointerX = 0, pointerY = 0;
@@ -196,7 +196,7 @@ const ProfilePage: React.FC = () => {
     if (!context) return;
     let frame = 0, width = 0, height = 0;
     let mouseX = -999, mouseY = -999, lastX = -999, lastY = -999;
-    const accent = profile.accentColor || '#ef3340';
+    const accent = profile.accentColor || '#c15bd7';
     let sparks: {x:number;y:number;vx:number;vy:number;life:number;size:number;rotation:number;spin:number}[] = [];
     const resize=()=>{const dpr=Math.min(window.devicePixelRatio||1,2);width=window.innerWidth;height=window.innerHeight;canvas.width=Math.floor(width*dpr);canvas.height=Math.floor(height*dpr);canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;context.setTransform(dpr,0,0,dpr,0,0);};
     const move=(event:MouseEvent)=>{mouseX=event.clientX;mouseY=event.clientY;};
@@ -231,7 +231,7 @@ const ProfilePage: React.FC = () => {
   }, [username]);
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center bg-[#050505] text-sm text-[#a39b9c]">
-      <span aria-label="Loading" role="status" className="h-2 w-2 animate-pulse rounded-full bg-[#ef3340]" />
+      <span aria-label="Loading" role="status" className="h-2 w-2 animate-pulse rounded-full bg-[#c15bd7]" />
     </div>
   );
   if (!profile) return (
@@ -239,7 +239,7 @@ const ProfilePage: React.FC = () => {
       <img src={logo} alt="suffer.info" className="mb-5 h-14 w-14 rounded-xl border border-white/10" />
       <h1 className="text-2xl font-bold">This profile isn’t here.</h1>
       <p className="mt-2 text-sm text-[#928a8b]">The username may be unavailable or misspelled.</p>
-      <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#ef3340]/60 bg-[#ef3340]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#ef3340]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">Back to suffer.info</button>
+      <button onClick={() => navigate('/')} className="mt-6 inline-flex h-10 items-center rounded-full border border-[#c15bd7]/60 bg-[#c15bd7]/15 px-4 text-sm font-semibold text-white transition-colors hover:bg-[#c15bd7]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c15bd7]">Back to suffer.info</button>
     </div>
   );
   const aliases = (profile.aliases || []).slice(0, 2);
@@ -250,7 +250,7 @@ const ProfilePage: React.FC = () => {
   const linkBlur = Math.max(0, Math.min(40, profile.linkBlur ?? 0));
   const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
   const { profilePicture, backgroundMedia, backgroundType, audioUrl, audioTitle, audioCoverUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
-  const accentColor = profile.accentColor || '#ef3340';
+  const accentColor = profile.accentColor || '#c15bd7';
   const bgOpacity = Math.max(0, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
   const cardBlur = Math.max(0, Math.min(40, profile.cardBlur ?? profile.profileBlur ?? 0));
@@ -260,7 +260,7 @@ const ProfilePage: React.FC = () => {
   const usernameAnimation = profile.syncToBackground ? syncedMotion : usernameEffect === 'pulse' ? { scale: [1, 1.04, 1] } : usernameEffect === 'float' ? { y: [0, -5, 0] } : usernameEffect === 'shake' ? { x: [0, -3, 3, -2, 2, 0] } : usernameEffect === 'glow' ? { textShadow: ['0 0 0px '+accentColor, '0 0 22px '+accentColor, '0 0 0px '+accentColor] } : usernameEffect === 'bounce' ? { y: [0,-10,0,-5,0] } : usernameEffect === 'tilt' ? { rotate: [-2,2,-1,1,0] } : usernameEffect === 'zoom' ? { scale: [1,1.08,1] } : usernameEffect === 'blur' ? { filter: ['blur(0px)','blur(2px)','blur(0px)'] } : usernameEffect === 'flash' ? { opacity: [1,.45,1] } : usernameEffect === 'swing' ? { rotate: [-4,4,-3,3,0] } : usernameEffect === 'jelly' ? { scaleX: [1,1.08,.94,1.04,1], scaleY: [1,.94,1.06,.98,1] } : usernameEffect === 'heartbeat' ? { scale: [1,1.05,1,1.05,1] } : usernameEffect === 'neon' ? { textShadow: ['0 0 4px #fff, 0 0 12px '+accentColor,'0 0 14px '+accentColor+', 0 0 28px '+accentColor,'0 0 4px #fff, 0 0 12px '+accentColor] } : usernameEffect === 'rainbow' ? { filter: ['hue-rotate(0deg)','hue-rotate(180deg)','hue-rotate(360deg)'] } : {};
   const usernameAnimationTransition = usernameEffect === 'none' ? {} : { duration: usernameEffect === 'heartbeat' ? 1.1 : 2.2, repeat: Infinity, ease: 'easeInOut' as const };
   const backgroundClass = backgroundEffect === 'aurora' ? 'animate-pulse' : backgroundEffect === 'pulse' ? 'animate-[pulse_4s_ease-in-out_infinite]' : backgroundEffect === 'scanlines' ? 'opacity-70' : '';
-  const backgroundGfx = backgroundEffect === 'grid' ? 'bg-[linear-gradient(rgba(239,51,64,.10)_1px,transparent_1px),linear-gradient(90deg,rgba(239,51,64,.10)_1px,transparent_1px)] bg-[size:42px_42px] animate-[pulse_3s_ease-in-out_infinite]' : backgroundEffect === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_120%,rgba(239,51,64,.24),transparent_60%)] animate-pulse' : backgroundEffect === 'vignette' ? 'bg-[radial-gradient(circle,transparent_35%,rgba(0,0,0,.72)_100%)]' : backgroundEffect === 'spotlight' ? 'bg-[radial-gradient(circle_at_50%_35%,rgba(239,51,64,.22),transparent_35%)]' : backgroundEffect === 'halo' ? 'bg-[radial-gradient(circle,rgba(239,51,64,.18),transparent_32%)] animate-pulse' : backgroundEffect === 'radar' ? 'bg-[radial-gradient(circle,transparent_0,transparent_24%,rgba(239,51,64,.16)_25%,transparent_26%,transparent_49%,rgba(239,51,64,.12)_50%,transparent_51%)] animate-[spin_10s_linear_infinite]' : backgroundEffect === 'noise' ? 'opacity-20 mix-blend-screen' : '';
+  const backgroundGfx = backgroundEffect === 'grid' ? 'bg-[linear-gradient(rgba(193,91,215,.10)_1px,transparent_1px),linear-gradient(90deg,rgba(193,91,215,.10)_1px,transparent_1px)] bg-[size:42px_42px] animate-[pulse_3s_ease-in-out_infinite]' : backgroundEffect === 'waves' ? 'bg-[radial-gradient(ellipse_at_50%_120%,rgba(193,91,215,.24),transparent_60%)] animate-pulse' : backgroundEffect === 'vignette' ? 'bg-[radial-gradient(circle,transparent_35%,rgba(0,0,0,.72)_100%)]' : backgroundEffect === 'spotlight' ? 'bg-[radial-gradient(circle_at_50%_35%,rgba(193,91,215,.22),transparent_35%)]' : backgroundEffect === 'halo' ? 'bg-[radial-gradient(circle,rgba(193,91,215,.18),transparent_32%)] animate-pulse' : backgroundEffect === 'radar' ? 'bg-[radial-gradient(circle,transparent_0,transparent_24%,rgba(193,91,215,.16)_25%,transparent_26%,transparent_49%,rgba(193,91,215,.12)_50%,transparent_51%)] animate-[spin_10s_linear_infinite]' : backgroundEffect === 'noise' ? 'opacity-20 mix-blend-screen' : '';
   const backgroundGfxStyle = backgroundEffect === 'flicker' ? { animation: 'pulse 1.15s ease-in-out infinite' } : backgroundEffect === 'drift' ? { animation: 'pulse 6s ease-in-out infinite' } : backgroundEffect === 'breathe' ? { animation: 'pulse 4s ease-in-out infinite' } : backgroundEffect === 'orbit' ? { animation: 'spin 14s linear infinite' } : {};
   const validLinks = links.flatMap((link) => {
     const safeUrl = normalizeLinkUrl(link.url);
@@ -269,7 +269,7 @@ const ProfilePage: React.FC = () => {
   return (
     <>
     {(customFontUrl || fontFamily === 'template' || fontFamily === 'fuente') && <style>{`@font-face{font-family:'LostCustom';src:url(${JSON.stringify(customFontUrl || '/gunslol-template/assets/fonts/fuente.otf')});font-display:swap;}`}</style>}
-    {profile.pageEnterText && !templateEntered && <button type="button" onClick={() => { if (templateEntering) return; setTemplateEntering(true); const audio = audioRef.current; const video = backgroundVideoRef.current; if (audio) void audio.play().catch(() => {}); if (video) { video.muted = false; void video.play().catch(() => { video.muted = true; }); } window.setTimeout(() => { setTemplateEntered(true); setTemplateEntering(false); }, Math.max(0, Math.min(3000, profile.cardRevealDelay ?? 300))); }} disabled={templateEntering} className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-4 bg-black/90 px-6 text-center text-white backdrop-blur-md transition-opacity duration-500" aria-label="Enter profile"><span className="text-4xl text-[#ef3340]">{profile.pageEnterSymbol || "⛧"}</span><span className="text-xs font-semibold uppercase tracking-[.35em]">{profile.pageEnterText}</span><span className="mt-2 animate-pulse text-[10px] uppercase tracking-[.22em] text-white/45">Click to enter</span></button>}
+    {profile.pageEnterText && !templateEntered && <button type="button" onClick={() => { if (templateEntering) return; setTemplateEntering(true); const audio = audioRef.current; const video = backgroundVideoRef.current; if (audio) void audio.play().catch(() => {}); if (video) { video.muted = false; void video.play().catch(() => { video.muted = true; }); } window.setTimeout(() => { setTemplateEntered(true); setTemplateEntering(false); }, Math.max(0, Math.min(3000, profile.cardRevealDelay ?? 300))); }} disabled={templateEntering} className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-4 bg-black/90 px-6 text-center text-white backdrop-blur-md transition-opacity duration-500" aria-label="Enter profile"><span className="text-4xl text-[#c15bd7]">{profile.pageEnterSymbol || "⛧"}</span><span className="text-xs font-semibold uppercase tracking-[.35em]">{profile.pageEnterText}</span><span className="mt-2 animate-pulse text-[10px] uppercase tracking-[.22em] text-white/45">Click to enter</span></button>}
     <main className={`suffer-template-profile relative isolate flex min-h-screen ${cursorEffect === 'glow' ? 'cursor-crosshair' : ''} ${cursorEffect === 'red' ? 'cursor-none' : ''} items-center justify-center overflow-hidden px-4 py-16 sm:px-6`} style={{ backgroundColor: profile.backgroundColor || '#050505', color: textColor, fontFamily: resolvedFont, cursor: cursorEffect === 'template' || cursorEffect === 'custom' ? `url('/gunslol-template/assets/cursor.png') ${profile.customCursorHotspot || '0 0'}, auto` : undefined }}>
       <style>{`
 @keyframes suffer-aurora{0%,100%{filter:hue-rotate(0deg);transform:scale(1)}50%{filter:hue-rotate(35deg);transform:scale(1.08)}}
@@ -278,53 +278,53 @@ const ProfilePage: React.FC = () => {
 @keyframes suffer-flicker{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.45}}
 @keyframes suffer-wave{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes suffer-radar{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes suffer-name-noise{0%,100%{text-shadow:0 0 0 transparent;transform:translateX(0)}20%{text-shadow:-2px 0 rgba(239,51,64,.9),2px 0 rgba(255,255,255,.35);transform:translateX(-.5px)}40%{text-shadow:2px 0 rgba(239,51,64,.8),-1px 0 rgba(255,255,255,.35);transform:translateX(.5px)}60%{text-shadow:0 0 9px rgba(239,51,64,.7);transform:translateX(0)}80%{text-shadow:-1px 0 rgba(255,255,255,.35),1px 0 rgba(239,51,64,.8)}}
+@keyframes suffer-name-noise{0%,100%{text-shadow:0 0 0 transparent;transform:translateX(0)}20%{text-shadow:-2px 0 rgba(193,91,215,.9),2px 0 rgba(255,255,255,.35);transform:translateX(-.5px)}40%{text-shadow:2px 0 rgba(193,91,215,.8),-1px 0 rgba(255,255,255,.35);transform:translateX(.5px)}60%{text-shadow:0 0 9px rgba(193,91,215,.7);transform:translateX(0)}80%{text-shadow:-1px 0 rgba(255,255,255,.35),1px 0 rgba(193,91,215,.8)}}
 .suffer-name-noise{animation:suffer-name-noise .22s steps(2,end) infinite;}
-.suffer-bg-effect-aurora{background:linear-gradient(125deg,rgba(239,51,64,.20),rgba(92,40,130,.12),rgba(20,90,120,.13),rgba(239,51,64,.18));background-size:250% 250%;animation:suffer-wave 9s ease-in-out infinite,suffer-aurora 12s ease-in-out infinite}
+.suffer-bg-effect-aurora{background:linear-gradient(125deg,rgba(193,91,215,.20),rgba(92,40,130,.12),rgba(20,90,120,.13),rgba(193,91,215,.18));background-size:250% 250%;animation:suffer-wave 9s ease-in-out infinite,suffer-aurora 12s ease-in-out infinite}
 .suffer-bg-effect-pulse{animation:pulse 4s ease-in-out infinite}
 .suffer-bg-effect-scanlines{background:repeating-linear-gradient(to bottom,rgba(255,255,255,.055) 0px,rgba(255,255,255,.055) 1px,transparent 2px,transparent 5px);mix-blend-mode:screen}
 .suffer-bg-effect-vignette{background:radial-gradient(circle,transparent 30%,rgba(0,0,0,.78) 100%)}
-.suffer-bg-effect-spotlight{background:radial-gradient(circle at 50% 35%,rgba(239,51,64,.30),transparent 42%)}
+.suffer-bg-effect-spotlight{background:radial-gradient(circle at 50% 35%,rgba(193,91,215,.30),transparent 42%)}
 .suffer-bg-effect-breathe{animation:pulse 4s ease-in-out infinite}
 .suffer-bg-effect-flicker{animation:suffer-flicker 3.2s steps(1,end) infinite}
 .suffer-bg-effect-drift{animation:suffer-drift 9s ease-in-out infinite}
 .suffer-bg-effect-orbit{animation:suffer-orbit 18s linear infinite}
-.suffer-bg-effect-waves{background:linear-gradient(120deg,rgba(239,51,64,.18),transparent 35%,rgba(239,51,64,.13),transparent 75%);background-size:250% 250%;animation:suffer-wave 8s ease-in-out infinite}
-.suffer-bg-effect-halo{background:radial-gradient(circle,rgba(239,51,64,.24),transparent 40%);animation:pulse 4s ease-in-out infinite}
-.suffer-bg-effect-radar{background:repeating-radial-gradient(circle,transparent 0 32px,rgba(239,51,64,.15) 33px 34px,transparent 35px 62px);animation:suffer-radar 18s linear infinite}
+.suffer-bg-effect-waves{background:linear-gradient(120deg,rgba(193,91,215,.18),transparent 35%,rgba(193,91,215,.13),transparent 75%);background-size:250% 250%;animation:suffer-wave 8s ease-in-out infinite}
+.suffer-bg-effect-halo{background:radial-gradient(circle,rgba(193,91,215,.24),transparent 40%);animation:pulse 4s ease-in-out infinite}
+.suffer-bg-effect-radar{background:repeating-radial-gradient(circle,transparent 0 32px,rgba(193,91,215,.15) 33px 34px,transparent 35px 62px);animation:suffer-radar 18s linear infinite}
 .suffer-bg-effect-noise{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
 `}</style>
-      {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340] shadow-[0_0_18px_#ef3340] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
+      {cursorEffect === 'red' && cursorTrail.map((p,i)=><span key={p.id} aria-hidden="true" className="pointer-events-none fixed z-[100] h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#c15bd7] shadow-[0_0_18px_#c15bd7] transition-opacity duration-150" style={{left:p.x,top:p.y,opacity:(i+1)/cursorTrail.length,transform:`translate(-50%,-50%) scale(${0.45+(i+1)/cursorTrail.length*.7})`}}/>)}
       {backgroundMedia && backgroundType === 'image' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${backgroundMedia})`, opacity: bgOpacity }} />}
       {backgroundMedia && backgroundType === 'video' && <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden"><video ref={backgroundVideoRef} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" style={{ opacity: bgOpacity }}><source src={backgroundMedia} /></video></div>}
-      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_20%,rgba(239,51,64,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />
-      <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 suffer-bg-effect-${backgroundEffect} ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />
+      {backgroundEffect !== 'none' && <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_20%,rgba(193,91,215,.18),transparent_42%)] ${backgroundClass}`} style={{opacity:bgOpacity}} />}
+      {backgroundEffect !== 'none' && <div aria-hidden="true" className={`pointer-events-none absolute inset-0 z-0 suffer-bg-effect-${backgroundEffect} ${backgroundGfx}`} style={{...backgroundGfxStyle,opacity:bgOpacity}} />}
       <canvas ref={backgroundCanvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[1]" style={{opacity:bgOpacity}} />
       {cursorEffect === 'sparkle' && <canvas ref={cursorCanvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[100]" />}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ef3340]/[0.07] blur-[100px]" />
-      <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
-        <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#ef3340]/35 bg-[#ef3340]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(239,51,64,.12)]"><AudioLines size={16} /></span>
-        suffer<span className="-ml-2 text-[#ef3340]">.info</span>
-      </motion.a>
+      {backgroundEffect === 'grid' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />}
+
+      {profile.showBranding === true && <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
+        <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#c15bd7]/35 bg-[#c15bd7]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(193,91,215,.12)]"><AudioLines size={16} /></span>
+        suffer<span className="-ml-2 text-[#c15bd7]">.info</span>
+      </motion.a>}
       
-      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} onPointerMove={(event)=>{const rect=event.currentTarget.getBoundingClientRect();const intensity=profile.cardTiltIntensity??15;setCardTilt({x:-((event.clientY-rect.top)/rect.height-.5)*2*intensity,y:((event.clientX-rect.left)/rect.width-.5)*2*intensity});}} onPointerLeave={()=>setCardTilt({x:0,y:0})} className={`suffer-template-card relative z-10 w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(239,51,64,.04)' : 'none',transform:`perspective(${profile.cardTiltPerspective??1000}px) rotateX(${cardTilt.x}deg) rotateY(${cardTilt.y}deg)`,transition:'transform 180ms ease-out, background-color 250ms ease, box-shadow 250ms ease'}}>
+      <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} onPointerMove={(event)=>{const rect=event.currentTarget.getBoundingClientRect();const intensity=profile.cardTiltIntensity??15;setCardTilt({x:-((event.clientY-rect.top)/rect.height-.5)*2*intensity,y:((event.clientX-rect.left)/rect.width-.5)*2*intensity});}} onPointerLeave={()=>setCardTilt({x:0,y:0})} className={`suffer-template-card relative z-10 w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(193,91,215,.04)' : 'none',transform:`perspective(${profile.cardTiltPerspective??1000}px) rotateX(${cardTilt.x}deg) rotateY(${cardTilt.y}deg)`,transition:'transform 180ms ease-out, background-color 250ms ease, box-shadow 250ms ease'}}>
         {cardOpacity <= 0 && <style>{`.profile-card-transparent [class*="bg-"] { background: transparent !important; background-color: transparent !important; }
 .profile-card-transparent [class*="border-"] { border-color: transparent !important; }
 .profile-card-transparent [class*="shadow-"] { box-shadow: none !important; }
 .profile-card-transparent [style*="background-color"] { background-color: transparent !important; }
 .profile-card-transparent [style*="backdrop-filter"] { backdrop-filter: none !important; }`}</style>}
         <div className="hidden" />
-        <style>{'.suffer-template-profile .suffer-template-card:not(.profile-card-transparent){box-shadow:0 28px 100px rgba(0,0,0,.32),0 0 70px rgba(239,51,64,.055)!important;transition:background-color .25s ease,box-shadow .25s ease}.suffer-template-profile .suffer-template-card a{transition:transform .18s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease}.suffer-template-profile .suffer-template-card a:focus-visible{outline:2px solid #ef3340;outline-offset:3px}.suffer-template-profile .suffer-template-card a:hover{box-shadow:0 8px 28px rgba(239,51,64,.10)}.suffer-template-profile .suffer-template-card img{image-rendering:auto}@media(max-width:640px){.suffer-template-profile{padding-left:14px;padding-right:14px;padding-top:72px;padding-bottom:32px}.suffer-template-profile .suffer-template-card{border-radius:24px!important}.suffer-template-profile .suffer-template-card [class*=px-6]{padding-left:18px;padding-right:18px}}'} </style><div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
+        <style>{'.suffer-template-profile .suffer-template-card:not(.profile-card-transparent){box-shadow:0 28px 100px rgba(0,0,0,.32),0 0 70px rgba(193,91,215,.055)!important;transition:background-color .25s ease,box-shadow .25s ease}.suffer-template-profile .suffer-template-card a{transition:transform .18s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease}.suffer-template-profile .suffer-template-card a:focus-visible{outline:2px solid #c15bd7;outline-offset:3px}.suffer-template-profile .suffer-template-card a:hover{box-shadow:0 8px 28px rgba(193,91,215,.10)}.suffer-template-profile .suffer-template-card img{image-rendering:auto}@media(max-width:640px){.suffer-template-profile{padding-left:14px;padding-right:14px;padding-top:72px;padding-bottom:32px}.suffer-template-profile .suffer-template-card{border-radius:24px!important}.suffer-template-profile .suffer-template-card [class*=px-6]{padding-left:18px;padding-right:18px}}'} </style><div className="px-6 pb-7 pt-9 sm:px-10 sm:pb-9 sm:pt-11">
           <div className="mx-auto flex max-w-[560px] flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:text-left">
             <motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .08, duration: .5, type: 'spring', stiffness: 170 }} className="relative mb-1 shrink-0 sm:mb-0" style={{width:avatarSize,height:avatarSize}}>
               
               <img src={profilePicture || '/p.png'} alt={`${name}'s profile`} className="relative h-full w-full border border-white/15 bg-[#120708] object-cover" style={{borderRadius:profile.avatarShape==='square'?'14px':profile.avatarShape==='rounded'?'28%':'9999px'}} />{profile.avatarDecoration && <img src={profile.avatarDecoration} alt="" aria-hidden="true" className="pointer-events-none absolute -inset-[12%] h-[124%] w-[124%] object-contain" />}
             </motion.div>
             <div className="min-w-0 flex-1 text-center sm:text-left">
-            {profile.showUsernameTag !== false && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold tracking-[.2em]" style={{ color: profile.usernameTagColor || accentColor, fontFamily: profile.usernameTagFont && profile.usernameTagFont !== "inherit" ? profile.usernameTagFont : fontFamily, textTransform: profile.usernameTagStyle === "uppercase" ? "uppercase" : "none", fontStyle: profile.usernameTagStyle === "italic" ? "italic" : "normal", fontWeight: profile.usernameTagStyle === "bold" ? 800 : 600, textShadow: profile.usernameTagStyle === "glow" ? `0 0 8px ${profile.usernameTagColor || accentColor}, 0 0 18px ${profile.usernameTagColor || accentColor}` : "none" }}>@{profileUsername}</motion.span>}
-            <motion.h1 title={profile.nameTooltip || undefined} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className={`mt-2 text-3xl font-bold tracking-tight sm:text-4xl ${usernameEffect === 'noise' || usernameEffect === 'glitch' ? 'suffer-name-noise' : ''}`} style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#ef3340]/25 bg-[#ef3340]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
-            {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#ef3340]/45 hover:text-white">@{alias}</a>)}</div> : null}
+            {profile.showUsernameTag === true && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .2 }} className="text-[11px] font-semibold tracking-[.2em]" style={{ color: profile.usernameTagColor || accentColor, fontFamily: profile.usernameTagFont && profile.usernameTagFont !== "inherit" ? profile.usernameTagFont : fontFamily, textTransform: profile.usernameTagStyle === "uppercase" ? "uppercase" : "none", fontStyle: profile.usernameTagStyle === "italic" ? "italic" : "normal", fontWeight: profile.usernameTagStyle === "bold" ? 800 : 600, textShadow: profile.usernameTagStyle === "glow" ? `0 0 8px ${profile.usernameTagColor || accentColor}, 0 0 18px ${profile.usernameTagColor || accentColor}` : "none" }}>@{profileUsername}</motion.span>}
+            <motion.h1 title={profile.nameTooltip || undefined} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0, ...usernameAnimation }} transition={{ delay: .24, ...usernameAnimationTransition }} className={`mt-2 text-3xl font-bold tracking-tight sm:text-4xl ${usernameEffect === 'noise' || usernameEffect === 'glitch' ? 'suffer-name-noise' : ''}`} style={{ color: textColor }}>{name}{profile.verified ? <BadgeCheck size={21} className="ml-2 inline-block align-middle" /> : null}</motion.h1>{typewriterText&&<p className="mt-1 text-xs uppercase tracking-[.18em]" style={{color:accentColor}}>{typewriterText}</p>}{profile.role&&profile.role!=='member'&&<span className="mt-2 inline-flex rounded-full border border-[#c15bd7]/25 bg-[#c15bd7]/[.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.15em]" style={{color:accentColor}}>{profile.roleLabel||profile.role}</span>}
+            {aliases.length ? <div className="mt-3 flex flex-wrap justify-center gap-2">{aliases.map(alias=><a key={alias} href={`/${alias}`} className="rounded-full border border-[#c15bd7]/20 bg-[#c15bd7]/[0.06] px-3 py-1 text-[10px] font-semibold tracking-wide text-zinc-300 transition hover:border-[#c15bd7]/45 hover:text-white">@{alias}</a>)}</div> : null}
             
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
             </div>
@@ -334,9 +334,9 @@ const ProfilePage: React.FC = () => {
     <div className="flex items-center gap-3">
       <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-md bg-[#202020]">{audioCoverUrl?<img src={audioCoverUrl} alt="" className="h-full w-full object-cover"/>:<Disc3 size={25} className="text-zinc-500"/>}</div>
       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{audioTitle || 'Profile music'}</p><p className="mt-0.5 truncate text-[11px] text-zinc-500">@{profileUsername}</p></div>
-      <AudioLines size={18} className="shrink-0 text-[#ef3340]"/>
+      <AudioLines size={18} className="shrink-0 text-[#c15bd7]"/>
     </div>
-    <audio ref={audioRef} preload="metadata" autoPlay loop controls src={audioUrl} className="mt-4 h-10 w-full accent-red-500">Your browser does not support audio playback.</audio>
+    <audio ref={audioRef} preload="metadata" autoPlay={profile.audioAutoplay === true} loop controls src={audioUrl} className="mt-4 h-10 w-full accent-red-500">Your browser does not support audio playback.</audio>
     <p className="mt-2 text-[10px] text-zinc-600">Use the player controls to play, pause, seek, and adjust volume.</p>
   </div>
 </div>}
@@ -352,31 +352,31 @@ const ProfilePage: React.FC = () => {
           </div>
           {(profile.showDiscordPresence || profile.showLocation) && <div className="mx-auto mt-3 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3">
             <div className="flex flex-wrap items-center gap-2">
-              {profile.showDiscordPresence && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
+              {profile.showDiscordPresence === true && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-[#5865f2]/20 bg-[#5865f2]/[0.07] px-3 py-2.5">
                 <div className="relative h-9 w-9 shrink-0">
                   {profile.discordAvatar ? <img src={profile.discordAvatar} alt="" loading="lazy" className="h-9 w-9 rounded-full object-cover" /> : <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5865f2]/15"><MessageCircle size={17} className="text-[#7289da]" /></div>}
                   <img title={profile.discordPresenceStatus || 'offline'} alt={profile.discordPresenceStatus || 'offline'} src={`/gunslol-template/assets/icons/status/${profile.discordPresenceStatus==='online'?'online':profile.discordPresenceStatus==='idle'?'inactive':profile.discordPresenceStatus==='dnd'?'busy':'offline'}.png`} className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#101012] object-contain" loading="lazy" />
                 </div>
                 <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Discord</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.discordUsername || 'Connected'}{profile.discordActivity ? <div className="truncate text-[10px] text-zinc-400">{profile.discordActivity}</div> : null}</div></div>
               </div>}
-              {profile.showLocation && profile.location && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5">
+              {profile.showLocation === true && profile.location && <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2.5">
                 <MapPin size={17} className="shrink-0" style={{color:accentColor}} />
                 <div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Location</div><div className="truncate text-xs font-semibold" style={{color:textColor}}>{profile.location}</div></div>
               </div>}
             </div>
           </div>}
-          {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=>{const isImage=/^https?:\/\//i.test(b)&&/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(b);const templateBadge=getTemplateBadge(b);const badgeImage=isImage?b:templateBadge?.src;const badgeTitle=isImage?"Custom badge":(templateBadge?.title||b);return <span key={b} title={badgeTitle} className="inline-flex items-center gap-1.5 rounded-full border border-[#ef3340]/20 bg-[#ef3340]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#ef3340]/50" style={{color:textColor}}>{badgeImage?<img src={badgeImage} alt={badgeTitle} loading="lazy" className="h-5 w-5 rounded object-contain" />:<><BadgeCheck size={12} style={{color:accentColor}} />{b}</>}</span>})}</div> : null}
+          {profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=>{const isImage=/^https?:\/\//i.test(b)&&/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(b);const templateBadge=getTemplateBadge(b);const badgeImage=isImage?b:templateBadge?.src;const badgeTitle=isImage?"Custom badge":(templateBadge?.title||b);return <span key={b} title={badgeTitle} className="inline-flex items-center gap-1.5 rounded-full border border-[#c15bd7]/20 bg-[#c15bd7]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#c15bd7]/50" style={{color:textColor}}>{badgeImage?<img src={badgeImage} alt={badgeTitle} loading="lazy" className="h-5 w-5 rounded object-contain" />:<><BadgeCheck size={12} style={{color:accentColor}} />{b}</>}</span>})}</div> : null}
           <div className="mx-auto mt-8 max-w-[420px]" style={{display:'flex',flexDirection:'column',gap:linkSpacing}}>
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
-              <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#ef3340]/55 hover:bg-[#ef3340]/[0.07] hover:shadow-[0_8px_30px_rgba(239,51,64,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}}>
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] bg-black/40 transition-all duration-200 group-hover:border-[#ef3340]/30 group-hover:bg-[#ef3340]/10" style={{ color: accentColor, filter: `drop-shadow(0 0 5px ${profile.iconGlowColor || accentColor})` }}>{getTemplateSocialIcon(link.url) ? <img src={getTemplateSocialIcon(link.url)!} alt="" loading="lazy" className="h-5 w-5 object-contain transition-transform duration-200 group-hover:scale-110" /> : <IconComponent size={17} />}</span>
+              <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#c15bd7]/55 hover:bg-[#c15bd7]/[0.07] hover:shadow-[0_8px_30px_rgba(193,91,215,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c15bd7]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}}>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/[0.08] bg-black/40 transition-all duration-200 group-hover:border-[#c15bd7]/30 group-hover:bg-[#c15bd7]/10" style={{ color: accentColor, filter: `drop-shadow(0 0 5px ${profile.iconGlowColor || accentColor})` }}>{getTemplateSocialIcon(link.url) ? <img src={getTemplateSocialIcon(link.url)!} alt="" loading="lazy" className="h-5 w-5 object-contain transition-transform duration-200 group-hover:scale-110" /> : <IconComponent size={17} />}</span>
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold" style={{ color: textColor }}>{link.title || 'Open link'}</span>
                 <ArrowUpRight size={16} className="shrink-0 text-[#777173] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ff6872]" />
               </motion.a>
             ); })}
           </div>
           {validLinks.length === 0 && <p className="mt-8 text-center text-xs text-[#746d6e]">No links added yet.</p>}
-          <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span><span>Made with <span style={{ color: accentColor }}>suffer.info</span></span></div>
+          {profile.showBranding === true && <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span><span>Made with <span style={{ color: accentColor }}>suffer.info</span></span></div>}
         </div>
       </motion.section>
     </main>
