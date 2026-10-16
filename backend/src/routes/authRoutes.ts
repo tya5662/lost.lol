@@ -134,8 +134,8 @@ router.post('/register', async (req, res, next) => {
     res.status(400).json({ message: 'Enter a valid email address.' });
     return;
   }
-  if (!/^[a-z0-9._]{1,3}$/.test(username)) {
-    res.status(400).json({ message: 'Username must be 1-3 characters using lowercase letters, numbers, periods, or underscores.' });
+  if (!/^[a-z0-9._]{1,20}$/.test(username)) {
+    res.status(400).json({ message: 'Username must be 1-20 characters using lowercase letters, numbers, periods, or underscores.' });
     return;
   }
   if (reservedUsernames.has(username)) {
