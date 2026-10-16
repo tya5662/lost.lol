@@ -163,7 +163,7 @@ export const AuthPage: React.FC = () => {
                 <span className="mb-2.5 block text-sm font-medium text-[#e5dfdc]">Email verification code</span>
                 <span className="flex h-[62px] items-center gap-4 rounded-[18px] border border-white/[0.1] bg-[#080808] px-4 transition-colors focus-within:border-[#c15bd7]/70 sm:h-[68px] sm:px-5">
                   <Mail size={20} className="shrink-0 text-[#c15bd7]" />
-                  <input value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required className="h-full min-w-0 flex-1 bg-transparent text-base tracking-[.35em] text-white outline-none placeholder:text-[#625d59] sm:text-lg" placeholder="000000" />
+                  <input value={otpCode} onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required className="h-full min-w-0 flex-1 bg-transparent text-base tracking-[.35em] text-white outline-none placeholder:text-[#625d59] sm:text-lg" placeholder="000000" />
                 </span>
                 <span className="mt-2 block text-[11px] text-[#817a75]">Code sent to {otpEmail}. It expires in 10 minutes.</span>
               </label>
