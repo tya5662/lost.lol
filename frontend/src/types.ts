@@ -123,7 +123,6 @@ export interface User {
   linkBlur?: number;
   linkSpacing?: number;
   avatarSize?: number;
-  showAvatar?: boolean;
   avatarShape?: 'circle'|'rounded'|'square';
   avatarGlow?: boolean;
   showViews?: boolean;
