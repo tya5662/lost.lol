@@ -264,7 +264,7 @@ router.post('/verify-otp', async (req, res, next) => {
     return;
   }
   try {
-    const user = await User.findOne({ email }).select('+otpHash +otpExpiresAt +otpAttempts');
+    const user = await User.findOne({ email }).select('+otpHash +otpExpiresAt +otpAttempts +trustedIpHashes');
     if (!user || !user.otpHash || !user.otpExpiresAt || user.otpExpiresAt.getTime() < Date.now()) {
       res.status(400).json({ message: 'That code expired. Sign in or register again to get a new one.' });
       return;
