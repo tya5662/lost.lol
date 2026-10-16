@@ -142,12 +142,14 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const audio = audioRef.current;
     const video = backgroundVideoRef.current;
-    if (audio && profile?.audioUrl && profile?.audioAutoplay === true) {
+    if (audio && profile?.audioUrl) {
       audio.loop = true;
       audio.autoplay = true;
+      audio.preload = 'auto';
     }
     const attemptMediaPlayback = () => {
-      if (audio && profile?.audioUrl && profile?.audioAutoplay === true) void audio.play().catch(() => {});
+      // Try immediately, then retry on the first user gesture for browsers such as iOS Safari.
+      if (audio && profile?.audioUrl) void audio.play().catch(() => {});
       if (video && profile?.backgroundType === 'video') {
         video.muted = false;
         void video.play().catch(() => { video.muted = true; });
@@ -335,17 +337,7 @@ const ProfilePage: React.FC = () => {
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
             </div>
           </div>
-          {audioUrl && <div className="mx-auto mt-7 max-w-[560px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
-  <div className="p-3.5 sm:p-4">
-    <div className="flex items-center gap-3">
-      <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-md bg-[#202020]">{audioCoverUrl?<img src={audioCoverUrl} alt="" className="h-full w-full object-cover"/>:<Disc3 size={25} className="text-zinc-500"/>}</div>
-      <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{audioTitle || 'Profile music'}</p><p className="mt-0.5 truncate text-[11px] text-zinc-500">@{profileUsername}</p></div>
-      <AudioLines size={18} className="shrink-0 text-[#c15bd7]"/>
-    </div>
-    <audio ref={audioRef} preload="metadata" autoPlay={profile.audioAutoplay === true} loop controls src={audioUrl} className="mt-4 h-10 w-full accent-red-500">Your browser does not support audio playback.</audio>
-    <p className="mt-2 text-[10px] text-zinc-600">Use the player controls to play, pause, seek, and adjust volume.</p>
-  </div>
-</div>}
+          {audioUrl && <audio ref={audioRef} preload="auto" autoPlay loop src={audioUrl} className="hidden" aria-hidden="true" />}
           {(profile.showViews === true || profile.showStatus === true) && <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
             {profile.showViews === true && <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Eye size={13} /> Views</div>
