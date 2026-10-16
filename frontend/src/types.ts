@@ -129,6 +129,10 @@ export interface User {
   showViews?: boolean;
   showStatus?: boolean;
   showBranding?: boolean;
+  showAvatar?: boolean;
+  showBadges?: boolean;
+  showAliases?: boolean;
+  showRoleLabel?: boolean;
   accentGlow?: number;
   pageEnterEffect?: 'fade'|'rise'|'zoom'|'blur'|'none';
   clickEffect?: 'ripple'|'flash'|'scale'|'none';
