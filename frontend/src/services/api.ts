@@ -5,7 +5,7 @@ export const BURL = backendUrl;
 export const AUTH = `${backendUrl}/auth/me`;
 export const API_URL = `${backendUrl}/api`;
 
-interface AuthResponse { token?: string; otpRequired?: boolean; email?: string; user: { id:number; username:string; name:string; email:string; }; }
+interface AuthResponse { token?: string; otpRequired?: boolean; email?: string; message?: string; sessionDays?: number; user?: { id:number; username:string; name:string; email:string; }; }
 
 const requestJson = async (path:string, init?:RequestInit):Promise<any>=>{
   try{const response=await fetch(`${backendUrl}${path}`,init);const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof data?.message==='string'?data.message:`Request failed (${response.status})`);return data;}
@@ -17,6 +17,7 @@ const submitAuth=async(path:'register'|'login',details:Record<string,string>):Pr
 export const apiService={
  registerAccount:(details:{email:string;username:string;password:string;turnstileToken:string})=>submitAuth('register',details),
  loginAccount:(details:{identifier:string;password:string;turnstileToken:string})=>submitAuth('login',details),
+ verifyOtp:async(details:{email:string;code:string}):Promise<AuthResponse>=>{const data=await requestJson('/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;},
  logout:()=>{localStorage.removeItem('token');},
  getUser:async(username:string):Promise<User>=>requestJson(`/api/users/${encodeURIComponent(username)}`),
  getSiteSettings:async():Promise<SiteSettings>=>requestJson('/api/site-settings'),
