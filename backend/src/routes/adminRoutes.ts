@@ -35,6 +35,34 @@ router.get('/users', async (_req, res, next) => {
   }
 });
 
+router.delete('/users/:id/account', async (req, res, next) => {
+  try {
+    const actor = (req as any).actor;
+    if (!actor.rootOwner) {
+      res.status(403).json({ message: 'Only the primary owner can permanently delete accounts.' });
+      return;
+    }
+    const targetId = Number(req.params.id);
+    if (!Number.isSafeInteger(targetId)) {
+      res.status(400).json({ message: 'Invalid user ID.' });
+      return;
+    }
+    const target = await User.findOne({ id: targetId });
+    if (!target) {
+      res.status(404).json({ message: 'User not found.' });
+      return;
+    }
+    if (target.rootOwner || target.id === actor.id) {
+      res.status(403).json({ message: 'The primary owner account cannot be deleted.' });
+      return;
+    }
+    await User.deleteOne({ id: targetId });
+    res.json({ success: true, id: targetId, username: target.username });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.patch('/users/:id', async (req, res, next) => {
   try {
     const actor = (req as any).actor;
