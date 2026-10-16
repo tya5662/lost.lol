@@ -46,6 +46,10 @@ const defaults = {
   featuresTitle:'Everything important is one tap away.', featuresDescription:'Powerful controls without making you learn code.',
   featureCards:[],
   customCss:'',
+  maintenanceMode:false,
+  maintenanceTitle:'We’ll be back soon',
+  maintenanceMessage:'suffer.info is temporarily unavailable while we make improvements.',
+  maintenanceEta:'',
 };
 
 router.get('/', async (_req, res, next) => {
