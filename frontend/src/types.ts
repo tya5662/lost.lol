@@ -83,6 +83,10 @@ export interface User {
   cardTiltIntensity?: number;
   cardTiltPerspective?: number;
   usernameEffect?: string;
+  showUsernameTag?: boolean;
+  usernameTagColor?: string;
+  usernameTagFont?: string;
+  usernameTagStyle?: string;
   backgroundEffect?: string;
   syncToBackground?: boolean;
   cursorEffect?: string;
@@ -119,6 +123,7 @@ export interface User {
   linkBlur?: number;
   linkSpacing?: number;
   avatarSize?: number;
+  showAvatar?: boolean;
   avatarShape?: 'circle'|'rounded'|'square';
   avatarGlow?: boolean;
   showViews?: boolean;
