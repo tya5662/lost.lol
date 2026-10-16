@@ -25,6 +25,8 @@ const userSchema = new mongoose.Schema({
   otpHash: { type: String, select: false },
   otpExpiresAt: { type: Date, select: false },
   otpAttempts: { type: Number, default: 0, select: false },
+  // HMAC hashes of previously verified client IPs; raw IP addresses are not stored.
+  trustedIpHashes: { type: [String], default: [], select: false },
 
   // Platform/team permissions
   role: {
