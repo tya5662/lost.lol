@@ -231,7 +231,7 @@ const ProfilePage: React.FC = () => {
   }, [username]);
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center bg-[#050505] text-sm text-[#a39b9c]">
-      <span className="mr-3 h-2 w-2 animate-pulse rounded-full bg-[#ef3340]" />Loading profile
+      <span aria-label="Loading" role="status" className="h-2 w-2 animate-pulse rounded-full bg-[#ef3340]" />
     </div>
   );
   if (!profile) return (
