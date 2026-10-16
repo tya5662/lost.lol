@@ -27,6 +27,10 @@ interface UserProfile {
   discordAvatar?: string;
   discordPresenceStatus?: 'online'|'idle'|'dnd'|'offline';
   nameTooltip?: string;
+  showAvatar?: boolean;
+  showBadges?: boolean;
+  showAliases?: boolean;
+  showRoleLabel?: boolean;
   avatarDecoration?: string;
   badges?: string[];
   aliases?: string[];
