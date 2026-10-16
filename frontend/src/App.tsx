@@ -7,6 +7,7 @@ import {DashboardHome} from './components/pages/dashboard/DashboardHome';
 import {DashboardSection} from './components/pages/dashboard/DashboardSection';
 import {SiteEditor} from './components/pages/dashboard/SiteEditor';
 import {AdminPanel} from './components/pages/admin/AdminPanel';
+import {LegalPage} from './components/pages/legal/LegalPages';
 import {AUTH,apiService} from './services/api';
 import {User} from './types';
 import {Analytics} from '@vercel/analytics/react';
@@ -35,7 +36,7 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
 const PublicSiteGate:React.FC<{children:React.ReactNode}>=({children})=>{const [settings,setSettings]=useState<any>(null);useEffect(()=>{apiService.getSiteSettings().then(setSettings).catch(()=>setSettings({maintenanceMode:false}));},[]);if(!settings)return <div className="min-h-screen bg-[#070707]"/>;if(settings.maintenanceMode)return <MaintenanceScreen settings={settings}/>;return <>{children}</>;};
 
 const App:React.FC=()=> <><Analytics/><Router><Routes>
- <Route path="/" element={<PublicSiteGate><HomePage/></PublicSiteGate>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/>
+ <Route path="/" element={<PublicSiteGate><HomePage/></PublicSiteGate>}/><Route path="/terms" element={<LegalPage/>}/><Route path="/policy" element={<LegalPage/>}/><Route path="/refunds" element={<LegalPage/>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/>
  <Route path="/dashboard/*" element={<DashboardRouter/>}/><Route path="/admin" element={<AdminPanel/>}/><Route path="/:username" element={<PublicSiteGate><ProfilePage/></PublicSiteGate>}/>
 </Routes></Router></>;
 export default App;
