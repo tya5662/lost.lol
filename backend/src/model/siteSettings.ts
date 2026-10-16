@@ -59,6 +59,10 @@ const siteSettingsSchema = new mongoose.Schema({
   featuresDescription: { type: String, default: 'Powerful controls without making you learn code.' },
   featureCards: { type: [mongoose.Schema.Types.Mixed], default: [] },
   customCss: { type: String, default: '', maxlength: 12000 },
+  maintenanceMode: { type: Boolean, default: false },
+  maintenanceTitle: { type: String, default: 'We’ll be back soon', maxlength: 100 },
+  maintenanceMessage: { type: String, default: 'suffer.info is temporarily unavailable while we make improvements.', maxlength: 500 },
+  maintenanceEta: { type: String, default: '', maxlength: 100 },
   updatedAt: { type: Date, default: Date.now },
 });
 
