@@ -7,7 +7,7 @@ import {DashboardHome} from './components/pages/dashboard/DashboardHome';
 import {DashboardSection} from './components/pages/dashboard/DashboardSection';
 import {SiteEditor} from './components/pages/dashboard/SiteEditor';
 import {AdminPanel} from './components/pages/admin/AdminPanel';
-import {AUTH} from './services/api';
+import {AUTH,apiService} from './services/api';
 import {User} from './types';
 import {Analytics} from '@vercel/analytics/react';
 
@@ -28,8 +28,10 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
  return <DashboardSection user={user} section={section}/>;
 };
 
+const PublicSiteGate:React.FC<{children:React.ReactNode}>=({children})=>{const [settings,setSettings]=useState<any>(null);useEffect(()=>{apiService.getSiteSettings().then(setSettings).catch(()=>setSettings({maintenanceMode:false}));},[]);if(!settings)return <div className="min-h-screen bg-[#070707]"/>;if(settings.maintenanceMode)return <main className="grid min-h-screen place-items-center bg-[#070707] px-6 text-white"><section className="w-full max-w-xl rounded-3xl border border-white/10 bg-white/[.03] p-8 text-center shadow-2xl"><div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-red-500/20 bg-red-500/10 text-2xl">✦</div><p className="mt-5 text-xs font-bold uppercase tracking-[.25em] text-red-300">suffer.info</p><h1 className="mt-3 text-3xl font-black">{settings.maintenanceTitle||'We’ll be back soon'}</h1><p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-zinc-400">{settings.maintenanceMessage||'We are making improvements. Please check back soon.'}</p>{settings.maintenanceEta&&<p className="mt-4 text-sm text-red-300">{settings.maintenanceEta}</p>}<p className="mt-8 text-xs text-zinc-600">The admin panel remains available to authorized staff.</p></section></main>;return <>{children}</>;};
+
 const App:React.FC=()=> <><Analytics/><Router><Routes>
- <Route path="/" element={<HomePage/>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/>
- <Route path="/dashboard/*" element={<DashboardRouter/>}/><Route path="/admin" element={<AdminPanel/>}/><Route path="/:username" element={<ProfilePage/>}/>
+ <Route path="/" element={<PublicSiteGate><HomePage/></PublicSiteGate>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/>
+ <Route path="/dashboard/*" element={<DashboardRouter/>}/><Route path="/admin" element={<AdminPanel/>}/><Route path="/:username" element={<PublicSiteGate><ProfilePage/></PublicSiteGate>}/>
 </Routes></Router></>;
 export default App;
