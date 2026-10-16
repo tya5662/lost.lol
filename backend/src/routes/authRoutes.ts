@@ -134,8 +134,8 @@ router.post('/register', async (req, res, next) => {
     res.status(400).json({ message: 'Enter a valid email address.' });
     return;
   }
-  if (!/^[a-z0-9._]{3}$/.test(username)) {
-    res.status(400).json({ message: 'Username must be exactly 3 characters using lowercase letters, numbers, periods, or underscores.' });
+  if (!/^[a-z0-9._]{1,3}$/.test(username)) {
+    res.status(400).json({ message: 'Username must be 1-3 characters using lowercase letters, numbers, periods, or underscores.' });
     return;
   }
   if (reservedUsernames.has(username)) {
@@ -216,7 +216,7 @@ router.post('/login', async (req, res, next) => {
   }
 
   try {
-    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts');
+    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts +trustedIpHashes');
     if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
       res.status(401).json({ message: 'Incorrect email/username or password.' });
       return;
