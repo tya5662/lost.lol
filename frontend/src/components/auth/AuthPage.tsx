@@ -137,9 +137,9 @@ export const AuthPage: React.FC = () => {
                   <span className="mb-2.5 block text-sm font-medium text-[#e5dfdc]">Username</span>
                   <span className="flex h-[62px] items-center gap-4 rounded-[18px] border border-white/[0.1] bg-[#080808] px-4 transition-colors focus-within:border-[#c15bd7]/70 sm:h-[68px] sm:px-5">
                     <AtSign size={20} className="shrink-0 text-[#c15bd7]" />
-                    <input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase().replace(/\s/g, ''))} minLength={3} maxLength={3} pattern="[a-z0-9._]{3}" autoComplete="username" required className="h-full min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-[#625d59] sm:text-lg" placeholder="yourname" />
+                    <input value={username} onChange={(event) => setUsername(event.target.value.toLowerCase().replace(/\s/g, ''))} minLength={1} maxLength={3} pattern="[a-z0-9._]{1,3}" autoComplete="username" required className="h-full min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-[#625d59] sm:text-lg" placeholder="yourname" />
                   </span>
-                  <span className="mt-2 block text-[11px] text-[#817a75]">Username must be exactly 3 characters. Your page will be at suffer.info/{username || 'abc'}</span>
+                  <span className="mt-2 block text-[11px] text-[#817a75]">Username can be up to 3 characters. Your page will be at suffer.info/{username || 'abc'}</span>
                 </label>
                 <label className="block">
                   <span className="mb-2.5 block text-sm font-medium text-[#e5dfdc]">Email</span>
