@@ -31,6 +31,7 @@ export const apiService={
  deleteLink:async(id:number|string)=>{await requestJson(`/api/links/${id}`,{method:'DELETE',headers:authHeaders()})},
  reorderLinks:async(userId:number|string,linkIds:(number|string)[])=>{await requestJson(`/api/links/reorder/${userId}`,{method:'PUT',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({linkIds})})},
  getAdminUsers:async()=>requestJson('/admin/users',{headers:authHeaders()}),
+  deleteAdminAccount:async(id:number)=>requestJson(`/admin/users/${id}/account`,{method:'DELETE',headers:authHeaders()}),
  getAdminBadgeDefinitions:async()=>requestJson('/admin/badge-definitions',{headers:authHeaders()}),
  saveAdminBadgeDefinition:async(body:Record<string,unknown>)=>requestJson('/admin/badge-definitions',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
  deleteAdminBadgeDefinition:async(name:string)=>requestJson(`/admin/badge-definitions/${encodeURIComponent(name)}`,{method:'DELETE',headers:authHeaders()}),
