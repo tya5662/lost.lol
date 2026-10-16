@@ -330,15 +330,14 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
           {audioUrl && <div className="mx-auto mt-7 max-w-[560px] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212] shadow-[0_12px_35px_rgba(0,0,0,.22)]">
-  <audio ref={audioRef} preload="auto" autoPlay loop src={audioUrl}>Your browser does not support audio playback.</audio>
   <div className="p-3.5 sm:p-4">
     <div className="flex items-center gap-3">
       <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-md bg-[#202020]">{audioCoverUrl?<img src={audioCoverUrl} alt="" className="h-full w-full object-cover"/>:<Disc3 size={25} className="text-zinc-500"/>}</div>
       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-white">{audioTitle || 'Profile music'}</p><p className="mt-0.5 truncate text-[11px] text-zinc-500">@{profileUsername}</p></div>
-      
+      <AudioLines size={18} className="shrink-0 text-[#ef3340]"/>
     </div>
-    <div className="mt-4 h-1 rounded-full bg-[#3a3a3a]"><div className="h-full w-[28%] rounded-full bg-white"/></div>
-    <div className="mt-1.5 flex justify-between text-[9px] text-zinc-500"><span>0:00</span><span>—</span></div>
+    <audio ref={audioRef} preload="metadata" autoPlay loop controls src={audioUrl} className="mt-4 h-10 w-full accent-red-500">Your browser does not support audio playback.</audio>
+    <p className="mt-2 text-[10px] text-zinc-600">Use the player controls to play, pause, seek, and adjust volume.</p>
   </div>
 </div>}
           <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
