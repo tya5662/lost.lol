@@ -33,7 +33,9 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
  return <DashboardSection user={user} section={section}/>;
 };
 
-const PublicSiteGate:React.FC<{children:React.ReactNode}>=({children})=>{const [settings,setSettings]=useState<any>(null);useEffect(()=>{apiService.getSiteSettings().then(setSettings).catch(()=>setSettings({maintenanceMode:false}));},[]);if(!settings)return <div className="min-h-screen bg-[#070707]"/>;if(settings.maintenanceMode)return <MaintenanceScreen settings={settings}/>;return <>{children}</>;};
+// Never hold the public page hostage while the backend wakes up. Render it immediately,
+// then apply maintenance mode if the settings request reports that maintenance is enabled.
+const PublicSiteGate:React.FC<{children:React.ReactNode}>=({children})=>{const [settings,setSettings]=useState<any>(null);useEffect(()=>{let active=true;apiService.getSiteSettings().then(value=>{if(active)setSettings(value)}).catch(()=>{if(active)setSettings({maintenanceMode:false})});return()=>{active=false}},[]);if(settings?.maintenanceMode)return <MaintenanceScreen settings={settings}/>;return <>{children}</>;};
 
 const App:React.FC=()=> <><Analytics/><Router><Routes>
  <Route path="/" element={<PublicSiteGate><HomePage/></PublicSiteGate>}/><Route path="/terms" element={<LegalPage/>}/><Route path="/policy" element={<LegalPage/>}/><Route path="/refunds" element={<LegalPage/>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/>
