@@ -63,6 +63,13 @@ const siteSettingsSchema = new mongoose.Schema({
   maintenanceTitle: { type: String, default: 'We’ll be back soon', maxlength: 100 },
   maintenanceMessage: { type: String, default: 'suffer.info is temporarily unavailable while we make improvements.', maxlength: 500 },
   maintenanceEta: { type: String, default: '', maxlength: 100 },
+  rottingCardImage: { type: String, default: '', maxlength: 1500000 },
+  rottingCardAnimation: { type: String, enum: ['float','pulse','slow-zoom','none'], default: 'float' },
+  rottingCardAnimationSpeed: { type: Number, default: 5, min: 1, max: 20 },
+  rottingCredit: { type: String, default: 'made by rotting', maxlength: 80 },
+  rottingCreditGlow: { type: Boolean, default: true },
+  rottingMonochrome: { type: Boolean, default: true },
+  rottingCardRadius: { type: Number, default: 22, min: 0, max: 48 },
   updatedAt: { type: Date, default: Date.now },
 });
 
