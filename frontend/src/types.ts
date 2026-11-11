@@ -37,6 +37,13 @@ export interface SiteSettings {
   maintenanceTitle?: string;
   maintenanceMessage?: string;
   maintenanceEta?: string;
+  rottingCardImage?: string;
+  rottingCardAnimation?: 'float'|'pulse'|'slow-zoom'|'none';
+  rottingCardAnimationSpeed?: number;
+  rottingCredit?: string;
+  rottingCreditGlow?: boolean;
+  rottingMonochrome?: boolean;
+  rottingCardRadius?: number;
 }
 
 export interface User {
