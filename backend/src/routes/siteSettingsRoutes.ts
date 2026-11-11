@@ -50,6 +50,8 @@ const defaults = {
   maintenanceTitle:'We’ll be back soon',
   maintenanceMessage:'suffer.info is temporarily unavailable while we make improvements.',
   maintenanceEta:'',
+  rottingCardImage:'', rottingCardAnimation:'float', rottingCardAnimationSpeed:5,
+  rottingCredit:'made by rotting', rottingCreditGlow:true, rottingMonochrome:true, rottingCardRadius:22,
 };
 
 router.get('/', async (_req, res, next) => {
