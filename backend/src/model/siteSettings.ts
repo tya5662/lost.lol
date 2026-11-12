@@ -20,6 +20,7 @@ const siteSettingsSchema = new mongoose.Schema({
   ghostMode: { type: Boolean, default: true },
   featureSection: { type: Boolean, default: true },
   mediaLayers: { type: [mongoose.Schema.Types.Mixed], default: [] },
+  canvasElements: { type: [mongoose.Schema.Types.Mixed], default: [] },
   siteAnimations: { type: [mongoose.Schema.Types.Mixed], default: [] },
   announcement: { type: String, default: '' },
   showcaseLabel: { type: String, default: 'Showcase' },
