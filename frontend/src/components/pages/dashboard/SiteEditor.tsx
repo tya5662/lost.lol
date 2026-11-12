@@ -51,7 +51,7 @@ export const SiteEditor:React.FC<{user:User}>=({user})=>{
     <div ref={canvasRef} className="relative min-h-[620px] overflow-hidden p-5 sm:p-8" style={{background:'radial-gradient(circle at 50% 0%,'+settings.accentColor+'35,transparent 34%),'+settings.backgroundColor}}>
       <div className="mx-auto flex min-h-[560px] max-w-md flex-col items-center justify-center text-center">
        <div className="mb-5"><div className="text-3xl font-semibold tracking-[-.055em] text-white">{settings.brandName}<span className="text-white/55">{settings.brandTld}</span></div><p className="mt-2 text-xs tracking-[.2em] text-white/70">{settings.rottingCredit||'made by rotting'}</p></div>
-       <div className="w-full overflow-hidden border border-white/20 bg-white/[.08] p-2 shadow-2xl" style={{width:'min(100%,340px)',borderRadius:settings.rottingCardRadius||22,animation:settings.rottingCardAnimation==='float'?'previewFloat 5s ease-in-out infinite':'none'}}>
+       <div className="w-full overflow-hidden border border-white/20 bg-white/[.08] p-2 shadow-2xl" style={{width:'min(100%,340px)',borderRadius:settings.rottingCardRadius||22}}>
         <div className="grid min-h-[260px] place-items-center overflow-hidden bg-[#090909]" style={{borderRadius:Math.max(0,(settings.rottingCardRadius||22)-7)}}>
          {settings.rottingCardImage?<img src={settings.rottingCardImage} alt="" className="h-full max-h-[300px] min-h-[230px] w-full object-cover" style={{filter:settings.rottingMonochrome===false?'none':'grayscale(1)'}}/>:<span className="text-2xl font-semibold tracking-[.2em] text-white/70">ROTTING</span>}
         </div>
@@ -63,7 +63,7 @@ export const SiteEditor:React.FC<{user:User}>=({user})=>{
        </div>
        <p className="mt-5 text-xs text-white/45">Already have an account? <span className="font-semibold text-white underline">Sign in</span></p>
       </div>
-      {(settings.canvasElements||[]).map(el=><div key={el.id} draggable onDragEnd={e=>moveCanvasElement(el.id,e)} onClick={()=>setSelectedElement(el.id)} className={'absolute cursor-move select-none '+(selectedElement===el.id?'outline outline-2 outline-dashed outline-white/80':'')} style={{left:el.x+'%',top:el.y+'%',width:el.width+'%',minHeight:el.height+'px',transform:'translate(-50%,-50%)',fontSize:el.fontSize,color:el.color,zIndex:20}}>{el.type==='text'?<div className="break-words font-semibold drop-shadow-lg">{el.content}</div>:<img src={el.url} alt="" className="h-full w-full rounded-lg object-contain pointer-events-none"/>}</div>)}
+      {(settings.canvasElements||[]).map(el=><div key={el.id} draggable onDragEnd={e=>moveCanvasElement(el.id,e)} onClick={()=>setSelectedElement(el.id)} className={'absolute cursor-move select-none '+(selectedElement===el.id?'outline outline-2 outline-dashed outline-white/80':'')} style={{left:el.x+'%',top:el.y+'%',width:el.width+'%',height:el.height+'px',transform:'translate(-50%,-50%)',fontSize:el.fontSize,color:el.color,zIndex:20}}>{el.type==='text'?<div className="break-words font-semibold drop-shadow-lg">{el.content}</div>:<img src={el.url} alt="" className="h-full w-full rounded-lg object-contain pointer-events-none"/>}</div>)}
     </div>
    </section>
    <div className="space-y-4">
