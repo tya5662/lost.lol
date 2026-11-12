@@ -24,6 +24,7 @@ const defaults = {
   ghostMode: true,
   featureSection: true,
   mediaLayers: [],
+  canvasElements: [],
   siteAnimations: [],
   announcement: '',
   showcaseLabel: 'Showcase',
