@@ -4,9 +4,11 @@ export type UserRole = 'owner' | 'co-owner' | 'staff' | 'member';
 
 export interface SiteMediaLayer { id:string; type:'image'|'video'; url:string; x:number; y:number; width:number; height:number; opacity:number; blur:number; rotation:number; zIndex:number; objectFit:'cover'|'contain'; autoplay:boolean; loop:boolean; muted:boolean; clickableUrl?:string; }
 
+export interface SiteCanvasElement { id:string; type:'text'|'image'; content:string; url?:string; x:number; y:number; width:number; height:number; fontSize:number; color:string; }
+
 export interface SiteSettings {
   brandName:string; brandTld:string; heroBadge:string; heroTitle:string; heroSubtitle:string; primaryButton:string; secondaryButton:string;
-  accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number;
+  accentColor:string; secondaryColor:string; backgroundColor:string; panelColor:string; gridOpacity:number; glowOpacity:number; canvasElements?:SiteCanvasElement[];
   particles:boolean; grid:boolean; ghostMode:boolean; featureSection:boolean; mediaLayers:SiteMediaLayer[]; siteAnimations:{id:string;target:'site'|'media';mediaId?:string;name:string;duration:number;delay:number;intensity:number;enabled:boolean}[]; announcement:string; showcaseLabel:string; featuresLabel:string; signInLabel:string; createLabel:string; primaryButtonUrl:string; secondaryButtonUrl:string; heroAlignment:'left'|'center'|'right'; seoTitle:string; seoDescription:string; seoImage:string; footerText:string; effectsIntensity:number;
   navStyle?: 'glass'|'solid'|'minimal'|'floating';
   heroSize?: 'compact'|'standard'|'large'|'fullscreen';
