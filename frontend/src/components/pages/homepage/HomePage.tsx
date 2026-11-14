@@ -19,5 +19,6 @@ export const HomePage:React.FC=()=>{
  <button type="button" onClick={()=>navigate('/login')} className="mt-5 rounded-xl px-5 py-3 text-sm font-medium text-white/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50">Already have an account? <span className="font-semibold text-white underline underline-offset-4">Sign in</span></button>
  </div>
  {(site.canvasElements||[]).map(el=><div key={el.id} className="pointer-events-none absolute" style={{left:el.x+'%',top:el.y+'%',width:el.width+'%',minHeight:el.height+'px',transform:'translate(-50%,-50%)',fontSize:el.fontSize,color:el.color,zIndex:5}}>{el.type==='text'?<div className="break-words font-semibold drop-shadow-lg">{el.content}</div>:el.url?<img src={el.url} alt="" className="h-auto w-full rounded-lg object-contain"/>:null}</div>)}
+ <footer className="relative mx-auto mt-12 flex max-w-xl flex-wrap justify-center gap-x-6 gap-y-3 border-t border-white/10 pt-6 text-xs text-white/45"><a className="transition-colors duration-200 hover:text-white" href="/terms">Terms of Service</a><a className="transition-colors duration-200 hover:text-white" href="/policy">Privacy Policy</a><a className="transition-colors duration-200 hover:text-white" href="/refunds">No Refunds Policy</a></footer>
  </main>;
 };
