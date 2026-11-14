@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, AtSign, LockKeyhole, Mail } from 'lucide-react';
-import { apiService } from '@/services/api';
+import { AUTH, apiService } from '@/services/api';
 
 export const AuthPage: React.FC = () => {
   const location = useLocation();
@@ -24,6 +24,23 @@ export const AuthPage: React.FC = () => {
   const turnstileWidgetId = useRef<string | null>(null);
   const isEmailTaken = error.toLowerCase().includes('email') && error.toLowerCase().includes('account');
   const TURNSTILE_SITE_KEY = '0x4AAAAAAFRAyeyXHwm1-O5M';
+
+  // Restore a valid session automatically for returning visitors.
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    let active = true;
+    const restoreSession = isAdminLogin
+      ? apiService.getAdminMe()
+      : fetch(AUTH, { headers: { Authorization: `Bearer ${token}` } }).then(async response => {
+          if (!response.ok) throw new Error('Session expired');
+          return response.json();
+        });
+    restoreSession
+      .then(() => { if (active) navigate(destination, { replace: true }); })
+      .catch(() => { if (active) localStorage.removeItem('token'); });
+    return () => { active = false; };
+  }, [destination, isAdminLogin, navigate]);
 
   useEffect(() => {
     let cancelled = false;

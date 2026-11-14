@@ -203,10 +203,6 @@ router.post('/login', async (req, res, next) => {
     res.status(503).json({ message: 'Sign-in is temporarily unavailable. CAPTCHA is not configured yet.' });
     return;
   }
-  if (!(await verifyTurnstile(turnstileToken, req.ip))) {
-    res.status(400).json({ message: 'Please complete the CAPTCHA and try again.' });
-    return;
-  }
   if (!identifier || !password || password.length > 128) {
     res.status(400).json({ message: 'Enter your email or username and password.' });
     return;
@@ -217,7 +213,14 @@ router.post('/login', async (req, res, next) => {
   }
 
   try {
-    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts +trustedIpHashes +trustedDeviceHashes');
+    const [turnstile, user] = await Promise.all([
+      verifyTurnstile(turnstileToken, req.ip),
+      User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts +trustedIpHashes +trustedDeviceHashes'),
+    ]);
+    if (!turnstile.ok) {
+      res.status(400).json({ message: `CAPTCHA verification failed${turnstile.codes.length ? ` (${turnstile.codes.join(', ')})` : ''}. Please complete it again.` });
+      return;
+    }
     if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
       res.status(401).json({ message: 'Incorrect email/username or password.' });
       return;
