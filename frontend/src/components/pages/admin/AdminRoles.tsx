@@ -25,7 +25,7 @@ export const AdminRoles:React.FC=()=>{
  const [editing,setEditing]=useState<string|null>(null);
  const [form,setForm]=useState({name:'',key:'',level:10,color:'#a1a1aa',description:'',permissions:['view_dashboard'] as string[]});
  const [search,setSearch]=useState('');
- const load=async()=>{setLoading(true);setError('');try{const me=await apiService.getAdminMe();if(!me.rootOwner){setAllowed(false);setError('Only the primary owner can manage custom administrator ranks.');return;}setAllowed(true);const [r,u]=await Promise.all([apiService.getAdminRoles(),apiService.getAdminUsers()]);setRoles(r);setUsers(u);}catch(e){setError(e instanceof Error?e.message:'Unable to load administrator settings.')}finally{setLoading(false)}};
+ const load=async()=>{setLoading(true);setError('');try{const me=await apiService.getAdminMe();if(!me.rootOwner&&!(me.permissions||[]).includes('manage_admins')){setAllowed(false);setError('You do not have permission to manage administrators.');return;}setAllowed(true);const [r,u]=await Promise.all([apiService.getAdminRoles(),apiService.getAdminUsers()]);setRoles(r);setUsers(u);}catch(e){setError(e instanceof Error?e.message:'Unable to load administrator settings.')}finally{setLoading(false)}};
  useEffect(()=>{void load()},[]);
  const reset=()=>{setEditing(null);setForm({name:'',key:'',level:10,color:'#a1a1aa',description:'',permissions:['view_dashboard']})};
  const edit=(r:Role)=>{setEditing(r._id);setForm({name:r.name,key:r.key,level:r.level,color:r.color,description:r.description||'',permissions:r.permissions||[]});window.scrollTo({top:0,behavior:'smooth'})};
