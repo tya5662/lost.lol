@@ -114,6 +114,7 @@ export interface User {
   audioTitle?: string;
   audioAutoplay?: boolean;
   audioCoverUrl?: string;
+  audioTracks?: string[];
   audioMedia?: string;
   layout?: string;
   metadataTitle?: string;
