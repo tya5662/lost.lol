@@ -13,7 +13,7 @@ import { mongoDB } from './config/database';
 const app=express();
 // Liveness endpoint intentionally runs before the database middleware so the platform can
 // distinguish a running process from application readiness.
-app.get('/health',(_req,res)=>res.status(200).json({status:'ok'}));
+app.get('/health',(_req,res)=>{res.status(200).json({status:'ok'});});
 // Render sits behind a proxy; trust one proxy hop so req.ip reflects the client IP for trusted-device checks.
 app.set('trust proxy', 1);
 if(!process.env.JWT_SECRET)console.error('JWT_SECRET is not configured; sign-up and sign-in requests will be unavailable.');
@@ -23,7 +23,7 @@ app.use(cors({origin:(origin,callback)=>callback(null,isAllowedFrontendOrigin(or
 app.use(express.json());
 app.use((_req,_res,next)=>{void mongoDB().then(()=>next()).catch(next)});
 // Readiness is checked after the database middleware succeeds.
-app.get('/ready',(_req,res)=>res.status(200).json({status:'ready'}));
+app.get('/ready',(_req,res)=>{res.status(200).json({status:'ready'});});
 app.use('/uploads',express.static(path.join(__dirname,'../uploads')));
 app.use('/auth',authRoutes);
 app.use('/admin',adminRoutes);
