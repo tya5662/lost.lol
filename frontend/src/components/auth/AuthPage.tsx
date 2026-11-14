@@ -90,7 +90,7 @@ export const AuthPage: React.FC = () => {
         setError(result.message || 'Check your email for a 6-digit verification code.');
         return;
       }
-      navigate('/dashboard');
+      navigate(destination);
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Unable to authenticate. Please try again.');
       if (!otpStep) {
