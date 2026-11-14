@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { isAuthenticated } from '../middleware/auth';
 import { User } from '../model/profiles';
 import { Badge } from '../model/badges';
+import { Link } from '../model/link';
+import { ProfileComment } from '../model/profileComment';
 
 const router = Router();
 const privilegedRoles = new Set(['owner', 'co-owner', 'staff']);
@@ -277,8 +279,14 @@ router.post('/users/:id/ban', async(req,res,next)=>{
     const actor=(req as any).actor; const target=await User.findOne({id:Number(req.params.id)});
     if(!target){res.status(404).json({message:'User not found.'});return;}
     const denial=canModerateTarget(actor,target,'ban'); if(denial){res.status(403).json({message:denial});return;}
+    const releasedUsername=target.username;
     target.banned=true; target.banReason=typeof req.body?.reason==='string'?req.body.reason.trim().slice(0,500):''; target.bannedAt=new Date(); target.bannedBy=actor.id;
-    await target.save(); res.json({id:target.id,username:target.username,banned:true,banReason:target.banReason});
+    (target as any).bannedUsername=releasedUsername;
+    (target as any).username=undefined;
+    target.aliases=[];
+    target.badges=[];
+    await Promise.all([Link.deleteMany({userId:target._id}),ProfileComment.deleteMany({profileUserId:target._id})]);
+    await target.save(); res.json({id:target.id,username:releasedUsername,banned:true,usernameReleased:true,banReason:target.banReason});
   }catch(error){next(error);}
 });
 
@@ -287,8 +295,11 @@ router.delete('/users/:id/ban', async(req,res,next)=>{
     const actor=(req as any).actor; const target=await User.findOne({id:Number(req.params.id)});
     if(!target){res.status(404).json({message:'User not found.'});return;}
     const denial=canModerateTarget(actor,target,'unban'); if(denial){res.status(403).json({message:denial});return;}
-    target.banned=false; target.banReason=''; target.bannedAt=undefined; target.bannedBy=undefined;
-    await target.save(); res.json({id:target.id,username:target.username,banned:false});
+    const priorUsername=(target as any).bannedUsername as string|undefined;
+    let restoredUsername='';
+    if(priorUsername){const conflict=await User.findOne({$or:[{username:priorUsername},{aliases:priorUsername}],_id:{$ne:target._id}}).select('_id');if(!conflict){target.username=priorUsername;restoredUsername=priorUsername;}}
+    target.banned=false; target.banReason=''; target.bannedAt=undefined; target.bannedBy=undefined; (target as any).bannedUsername=undefined;
+    await target.save(); res.json({id:target.id,username:restoredUsername,banned:false,usernameNeedsAssignment:!restoredUsername});
   }catch(error){next(error);}
 });
 
