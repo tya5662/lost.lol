@@ -103,9 +103,6 @@ const ProfilePage: React.FC = () => {
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [profileComments, setProfileComments] = useState<any[]>([]);
-  const [commentDraft, setCommentDraft] = useState('');
-  const [commentBusy, setCommentBusy] = useState(false);
   const musicTracks = (profile?.audioTracks || []).filter((track:string) => typeof track === 'string' && track.trim()).map((url:string) => url.trim());
   const activeTrackUrl = musicTracks[trackIndex] || profile?.audioUrl || '';
   const changeTrack = (direction:number) => { if (!musicTracks.length) return; setTrackIndex((current) => (current + direction + musicTracks.length) % musicTracks.length); setCurrentTime(0); };
@@ -118,8 +115,6 @@ const ProfilePage: React.FC = () => {
   const backgroundCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cursorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
-  useEffect(() => { if (!username) return; apiService.getProfileComments(username).then((items:any) => setProfileComments(Array.isArray(items) ? items : [])).catch(() => setProfileComments([])); }, [username]);
-  const submitProfileComment = async () => { if (!username || !commentDraft.trim() || commentBusy) return; setCommentBusy(true); try { const item = await apiService.addProfileComment(username, commentDraft.trim()); setProfileComments((current) => [item, ...current]); setCommentDraft(''); } catch (error) { toast.error(error instanceof Error ? error.message : 'Sign in to leave a comment.'); } finally { setCommentBusy(false); } };
 
   useEffect(()=>{
     if(profile?.cursorEffect !== 'red') { setCursorTrail([]); return; }
@@ -397,13 +392,7 @@ const ProfilePage: React.FC = () => {
               </motion.a>
             ); })}
           </div>
-          {validLinks.length === 0 && <p className="mt-8 text-center text-xs text-[#746d6e]">No links added yet.</p>}
-          <section className="mx-auto mt-8 max-w-[420px] rounded-2xl border border-white/[.08] bg-white/[.025] p-4 text-left">
-            <div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-semibold">Comments</h2><span className="text-xs text-zinc-500">{profileComments.length}/100</span></div>
-            <div className="flex gap-2"><textarea value={commentDraft} onChange={e=>setCommentDraft(e.target.value.slice(0,500))} maxLength={500} rows={2} placeholder="Leave a comment..." className="min-w-0 flex-1 resize-none rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-white/30"/><button type="button" disabled={!commentDraft.trim()||commentBusy} onClick={submitProfileComment} className="self-end rounded-xl bg-white px-3 py-2 text-xs font-semibold text-black disabled:opacity-40">{commentBusy?'Posting…':'Post'}</button></div>
-            <div className="mt-3 space-y-3">{profileComments.map((comment:any)=><article key={comment._id} className="rounded-xl border border-white/[.06] bg-black/20 p-3"><div className="flex items-center justify-between gap-3"><a href={'/'+comment.authorUsername} className="truncate text-xs font-semibold text-white hover:underline">{comment.authorName||comment.authorUsername} <span className="font-normal text-zinc-500">@{comment.authorUsername}</span></a><time className="shrink-0 text-[10px] text-zinc-600">{comment.createdAt?new Date(comment.createdAt).toLocaleDateString():''}</time></div><p className="mt-2 whitespace-pre-wrap break-words text-sm text-zinc-300">{comment.body}</p></article>)}{!profileComments.length&&<p className="py-3 text-center text-xs text-zinc-600">No comments yet.</p>}</div>
-          </section>
-          {profile.showBranding === true && <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span><span>Made with <span style={{ color: accentColor }}>suffer.info</span></span></div>}
+          {profile.showBranding === true && <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span></div>}
         </div>
       </motion.section>
     </main>
