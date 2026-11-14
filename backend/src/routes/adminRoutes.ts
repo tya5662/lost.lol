@@ -81,7 +81,7 @@ router.delete('/roles/:id', async(req,res,next)=>{
 router.patch('/users/:id/admin-role', async(req,res,next)=>{
   try{
     const actor=(req as any).actor;
-    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can assign custom admin ranks.'});return;}
+    if(!actor.rootOwner && !(actor.adminPermissions||[]).includes('manage_admins')){res.status(403).json({message:'You do not have permission to manage administrators.'});return;}
     const target=await User.findOne({id:Number(req.params.id)});
     if(!target){res.status(404).json({message:'User not found.'});return;}
     if(target.rootOwner){res.status(400).json({message:'The primary owner rank cannot be changed.'});return;}
@@ -89,6 +89,7 @@ router.patch('/users/:id/admin-role', async(req,res,next)=>{
     if(!roleId){target.adminRoleId=null;target.role='member';await target.save();res.json({id:target.id,role:target.role,adminRoleId:null});return;}
     const role=await AdminRole.findById(roleId);
     if(!role){res.status(404).json({message:'Admin rank not found.'});return;}
+    if(!actor.rootOwner){const actorLevel=Number((actor as any).adminRoleLevel||0);if(Number(role.level)>=actorLevel||target.rootOwner){res.status(403).json({message:'You can only assign ranks below your own level.'});return;}}
     target.adminRoleId=role._id as any;target.role=role.key;
     await target.save();
     res.json({id:target.id,role:target.role,adminRoleId:String(role._id),roleName:role.name,permissions:role.permissions});
