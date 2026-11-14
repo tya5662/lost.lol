@@ -66,7 +66,7 @@ router.get('/', async (_req, res, next) => {
 router.patch('/', isAuthenticated, async (req, res, next) => {
   try {
     const actor = await User.findOne({ id: (req.user as any)?.id }).select('role rootOwner adminRoleId');
-    const assignedRole = actor?.adminRoleId ? await AdminRole.findById(actor.adminRoleId).lean() : null;
+    const assignedRole: any = actor?.adminRoleId ? await AdminRole.findById(actor.adminRoleId).lean() as any : null;
     const permissions = assignedRole?.permissions || [];
     if (!actor || (!actor.rootOwner && !permissions.includes('manage_site') && !permissions.includes('manage_homepage'))) {
       res.status(403).json({ message: 'You do not have permission to edit global site settings.' });
