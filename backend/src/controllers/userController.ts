@@ -404,7 +404,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
       { new: true }
     );
 
-    if (!user) {
+    if (!user || user.banned) {
        res.status(404).json({ message: 'User not found' });
        return
     }
