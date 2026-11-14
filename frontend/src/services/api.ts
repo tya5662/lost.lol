@@ -12,12 +12,18 @@ const requestJson = async (path:string, init?:RequestInit):Promise<any>=>{
   catch(error){if(error instanceof TypeError)throw new Error('Unable to reach the suffer.info server. Please try again in a moment.');throw error;}
 };
 const authHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('token')??''}`});
+const getTrustedDeviceId=():string=>{
+ let id=localStorage.getItem('suffer_device_id');
+ if(!id){id=typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(24))).map(v=>v.toString(16).padStart(2,'0')).join('');localStorage.setItem('suffer_device_id',id);}
+ return id;
+};
+
 const submitAuth=async(path:'register'|'login',details:Record<string,string>):Promise<AuthResponse>=>{const data=await requestJson(`/auth/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;};
 
 export const apiService={
  registerAccount:(details:{email:string;username:string;password:string;turnstileToken:string})=>submitAuth('register',details),
- loginAccount:(details:{identifier:string;password:string;turnstileToken:string})=>submitAuth('login',details),
- verifyOtp:async(details:{email:string;code:string}):Promise<AuthResponse>=>{const data=await requestJson('/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(details)});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;},
+ loginAccount:(details:{identifier:string;password:string;turnstileToken:string})=>submitAuth('login',{...details,deviceId:getTrustedDeviceId()}),
+ verifyOtp:async(details:{email:string;code:string}):Promise<AuthResponse>=>{const data=await requestJson('/auth/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...details,deviceId:getTrustedDeviceId()})});if(data.token)localStorage.setItem('token',data.token);return data as AuthResponse;},
  logout:()=>{localStorage.removeItem('token');},
  getUser:async(username:string):Promise<User>=>requestJson(`/api/users/${encodeURIComponent(username)}`),
  getProfileComments:async(username:string)=>requestJson(`/api/users/${encodeURIComponent(username)}/comments`),
