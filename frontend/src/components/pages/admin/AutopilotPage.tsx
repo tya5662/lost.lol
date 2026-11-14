@@ -9,7 +9,7 @@ type StatusData = { readOnly:boolean; checkedAt:string; integrations:{vercel:{co
 const StatePill:React.FC<{value:string}> = ({value}) => {
  const normalized=value.toLowerCase();
  const tone=normalized==='ready'||normalized==='success'?'border-emerald-500/20 bg-emerald-500/10 text-emerald-300':normalized==='error'||normalized==='failure'?'border-red-500/20 bg-red-500/10 text-red-300':'border-white/10 bg-white/5 text-zinc-300';
- return <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${tone}`}>{value.replaceAll('_',' ')}</span>;
+ return <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${tone}`}>{value.replace(/_/g,' ')}</span>;
 };
 
 const IntegrationCard:React.FC<{title:string;connected:boolean;reason?:string}> = ({title,connected,reason}) => <div className="rounded-2xl border border-white/[.08] bg-[#101012] p-4"><div className="flex items-center justify-between"><span className="font-semibold">{title}</span><StatePill value={connected?'connected':'not connected'}/></div>{reason&&<p className="mt-3 break-words text-xs leading-5 text-zinc-500">{reason}</p>}</div>;
