@@ -260,6 +260,7 @@ const ProfilePage: React.FC = () => {
     </div>
   );
   const aliases = (profile.aliases || []).slice(0, 2);
+  const displayBadges: NonNullable<UserProfile['badgeDefinitions']> = profile.badgeDefinitions?.length ? profile.badgeDefinitions : (profile.badges || []).map(name => ({ name }));
   const cardRadius = Math.max(0, Math.min(48, profile.cardRadius ?? 28));
   const avatarSize = Math.max(64, Math.min(180, profile.avatarSize ?? 104));
   const linkRadius = Math.max(0, Math.min(32, profile.linkRadius ?? 16));
@@ -385,8 +386,8 @@ const ProfilePage: React.FC = () => {
               </div>}
             </div>
           </div>}
-          {profile.showBadges !== false && ((profile.badgeDefinitions?.length || profile.badges?.length) ? <div className="mx-auto mt-3 flex max-w-[520px] flex-wrap justify-center gap-2">
-            {(profile.badgeDefinitions?.length ? profile.badgeDefinitions : (profile.badges||[]).map(name=>({name}))).slice(0,12).map((badge,index)=>{
+          {profile.showBadges !== false && displayBadges.length > 0 ? <div className="mx-auto mt-3 flex max-w-[520px] flex-wrap justify-center gap-2">
+            {displayBadges.slice(0,12).map((badge,index)=>{
               const name=typeof badge.name==='string'?badge.name:'Badge';
               const templateBadge=getTemplateBadge(name);
               const image=badge.image||templateBadge?.src||'';
@@ -398,7 +399,7 @@ const ProfilePage: React.FC = () => {
                 <span>{name}</span>
               </motion.span>;
             })}
-          </div> : null)}
+          </div> : null}
           <div className="mx-auto mt-8 max-w-[420px]" style={{display:'flex',flexDirection:'column',gap:linkSpacing}}>
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
               <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#c15bd7]/55 hover:bg-[#c15bd7]/[0.07] hover:shadow-[0_8px_30px_rgba(193,91,215,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c15bd7]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}}>
