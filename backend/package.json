@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "dev": "tsc --outDir build -w index.ts",
     "migrate": "npx tsc && node --env-file=.env build/dbmigrate.js",
     "dev1": "npx tsc && node --watch --env-file=.env build/index.js",
