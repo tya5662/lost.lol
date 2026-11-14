@@ -5,16 +5,14 @@ import userRoutes from './routes/userRoutes';
 import linkRoutes from "./routes/linkRoutes";
 import authRoutes from './routes/authRoutes';
 import adminRoutes from './routes/adminRoutes';
+import autopilotRoutes from './routes/autopilotRoutes';
 import siteSettingsRoutes from './routes/siteSettingsRoutes';
 import connectionRoutes from './routes/connectionRoutes';
 import communityTemplateRoutes from './routes/communityTemplateRoutes';
 import { mongoDB } from './config/database';
 
 const app=express();
-// Liveness endpoint intentionally runs before the database middleware so the platform can
-// distinguish a running process from application readiness.
 app.get('/health',(_req,res)=>{res.status(200).json({status:'ok'});});
-// Render sits behind a proxy; trust one proxy hop so req.ip reflects the client IP for trusted-device checks.
 app.set('trust proxy', 1);
 if(!process.env.JWT_SECRET)console.error('JWT_SECRET is not configured; sign-up and sign-in requests will be unavailable.');
 const frontendOrigins=new Set([process.env.FRONTEND_URL,process.env.FRONTEND_URLS,'https://lost-lol.vercel.app','https://suffer.info','https://www.suffer.info'].filter((v):v is string=>Boolean(v)).flatMap(v=>v.split(',')).map(v=>v.trim().replace(/\/+$/,'')).filter(Boolean));
@@ -22,11 +20,11 @@ const isAllowedFrontendOrigin=(origin?:string)=>{if(!origin)return true;if(front
 app.use(cors({origin:(origin,callback)=>callback(null,isAllowedFrontendOrigin(origin)),credentials:true,optionsSuccessStatus:204}));
 app.use(express.json());
 app.use((_req,_res,next)=>{void mongoDB().then(()=>next()).catch(next)});
-// Readiness is checked after the database middleware succeeds.
 app.get('/ready',(_req,res)=>{res.status(200).json({status:'ready'});});
 app.use('/uploads',express.static(path.join(__dirname,'../uploads')));
 app.use('/auth',authRoutes);
 app.use('/admin',adminRoutes);
+app.use('/admin/autopilot',autopilotRoutes);
 app.use('/api/site-settings',siteSettingsRoutes);
 app.use('/api/connections',connectionRoutes);
 app.use('/api/community-templates',communityTemplateRoutes);
