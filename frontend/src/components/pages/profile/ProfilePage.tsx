@@ -269,7 +269,7 @@ const ProfilePage: React.FC = () => {
   const linkOpacity = Math.max(0, Math.min(0.2, profile.linkOpacity ?? 0.025));
   const linkBlur = Math.max(0, Math.min(40, profile.linkBlur ?? 0));
   const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
-  const { profilePicture, backgroundMedia, backgroundType, audioUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
+  const { profilePicture, backgroundMedia, backgroundType, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#c15bd7';
   const bgOpacity = Math.max(0, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
