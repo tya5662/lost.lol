@@ -216,7 +216,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
     }
 
     const allowed = [
-      'name','location','showLocation','showDiscordPresence','discordUsername','nameTooltip','avatarDecoration','pageEnterSymbol','cardRevealDelay','iconGlowColor','particleColor','particleCount','cursorTrailSize','cursorTrailCount','cursorTrailGlow','customCursorHotspot','cardTiltIntensity','cardTiltPerspective','backgroundMediaUrl','backgroundType',
+      'name','location','showLocation','showDiscordPresence','discordUsername','nameTooltip','avatarDecoration','pageEnterSymbol','cardRevealDelay','iconGlowColor','particleColor','particleCount','cursorTrailSize','cursorTrailCount','cursorTrailGlow','customCursorHotspot','cardTiltIntensity','cardTiltPerspective','backgroundMediaUrl','backgroundType','showAvatar','showBadges','showAliases','showRoleLabel','showUsernameTag','usernameTagColor','usernameTagFont','usernameTagStyle',
       'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle','tabTitle',
       'usernameEffect','backgroundEffect','syncToBackground','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
@@ -418,7 +418,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
     const userProfile = {
       ...user.toObject(),
       badges: publicBadges,
-      showBadges: true,
+      showBadges: user.showBadges !== false,
       username: user.username,
       aliasMatched: username.toLowerCase() !== user.username.toLowerCase(),
       profilePicture: user.profilePicture
