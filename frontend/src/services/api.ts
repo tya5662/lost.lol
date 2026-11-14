@@ -14,7 +14,7 @@ const requestJson = async (path:string, init?:RequestInit):Promise<any>=>{
 const authHeaders=()=>({Authorization:`Bearer ${localStorage.getItem('token')??''}`});
 const getTrustedDeviceId=():string=>{
  let id=localStorage.getItem('suffer_device_id');
- if(!id){id=typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(24))).map(v=>v.toString(16).padStart(2,'0')).join('');localStorage.setItem('suffer_device_id',id);}
+ if(!id){id=crypto.randomUUID();localStorage.setItem('suffer_device_id',id);}
  return id;
 };
 
