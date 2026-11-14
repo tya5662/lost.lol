@@ -67,7 +67,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
     <Editor title={title} text="Configure this section from the dashboard."><p className="text-sm text-zinc-500">This panel is ready for configuration.</p></Editor>}
    </div>
   </main>
- </div>
+ </motion.div>
 };
 
 
