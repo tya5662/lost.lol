@@ -4,25 +4,94 @@ import { User } from '../model/profiles';
 import { Badge } from '../model/badges';
 import { Link } from '../model/link';
 import { ProfileComment } from '../model/profileComment';
+import { AdminRole } from '../model/adminRole';
 
 const router = Router();
-const privilegedRoles = new Set(['owner', 'co-owner', 'staff']);
-
 router.use(isAuthenticated);
 
 router.use(async (req, res, next) => {
   try {
     const id = (req.user as any).id;
-    const actor = await User.findOne({ id });
-    if (!actor || !privilegedRoles.has(actor.role)) {
+    const actor = await User.findOne({ id }).select('+adminRoleId');
+    if (!actor) { res.status(403).json({ message: 'Admin account not found.' }); return; }
+    const assignedRole = actor.adminRoleId ? await AdminRole.findById(actor.adminRoleId).lean() : null;
+    const permissions = actor.rootOwner ? ['*'] : (assignedRole?.permissions || []);
+    if (!actor.rootOwner && permissions.length === 0) {
       res.status(403).json({ message: 'You do not have permission to access the admin panel.' });
       return;
     }
+    const has = (permission: string) => actor.rootOwner || permissions.includes('*') || permissions.includes(permission);
+    (actor as any).adminPermissions = permissions;
+    (actor as any).adminRoleName = assignedRole?.name || (actor.rootOwner ? 'Primary Owner' : actor.role);
+    (actor as any).adminRoleLevel = assignedRole?.level || (actor.rootOwner ? 100 : 0);
+    (actor as any).canBan = has('ban_users');
+    (actor as any).canDemote = has('manage_roles');
+    (actor as any).canManageRoles = has('manage_roles');
+    (actor as any).canManagePremium = has('manage_premium');
+    (actor as any).canManageBadges = has('manage_badges');
+    (actor as any).canCustomizeUsers = has('customize_users');
     (req as any).actor = actor;
     next();
   } catch (error) {
     next(error);
   }
+});
+
+
+const ADMIN_PERMISSION_KEYS = ['view_dashboard','manage_users','ban_users','manage_roles','manage_premium','manage_badges','customize_users','manage_site','manage_homepage','manage_comments','view_analytics','manage_admins'] as const;
+
+router.get('/me', async (req,res) => {
+  const actor=(req as any).actor;
+  res.json({ id:actor.id, username:actor.username, rootOwner:!!actor.rootOwner, role:actor.role, roleName:actor.adminRoleName, roleLevel:actor.adminRoleLevel, permissions:actor.adminPermissions });
+});
+
+router.get('/roles', async (_req,res,next) => {
+  try { res.json(await AdminRole.find({}).sort({level:-1,name:1}).lean()); } catch(error){ next(error); }
+});
+
+router.post('/roles', async (req,res,next) => {
+  try {
+    const actor=(req as any).actor;
+    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can create or edit admin ranks.'});return;}
+    const body=req.body||{};
+    const name=typeof body.name==='string'?body.name.trim().slice(0,32):'';
+    const key=typeof body.key==='string'?body.key.toLowerCase().trim().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').slice(0,40):'';
+    const level=Number.isFinite(body.level)?Math.max(1,Math.min(99,Math.floor(body.level))):10;
+    const color=typeof body.color==='string'?body.color:'#a1a1aa';
+    if(!name||!key||!/^#[0-9a-fA-F]{6}$/.test(color)){res.status(400).json({message:'Enter a rank name, valid rank key, and six-digit hex color.'});return;}
+    const permissions=Array.isArray(body.permissions)?[...new Set(body.permissions.filter((p:string)=>ADMIN_PERMISSION_KEYS.includes(p as any)))]:[];
+    const role=await AdminRole.findOneAndUpdate({key},{name,key,level,color,permissions,description:typeof body.description==='string'?body.description.slice(0,180):''},{new:true,upsert:true,setDefaultsOnInsert:true});
+    res.json(role);
+  }catch(error){next(error);}
+});
+
+router.delete('/roles/:id', async(req,res,next)=>{
+  try{
+    const actor=(req as any).actor;
+    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can delete admin ranks.'});return;}
+    const role=await AdminRole.findById(req.params.id);
+    if(!role){res.status(404).json({message:'Rank not found.'});return;}
+    const assigned=await User.countDocuments({adminRoleId:role._id});
+    if(assigned){res.status(409).json({message:'Reassign all administrators before deleting this rank.'});return;}
+    await role.deleteOne();res.json({success:true});
+  }catch(error){next(error);}
+});
+
+router.patch('/users/:id/admin-role', async(req,res,next)=>{
+  try{
+    const actor=(req as any).actor;
+    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can assign custom admin ranks.'});return;}
+    const target=await User.findOne({id:Number(req.params.id)});
+    if(!target){res.status(404).json({message:'User not found.'});return;}
+    if(target.rootOwner){res.status(400).json({message:'The primary owner rank cannot be changed.'});return;}
+    const roleId=typeof req.body?.roleId==='string'?req.body.roleId:'';
+    if(!roleId){target.adminRoleId=null;target.role='member';await target.save();res.json({id:target.id,role:target.role,adminRoleId:null});return;}
+    const role=await AdminRole.findById(roleId);
+    if(!role){res.status(404).json({message:'Admin rank not found.'});return;}
+    target.adminRoleId=role._id as any;target.role=role.key;
+    await target.save();
+    res.json({id:target.id,role:target.role,adminRoleId:String(role._id),roleName:role.name,permissions:role.permissions});
+  }catch(error){next(error);}
 });
 
 router.get('/users', async (_req, res, next) => {
