@@ -7,6 +7,7 @@ import {DashboardHome} from './components/pages/dashboard/DashboardHome';
 import {DashboardSection} from './components/pages/dashboard/DashboardSection';
 import {SiteEditor} from './components/pages/dashboard/SiteEditor';
 import {AdminPanel} from './components/pages/admin/AdminPanel';
+import {AdminRoles} from './components/pages/admin/AdminRoles';
 import {HomepageSettings} from './components/pages/admin/HomepageSettings';
 import {LegalPage} from './components/pages/legal/LegalPages';
 import {AUTH,apiService} from './services/api';
@@ -39,7 +40,7 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
 const PublicSiteGate:React.FC<{children:React.ReactNode}>=({children})=>{const [settings,setSettings]=useState<any>(null);useEffect(()=>{let active=true;apiService.getSiteSettings().then(value=>{if(active)setSettings(value)}).catch(()=>{if(active)setSettings({maintenanceMode:false})});return()=>{active=false}},[]);if(settings?.maintenanceMode)return <MaintenanceScreen settings={settings}/>;return <>{children}</>;};
 
 const App:React.FC=()=> <><Analytics/><Router><Routes>
- <Route path="/" element={<PublicSiteGate><HomePage/></PublicSiteGate>}/><Route path="/terms" element={<LegalPage/>}/><Route path="/policy" element={<LegalPage/>}/><Route path="/refunds" element={<LegalPage/>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/>
- <Route path="/dashboard/*" element={<DashboardRouter/>}/><Route path="/admin" element={<AdminPanel/>}/><Route path="/admin/homepage" element={<HomepageSettings/>}/><Route path="/:username" element={<PublicSiteGate><ProfilePage/></PublicSiteGate>}/>
+ <Route path="/" element={<PublicSiteGate><HomePage/></PublicSiteGate>}/><Route path="/terms" element={<LegalPage/>}/><Route path="/policy" element={<LegalPage/>}/><Route path="/refunds" element={<LegalPage/>}/><Route path="/login" element={<AuthPage/>}/><Route path="/register" element={<AuthPage/>}/><Route path="/admin/login" element={<AuthPage/>}/>
+ <Route path="/dashboard/*" element={<DashboardRouter/>}/><Route path="/admin" element={<AdminPanel/>}/><Route path="/admin/roles" element={<AdminRoles/>}/><Route path="/admin/homepage" element={<HomepageSettings/>}/><Route path="/:username" element={<PublicSiteGate><ProfilePage/></PublicSiteGate>}/>
 </Routes></Router></>;
 export default App;
