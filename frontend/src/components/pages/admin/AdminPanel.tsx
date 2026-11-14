@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link,useNavigate} from 'react-router-dom';
 import {apiService,AUTH} from '../../../services/api';
 import {UserRole} from '../../../types';
 
@@ -9,7 +9,7 @@ type AdminUser={
  fontFamily?:string;customFontFamily?:string;profileOpacity?:number;profileBlur?:number;
  usernameEffect?:string;backgroundEffect?:string;cursorEffect?:string;layout?:string;
  customEmojis?:{name:string;value:string}[];
- rootOwner?:boolean;canBan?:boolean;canDemote?:boolean;canManageRoles?:boolean;canManagePremium?:boolean;canManageBadges?:boolean;canCustomizeUsers?:boolean;
+ adminRoleId?:string;rootOwner?:boolean;canBan?:boolean;canDemote?:boolean;canManageRoles?:boolean;canManagePremium?:boolean;canManageBadges?:boolean;canCustomizeUsers?:boolean;
  banned?:boolean;banReason?:string;
 };
 
@@ -24,6 +24,7 @@ const Select=({label,value,onChange,options}:{label:string;value:string;onChange
 <select value={value} onChange={e=>onChange(e.target.value)} className="h-10 w-full rounded-xl border border-white/10 bg-[#151315] px-3 text-sm">{options.map(x=><option key={x}>{x}</option>)}</select></label>;
 
 export const AdminPanel:React.FC=()=>{
+ const navigate=useNavigate();
  const [users,setUsers]=useState<AdminUser[]>([]); const [error,setError]=useState(''); const [loading,setLoading]=useState(true);
  const [activeTab,setActiveTab]=useState<'users'|'maintenance'>('users');
  const [maintenance,setMaintenance]=useState({maintenanceMode:false,maintenanceTitle:'We’ll be back soon',maintenanceMessage:'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:''}); const [maintenanceSaving,setMaintenanceSaving]=useState(false);
@@ -31,7 +32,7 @@ export const AdminPanel:React.FC=()=>{
  const [badge,setBadge]=useState(''); const [emojiName,setEmojiName]=useState(''); const [emojiValue,setEmojiValue]=useState('');
  const [saving,setSaving]=useState(false); const [badgeDefs,setBadgeDefs]=useState<any[]>([]); const [me,setMe]=useState<any>(null); const [banReason,setBanReason]=useState(''); const [newBadge,setNewBadge]=useState({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#a1a1aa',animation:'glow',description:'',selfClaimable:false,requiredPremium:false,requiredRole:'member',maxHolders:0,available:true,showOnProfiles:true});
  const load=async()=>{try{setUsers(await apiService.getAdminUsers() as AdminUser[])}catch(e){setError(e instanceof Error?e.message:'Unable to load admin panel')}finally{setLoading(false)}};
- useEffect(()=>{load(); apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([])); apiService.getSiteSettings().then(s=>setMaintenance({maintenanceMode:!!s.maintenanceMode,maintenanceTitle:s.maintenanceTitle||'We’ll be back soon',maintenanceMessage:s.maintenanceMessage||'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:s.maintenanceEta||''})).catch(()=>{}); fetch(AUTH,{headers:{Authorization:`Bearer ${localStorage.getItem('token')??''}`}}).then(r=>r.ok?r.json():null).then(setMe).catch(()=>{});},[]);
+ useEffect(()=>{if(!localStorage.getItem('token')){navigate('/admin/login',{replace:true});return;}apiService.getAdminMe().then(async info=>{setMe(info);await load();apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([]));apiService.getSiteSettings().then(s=>setMaintenance({maintenanceMode:!!s.maintenanceMode,maintenanceTitle:s.maintenanceTitle||'We’ll be back soon',maintenanceMessage:s.maintenanceMessage||'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:s.maintenanceEta||''})).catch(()=>{});}).catch(()=>navigate('/admin/login',{replace:true}));},[]);
  const target=users.find(u=>u.id===selected)||null; const isRootOwner=!!me?.rootOwner;
  const saveMaintenance=async(next=maintenance)=>{setMaintenanceSaving(true);setError('');try{const saved=await apiService.updateSiteSettings({...await apiService.getSiteSettings(),...next} as any);setMaintenance({maintenanceMode:!!saved.maintenanceMode,maintenanceTitle:saved.maintenanceTitle||next.maintenanceTitle,maintenanceMessage:saved.maintenanceMessage||next.maintenanceMessage,maintenanceEta:saved.maintenanceEta||''});}catch(e){setError(e instanceof Error?e.message:'Could not save maintenance settings')}finally{setMaintenanceSaving(false)}};
  const update=async(id:number,body:{role?:UserRole;premium?:boolean})=>{setError('');try{await apiService.updateAdminUser(id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Update failed')}};
@@ -51,7 +52,7 @@ export const AdminPanel:React.FC=()=>{
  return <div className="min-h-screen bg-[#070707] text-white">
   <header className="sticky top-0 z-30 border-b border-white/[.08] bg-[#0b0b0c]/95 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
    <div><Link to="/dashboard" className="text-xl font-black">suffer<span className="text-zinc-300">.info</span></Link><div className="text-[10px] uppercase tracking-[.2em] text-zinc-500">Admin control center</div></div>
-   <div className="flex items-center gap-2"><Link to="/admin/homepage" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Homepage</Link><Link to="/dashboard" className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5">Dashboard</Link></div>
+   <div className="flex items-center gap-2">{isRootOwner&&<Link to="/admin/roles" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Ranks & permissions</Link>}<Link to="/admin/homepage" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Homepage</Link><Link to="/dashboard" className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5">Dashboard</Link></div>
   </div></header>
   <main className="mx-auto max-w-7xl px-5 py-7">
    <div className="mb-5 flex flex-wrap gap-2 rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-2">
