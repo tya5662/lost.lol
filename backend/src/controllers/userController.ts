@@ -215,6 +215,11 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       req.body.aliases = normalizedAliases;
     }
 
+    if (req.body?.clearAudioMedia === true) {
+      user.audioMedia = undefined;
+      user.audioMime = '';
+    }
+
     const allowed = [
       'name','location','showLocation','showDiscordPresence','discordUsername','nameTooltip','avatarDecoration','pageEnterSymbol','cardRevealDelay','iconGlowColor','particleColor','particleCount','cursorTrailSize','cursorTrailCount','cursorTrailGlow','customCursorHotspot','cardTiltIntensity','cardTiltPerspective','backgroundMediaUrl','backgroundType','showAvatar','showBadges','showAliases','showRoleLabel','showUsernameTag','usernameTagColor','usernameTagFont','usernameTagStyle',
       'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle','tabTitle',
