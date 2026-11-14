@@ -286,7 +286,7 @@ export const Dashboard: React.FC = () => {
               <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#a1a1aa]">Your page / overview</p>
               <h2 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">Account overview</h2>
             </div>
-            <span className="rounded-md border border-white/[0.08] bg-[#111010] px-3 py-2 text-xs text-[#a39b9c]">lost.lol/{user.username}</span>
+            <span className="rounded-md border border-white/[0.08] bg-[#111010] px-3 py-2 text-xs text-[#a39b9c]">suffer.info/{user.username}</span>
           </div>
 
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
