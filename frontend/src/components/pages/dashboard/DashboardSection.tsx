@@ -26,7 +26,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
 
  React.useEffect(()=>{setLocal(user);},[user]);
  React.useEffect(()=>{if(section==='links'||section==='socials')apiService.getUserLinks(user._id).then(setLinks).catch(()=>setLinks([]));},[section,user.id]);
- React.useEffect(()=>{if(section!=='music')return;let active=true;fetch(`${API_URL}/users/${encodeURIComponent(user.username)}`).then(r=>{if(!r.ok)throw new Error('Could not load playlist.');return r.json();}).then(profile=>{if(active)setLocal(prev=>({...prev,audioUrl:profile.audioUrl||'',audioTracks:Array.isArray(profile.audioTracks)?profile.audioTracks:[],audioTitle:profile.audioTitle||prev.audioTitle,audioCoverUrl:profile.audioCoverUrl||prev.audioCoverUrl}));}).catch(e=>{if(active)setMessage(e instanceof Error?e.message:'Could not load playlist.');});return()=>{active=false;};},[section,user.username]);
+ React.useEffect(()=>{if(section!=='music')return;let active=true;fetch(`${API_URL}/users/${encodeURIComponent(user.username)}?preview=1`).then(r=>{if(!r.ok)throw new Error('Could not load playlist.');return r.json();}).then(profile=>{if(active)setLocal(prev=>({...prev,audioUrl:profile.audioUrl||'',audioTracks:Array.isArray(profile.audioTracks)?profile.audioTracks:[],audioTitle:profile.audioTitle||prev.audioTitle,audioCoverUrl:profile.audioCoverUrl||prev.audioCoverUrl}));}).catch(e=>{if(active)setMessage(e instanceof Error?e.message:'Could not load playlist.');});return()=>{active=false;};},[section,user.username]);
 
  const save=async(body:Record<string,unknown>)=>{
    setSaving(true);setMessage('');
