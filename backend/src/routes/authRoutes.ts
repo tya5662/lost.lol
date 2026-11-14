@@ -203,8 +203,9 @@ router.post('/login', async (req, res, next) => {
     res.status(503).json({ message: 'Sign-in is temporarily unavailable. CAPTCHA is not configured yet.' });
     return;
   }
-  if (!(await verifyTurnstile(turnstileToken, req.ip))) {
-    res.status(400).json({ message: 'Please complete the CAPTCHA and try again.' });
+  const turnstile = await verifyTurnstile(turnstileToken, req.ip);
+  if (!turnstile.ok) {
+    res.status(400).json({ message: `CAPTCHA verification failed${turnstile.codes.length ? ` (${turnstile.codes.join(', ')})` : ''}. Please complete it again.` });
     return;
   }
   if (!identifier || !password || password.length > 128) {
