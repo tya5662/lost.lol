@@ -34,6 +34,7 @@ interface UserProfile {
   showRoleLabel?: boolean;
   avatarDecoration?: string;
   badges?: string[];
+  badgeDefinitions?: Array<{name:string;image?:string;fontFamily?:string;textColor?:string;accentColor?:string;animation?:'none'|'pulse'|'float'|'spin'|'bounce'|'glow';description?:string}>;
   aliases?: string[];
   role?: 'owner'|'co-owner'|'staff'|'member'; roleLabel?: string;
   profileLayout?: 'default'|'compact'|'wide'|'minimal'|'split'; cardStyle?: 'glass'|'solid'|'outline'|'floating'; cardRadius?: number;
@@ -384,7 +385,20 @@ const ProfilePage: React.FC = () => {
               </div>}
             </div>
           </div>}
-          {profile.showBadges === true && profile.badges?.length ? <div className="mx-auto mt-3 flex max-w-[420px] flex-wrap justify-center gap-2">{profile.badges.slice(0,8).map(b=>{const isImage=/^https?:\/\//i.test(b)&&/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(b);const templateBadge=getTemplateBadge(b);const badgeImage=isImage?b:templateBadge?.src;const badgeTitle=isImage?"Custom badge":(templateBadge?.title||b);return <span key={b} title={badgeTitle} className="inline-flex items-center gap-1.5 rounded-full border border-[#c15bd7]/20 bg-[#c15bd7]/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#c15bd7]/50" style={{color:textColor}}>{badgeImage?<img src={badgeImage} alt={badgeTitle} loading="lazy" className="h-5 w-5 rounded object-contain" />:<><BadgeCheck size={12} style={{color:accentColor}} />{b}</>}</span>})}</div> : null}
+          {profile.showBadges !== false && ((profile.badgeDefinitions?.length || profile.badges?.length) ? <div className="mx-auto mt-3 flex max-w-[520px] flex-wrap justify-center gap-2">
+            {(profile.badgeDefinitions?.length ? profile.badgeDefinitions : (profile.badges||[]).map(name=>({name}))).slice(0,12).map((badge,index)=>{
+              const name=typeof badge.name==='string'?badge.name:'Badge';
+              const templateBadge=getTemplateBadge(name);
+              const image=badge.image||templateBadge?.src||'';
+              const accent=badge.accentColor||accentColor;
+              const animation=badge.animation||'none';
+              const animate=animation==='pulse'?{scale:[1,1.08,1]}:animation==='float'?{y:[0,-3,0]}:animation==='spin'?{rotate:[0,360]}:animation==='bounce'?{y:[0,-4,0]}:{};
+              return <motion.span key={name+'-'+index} title={badge.description||name} animate={animate} transition={{duration:animation==='spin'?5:2.2,repeat:animation==='none'||animation==='glow'?0:Infinity,ease:'easeInOut'}} className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.08em] transition-colors hover:-translate-y-0.5" style={{borderColor:accent+'55',backgroundColor:accent+'12',color:badge.textColor||textColor,fontFamily:badge.fontFamily||'inherit',boxShadow:animation==='glow'?'0 0 12px '+accent+'55':'none'}}>
+                {image?<img src={image} alt="" loading="lazy" className="h-5 w-5 rounded object-contain"/>:<BadgeCheck size={12} style={{color:accent}}/>}
+                <span>{name}</span>
+              </motion.span>;
+            })}
+          </div> : null)}
           <div className="mx-auto mt-8 max-w-[420px]" style={{display:'flex',flexDirection:'column',gap:linkSpacing}}>
             {validLinks.map((link, index) => { const IconComponent = getLinkIcon(link.url); return (
               <motion.a key={link._id || link.id || link.url} href={link.safeUrl} target={link.safeUrl.startsWith('mailto:') ? undefined : '_blank'} rel={link.safeUrl.startsWith('mailto:') ? undefined : 'noopener noreferrer'} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .34 + index * .055, duration: .35 }} whileHover={{ y: -2, scale: 1.012 }} whileTap={{ scale: .965 }} className="group flex min-h-14 items-center gap-3 border border-white/[0.08] bg-white/[0.025] px-4 text-left shadow-[inset_0_1px_rgba(255,255,255,.025)] transition-colors duration-200 hover:border-[#c15bd7]/55 hover:bg-[#c15bd7]/[0.07] hover:shadow-[0_8px_30px_rgba(193,91,215,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c15bd7]" style={{borderRadius:linkRadius,backgroundColor:`rgba(255,255,255,${linkOpacity})`,backdropFilter:`blur(${linkBlur}px)`}}>
