@@ -105,8 +105,11 @@ const ProfilePage: React.FC = () => {
   const [audioLoading, setAudioLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const musicTracks = (profile?.audioTracks || []).filter((track:string) => typeof track === 'string' && track.trim()).map((url:string) => url.trim());
-  const activeTrackUrl = musicTracks[trackIndex] || profile?.audioUrl || '';
+  const storedTracks = (profile?.audioTracks || []).filter((track:string) => typeof track === 'string' && track.trim()).map((url:string) => url.trim());
+  const uploadedTrack = profile?.audioUrl?.startsWith('data:audio/') ? [profile.audioUrl] : [];
+  const musicTracks = [...uploadedTrack, ...storedTracks.filter((track:string) => !track.startsWith('data:'))];
+  if (!musicTracks.length && profile?.audioUrl) musicTracks.push(profile.audioUrl);
+  const activeTrackUrl = musicTracks[trackIndex] || '';
   const changeTrack = (direction:number) => { if (!musicTracks.length) return; setTrackIndex((current) => (current + direction + musicTracks.length) % musicTracks.length); setCurrentTime(0); };
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
