@@ -98,6 +98,7 @@ const userSchema = new mongoose.Schema({
   audioTitle: { type: String, default: '' },
   audioAutoplay: { type: Boolean, default: false },
   audioCoverUrl: { type: String, default: '' },
+  audioTracks: { type: [String], default: [] },
   audioMedia: { type: Buffer },
   audioMime: { type: String, default: '' },
   layout: { type: String, enum: ['default', 'modern', 'minimal', 'portfolio'], default: 'default' },
