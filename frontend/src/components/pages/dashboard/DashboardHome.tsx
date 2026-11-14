@@ -3,13 +3,27 @@ import { Link, useLocation } from 'react-router-dom';
 import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes, Award, Search, Menu, X as XIcon, Sparkles } from 'lucide-react';
 import { User } from '../../../types';
 
-const nav = [
-  { label:'Overview', to:'/dashboard', icon:BarChart3 },
-  { label:'Analytics', to:'/dashboard/analytics', icon:BarChart3 },
-  { label:'Badges', to:'/dashboard/badges', icon:Award },
-  { label:'Settings', to:'/dashboard/settings', icon:Settings },
-  { label:'Customize', to:'/dashboard/appearance', icon:Palette },
-  { label:'Links', to:'/dashboard/links', icon:Link2 },
+const navGroups = [
+  {label:'Workspace',items:[
+    {label:'Overview',to:'/dashboard',icon:BarChart3},
+    {label:'Analytics',to:'/dashboard/analytics',icon:BarChart3},
+  ]},
+  {label:'Profile',items:[
+    {label:'Profile',to:'/dashboard/profile',icon:UserRound},
+    {label:'Customize',to:'/dashboard/appearance',icon:Palette},
+    {label:'Badges',to:'/dashboard/badges',icon:Award},
+  ]},
+  {label:'Content',items:[
+    {label:'Links',to:'/dashboard/links',icon:Link2},
+    {label:'Socials',to:'/dashboard/socials',icon:Share2},
+    {label:'Music',to:'/dashboard/music',icon:Music2},
+    {label:'Widgets',to:'/dashboard/widgets',icon:Boxes},
+    {label:'Templates',to:'/dashboard/templates',icon:Boxes},
+    {label:'Connections',to:'/dashboard/connections',icon:Plug},
+  ]},
+  {label:'Account',items:[
+    {label:'Settings',to:'/dashboard/settings',icon:Settings},
+  ]},
 ];
 const premium = [
   { label:'General', to:'/dashboard/premium', icon:Crown },
@@ -22,7 +36,7 @@ export const DashboardHome: React.FC<{user:User}> = ({user}) => {
   const [searchQuery,setSearchQuery]=React.useState('');
   const [searchOpen,setSearchOpen]=React.useState(false);
   const location=useLocation();
-  const workspaceItems = [...nav, ...premium, {label:'Socials',to:'/dashboard/socials',icon:Share2},{label:'Music',to:'/dashboard/music',icon:Music2},{label:'Widgets',to:'/dashboard/widgets',icon:Boxes},{label:'Profile',to:'/dashboard/profile',icon:UserRound}];
+  const workspaceItems = [...navGroups.flatMap(group=>group.items), ...premium, ...(user.role==='owner'?[{label:'Site Editor',to:'/dashboard/site',icon:Palette}]:[])];
   const searchResults = searchQuery.trim() ? workspaceItems.filter(item => item.label.toLowerCase().includes(searchQuery.trim().toLowerCase())).slice(0,6) : [];
   const privileged=['owner','co-owner','staff'].includes(user.role||'');
   const Sidebar=()=> <aside className={`fixed inset-y-0 left-0 z-50 flex max-h-screen w-[270px] flex-col overflow-y-auto overscroll-contain border-r border-white/[.07] bg-[#0b0b0c] px-4 py-5 transition-transform duration-200 lg:static lg:translate-x-0 ${open?'translate-x-0':'-translate-x-full'}`}>
@@ -30,13 +44,8 @@ export const DashboardHome: React.FC<{user:User}> = ({user}) => {
       <Link to="/dashboard" className="text-xl font-black tracking-tight">suffer<span className="text-[#a1a1aa]">.info</span></Link>
       <button className="lg:hidden rounded-lg p-2 hover:bg-white/5" onClick={()=>setOpen(false)}><XIcon size={18}/></button>
     </div>
-    <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Account</div>
-    <nav className="space-y-1">{nav.map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${location.pathname===to?'bg-white/[.07] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200'}`}><Icon size={17}/><span>{label}</span></Link>)}</nav>
-    <div className="my-6 h-px bg-white/[.06]"/>
-    <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Workspace</div>
-    <nav className="space-y-1">{[
-      {label:'Socials',to:'/dashboard/socials',icon:Share2},{label:'Music',to:'/dashboard/music',icon:Music2},{label:'Widgets',to:'/dashboard/widgets',icon:Boxes},{label:'Profile',to:'/dashboard/profile',icon:UserRound}
-    ].map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${location.pathname===to?'bg-white/[.07] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200'}`}><Icon size={17}/>{label}</Link>)}</nav>
+    <Link to="/" onClick={()=>setOpen(false)} className="mb-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-500 hover:bg-white/[.04] hover:text-white"><Eye size={17}/>Visit homepage</Link>
+    {navGroups.map(group=><div key={group.label} className="mb-5"><div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">{group.label}</div><nav className="space-y-1">{group.items.map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${location.pathname===to?'bg-white/[.07] text-white':'text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200'}`}><Icon size={17}/><span>{label}</span></Link>)}</nav></div>)}
     <div className="my-6 h-px bg-white/[.06]"/>
     <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.18em] text-zinc-600">Premium</div>
     <nav className="space-y-1">{premium.map(({label,to,icon:Icon})=><Link key={to} onClick={()=>setOpen(false)} to={to} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-500 hover:bg-white/[.04] hover:text-zinc-200"><Icon size={17}/>{label}{label!=='General'&&<span className="ml-auto rounded-full bg-amber-400/10 px-1.5 py-0.5 text-[8px] uppercase text-amber-400">Pro</span>}</Link>)}</nav>
