@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema({
   premium: { type: Boolean, default: false },
   premiumSince: { type: Date },
   badges: { type: [String], default: [] },
+  showBadges: { type: Boolean, default: true },
   verified: { type: Boolean, default: false },
   customEmojis: {
     type: [{
