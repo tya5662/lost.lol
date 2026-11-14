@@ -41,8 +41,8 @@ export const SiteEditor:React.FC<{user:User}>=({user})=>{
  if(user.role!=='owner')return <section className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 p-6"><h2 className="text-lg font-semibold">Site Editor</h2><p className="mt-2 text-sm text-zinc-400">Only the site owner can edit global homepage settings.</p></section>;
  return <div className="space-y-5">
   <div className="sticky top-[73px] z-20 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#0b0b0c]/95 p-3 backdrop-blur-xl">
-   <div className="flex items-center gap-2"><Eye size={16} className="text-zinc-300"/><div><p className="text-sm font-semibold">Visual site builder</p><p className="text-[10px] text-zinc-500">Edit the preview and see changes instantly.</p></div></div>
-   <button disabled={saving} onClick={save} className="inline-flex items-center gap-2 rounded-xl bg-zinc-500 px-4 py-2 text-xs font-bold text-white disabled:opacity-50"><Save size={14}/>{saving?'Saving…':'Publish changes'}</button>
+   <div className="flex items-center gap-2"><Eye size={16} className="text-zinc-300"/><div><p className="text-sm font-semibold">Visual site builder</p><p className="text-[10px] text-zinc-500">Edits save automatically after you stop typing.</p></div></div>
+   <span className="rounded-xl border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300">{!loaded?'Loading…':saving?'Saving…':'Auto-saved'}</span>
   </div>
   {message&&<div className="rounded-xl border border-white/10 bg-white/[.03] px-4 py-3 text-xs text-zinc-300">{message}</div>}
   <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,.8fr)]">
