@@ -83,6 +83,7 @@ const SOCIAL_PRESETS = [
   { id:'spotify', name:'Spotify', base:'https://open.spotify.com/user/', suffix:'' },
   { id:'soundcloud', name:'SoundCloud', base:'https://soundcloud.com/', suffix:'' },
   { id:'telegram', name:'Telegram', base:'https://t.me/', suffix:'' },
+  { id:'discord', name:'Discord profile (user ID)', base:'https://discord.com/users/', suffix:'' },
   { id:'reddit', name:'Reddit', base:'https://www.reddit.com/user/', suffix:'/' },
   { id:'pinterest', name:'Pinterest', base:'https://www.pinterest.com/', suffix:'/' },
   { id:'facebook', name:'Facebook', base:'https://www.facebook.com/', suffix:'' },
