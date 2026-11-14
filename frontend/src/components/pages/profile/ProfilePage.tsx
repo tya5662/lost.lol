@@ -5,7 +5,7 @@ import {
   ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, X, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles ,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { API_URL, apiService } from '@/services/api';
+import { API_URL } from '@/services/api';
 import logo from '../../../../public/p.png'
 interface UserProfile {
   id: number; username: string; name: string; description: string | null; profilePicture: string | null;
