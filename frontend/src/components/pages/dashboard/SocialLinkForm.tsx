@@ -11,6 +11,7 @@ import {
   
   X,
   MailIcon,
+  Ghost, Send, Music2, Video, MessageCircle, Globe, Camera, AtSign
 } from 'lucide-react';
 
 export const SOCIAL_PLATFORMS: SocialPlatform[] = [
@@ -57,6 +58,50 @@ export const SOCIAL_PLATFORMS: SocialPlatform[] = [
     baseUrl: 'https://facebook.com/'
   },
   {
+    id: 'snapchat', name: 'Snapchat', icon: Ghost, placeholder: 'username',
+    baseUrl: 'https://www.snapchat.com/add/'
+  },
+  {
+    id: 'telegram', name: 'Telegram', icon: Send, placeholder: 'username',
+    baseUrl: 'https://t.me/'
+  },
+  {
+    id: 'tiktok', name: 'TikTok', icon: Video, placeholder: 'username',
+    baseUrl: 'https://www.tiktok.com/@'
+  },
+  {
+    id: 'twitch', name: 'Twitch', icon: Video, placeholder: 'username',
+    baseUrl: 'https://www.twitch.tv/'
+  },
+  {
+    id: 'spotify', name: 'Spotify', icon: Music2, placeholder: 'profile ID or username',
+    baseUrl: 'https://open.spotify.com/user/'
+  },
+  {
+    id: 'discord', name: 'Discord', icon: MessageCircle, placeholder: 'user ID',
+    baseUrl: 'https://discord.com/users/'
+  },
+  {
+    id: 'reddit', name: 'Reddit', icon: AtSign, placeholder: 'username',
+    baseUrl: 'https://www.reddit.com/user/'
+  },
+  {
+    id: 'pinterest', name: 'Pinterest', icon: Camera, placeholder: 'username',
+    baseUrl: 'https://www.pinterest.com/'
+  },
+  {
+    id: 'threads', name: 'Threads', icon: AtSign, placeholder: 'username',
+    baseUrl: 'https://www.threads.net/@'
+  },
+  {
+    id: 'bluesky', name: 'Bluesky', icon: Globe, placeholder: 'handle.bsky.social',
+    baseUrl: 'https://bsky.app/profile/'
+  },
+  {
+    id: 'whatsapp', name: 'WhatsApp', icon: MessageCircle, placeholder: 'phone number with country code',
+    baseUrl: 'https://wa.me/'
+  },
+  {
     id: 'youtube',
     name: 'YouTube',
     icon: Youtube,
@@ -99,9 +144,10 @@ export const SocialLinkForm: React.FC<SocialLinkFormProps> = ({ platform, curren
       return;
     }
 
+    const handle = username.trim().replace(/^@/, '');
     const fullUrl = platform.id === 'website'
-      ? (username.startsWith('http') ? username : `https://${username}`)
-      : `${platform.baseUrl}${username.trim()}`;
+      ? (handle.startsWith('http') ? handle : `https://${handle}`)
+      : `${platform.baseUrl}${handle}`;
 
     onSubmit({
       title: platform.name,
