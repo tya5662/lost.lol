@@ -220,7 +220,7 @@ export const updatePreferences = async (req: Request, res: Response, next: NextF
       'profileOpacity','profileBlur','backgroundOpacity','cardOpacity','cardBlur','profileGradient','monochromeIcons','animatedTitle','tabTitle',
       'usernameEffect','backgroundEffect','syncToBackground','cursorEffect','fontFamily',
       'typewriterEnabled','typewriterTexts','pageEnterText','pageClickSound',
-      'audioUrl','audioTitle','audioAutoplay','audioCoverUrl','layout','metadataTitle','metadataDescription','metadataImage','aliases','customFontFamily','customEmojis',
+      'audioUrl','audioTitle','audioAutoplay','audioCoverUrl','audioTracks','layout','metadataTitle','metadataDescription','metadataImage','aliases','customFontFamily','customEmojis',
       'secondTab','accentColor','textColor','backgroundColor','customFontFamily','customEmojis',
       'roleLabel','profileLayout','cardStyle','cardRadius','linkStyle','linkRadius','linkOpacity','linkBlur','linkSpacing','avatarSize','avatarShape','avatarGlow','showViews','showStatus','showBranding','accentGlow','pageEnterEffect','clickEffect','cursorTrailSize','backgroundIntensity','particleEffect','typewriterSpeed','typewriterLoop','socialLinks','customCss'
     ] as const;
@@ -430,6 +430,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
       audioUrl: user.audioMedia
         ? `data:${user.audioMime || 'audio/mpeg'};base64,${user.audioMedia.toString('base64')}`
         : user.audioUrl || '',
+      audioTracks: Array.isArray((user as any).audioTracks) ? (user as any).audioTracks : [],
       links,
       badgeDefinitions
     };
