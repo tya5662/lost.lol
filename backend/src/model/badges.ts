@@ -9,6 +9,8 @@ const badgeSchema = new mongoose.Schema({
   animation: { type: String, enum: ['none','pulse','float','spin','bounce','glow'], default: 'none' },
   description: { type: String, default: '', maxlength: 160 },
   selfClaimable: { type: Boolean, default: false },
+  available: { type: Boolean, default: true },
+  showOnProfiles: { type: Boolean, default: true },
   requiredPremium: { type: Boolean, default: false },
   requiredRole: { type: String, enum: ['member','staff','co-owner','owner'], default: 'member' },
   maxHolders: { type: Number, default: 0, min: 0, max: 1000000 },
