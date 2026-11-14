@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema({
   canManageBadges: { type: Boolean, default: false },
   canCustomizeUsers: { type: Boolean, default: false },
   banned: { type: Boolean, default: false, index: true },
+  bannedUsername: { type: String, default: undefined, select: false },
   banReason: { type: String, default: '', maxlength: 500 },
   bannedAt: { type: Date },
   bannedBy: { type: Number },
