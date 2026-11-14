@@ -14,7 +14,7 @@ router.use(async (req, res, next) => {
     const id = (req.user as any).id;
     const actor = await User.findOne({ id }).select('+adminRoleId');
     if (!actor) { res.status(403).json({ message: 'Admin account not found.' }); return; }
-    const assignedRole = actor.adminRoleId ? await AdminRole.findById(actor.adminRoleId).lean() : null;
+    const assignedRole: any = actor.adminRoleId ? await AdminRole.findById(actor.adminRoleId).lean() as any : null;
     const legacyPermissions = actor.role === 'owner' ? ['view_dashboard','manage_users','ban_users','manage_roles','manage_premium','manage_badges','customize_users','manage_site','manage_homepage','manage_comments','view_analytics'] : ['view_dashboard', ...(actor.canBan?['ban_users']:[]), ...(actor.canDemote||actor.canManageRoles?['manage_roles']:[]), ...(actor.canManagePremium?['manage_premium']:[]), ...(actor.canManageBadges?['manage_badges']:[]), ...(actor.canCustomizeUsers?['customize_users']:[])];
     const permissions = actor.rootOwner ? ['*'] : (assignedRole?.permissions || (['owner','co-owner','staff'].includes(actor.role) ? legacyPermissions : []));
     if (!actor.rootOwner && permissions.length === 0) {
