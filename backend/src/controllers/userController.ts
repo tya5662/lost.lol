@@ -411,7 +411,7 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
 
     // Find links for the user
     const links = await Link.find({ userId: user._id }).sort({ order: 1 });
-    const badgeDefinitions = user.badges?.length ? await Badge.find({ name: { $in: user.badges }, available: true, showOnProfiles: true }).select('name image fontFamily textColor accentColor animation description').lean() : [];
+    const badgeDefinitions = user.badges?.length ? await Badge.find({ name: { $in: user.badges }, available: true, $or: [{ showOnProfiles: true }, { showOnProfiles: { $exists: false } }] }).select('name image fontFamily textColor accentColor animation description').lean() : [];
     const publicBadges = badgeDefinitions.map((badge:any)=>badge.name);
 
     // Prepare user profile response
