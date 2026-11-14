@@ -53,13 +53,14 @@ router.get('/roles', async (_req,res,next) => {
 router.post('/roles', async (req,res,next) => {
   try {
     const actor=(req as any).actor;
-    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can create or edit admin ranks.'});return;}
+    if(!actor.rootOwner && !(actor.adminPermissions||[]).includes('manage_admins')){res.status(403).json({message:'You do not have permission to manage admin ranks.'});return;}
     const body=req.body||{};
     const name=typeof body.name==='string'?body.name.trim().slice(0,32):'';
     const key=typeof body.key==='string'?body.key.toLowerCase().trim().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').slice(0,40):'';
     const level=Number.isFinite(body.level)?Math.max(1,Math.min(99,Math.floor(body.level))):10;
     const color=typeof body.color==='string'?body.color:'#a1a1aa';
     if(!name||!key||!/^#[0-9a-fA-F]{6}$/.test(color)){res.status(400).json({message:'Enter a rank name, valid rank key, and six-digit hex color.'});return;}
+    if(!actor.rootOwner && level >= Number(actor.adminRoleLevel||0)){res.status(403).json({message:'You can only create ranks below your own level.'});return;}
     const permissions=Array.isArray(body.permissions)?[...new Set(body.permissions.filter((p:string)=>ADMIN_PERMISSION_KEYS.includes(p as any)))]:[];
     const role=await AdminRole.findOneAndUpdate({key},{name,key,level,color,permissions,description:typeof body.description==='string'?body.description.slice(0,180):''},{new:true,upsert:true,setDefaultsOnInsert:true});
     res.json(role);
@@ -69,9 +70,10 @@ router.post('/roles', async (req,res,next) => {
 router.delete('/roles/:id', async(req,res,next)=>{
   try{
     const actor=(req as any).actor;
-    if(!actor.rootOwner){res.status(403).json({message:'Only the primary owner can delete admin ranks.'});return;}
+    if(!actor.rootOwner && !(actor.adminPermissions||[]).includes('manage_admins')){res.status(403).json({message:'You do not have permission to manage admin ranks.'});return;}
     const role=await AdminRole.findById(req.params.id);
     if(!role){res.status(404).json({message:'Rank not found.'});return;}
+    if(!actor.rootOwner && Number(role.level)>=Number(actor.adminRoleLevel||0)){res.status(403).json({message:'You can only delete ranks below your own level.'});return;}
     const assigned=await User.countDocuments({adminRoleId:role._id});
     if(assigned){res.status(409).json({message:'Reassign all administrators before deleting this rank.'});return;}
     await role.deleteOne();res.json({success:true});
