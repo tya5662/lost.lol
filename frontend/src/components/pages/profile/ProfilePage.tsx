@@ -5,7 +5,7 @@ import {
   ArrowUpRight, AudioLines, Instagram, Youtube, Twitch, Github, Globe, Linkedin, Mail, X, BadgeCheck, Eye, MapPin, MessageCircle, Sparkles ,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { API_URL } from '@/services/api';
+import { API_URL, apiService } from '@/services/api';
 import logo from '../../../../public/p.png'
 interface UserProfile {
   id: number; username: string; name: string; description: string | null; profilePicture: string | null;
@@ -18,6 +18,7 @@ interface UserProfile {
   audioTitle?: string;
   audioAutoplay?: boolean;
   audioCoverUrl?: string;
+  audioTracks?: string[];
   totalVisit?: number;
   location?: string;
   showLocation?: boolean;
@@ -98,6 +99,13 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [templateEntered, setTemplateEntered] = useState(false);
   const [templateEntering, setTemplateEntering] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [profileComments, setProfileComments] = useState<any[]>([]);
+  const [commentDraft, setCommentDraft] = useState('');
+  const [commentBusy, setCommentBusy] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const backgroundVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -107,6 +115,9 @@ const ProfilePage: React.FC = () => {
   const backgroundCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cursorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const clickAudioRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => { if (!username) return; apiService.getProfileComments(username).then((items:any) => setProfileComments(Array.isArray(items) ? items : [])).catch(() => setProfileComments([])); }, [username]);
+  const submitProfileComment = async () => { if (!username || !commentDraft.trim() || commentBusy) return; setCommentBusy(true); try { const item = await apiService.addProfileComment(username, commentDraft.trim()); setProfileComments((current) => [item, ...current]); setCommentDraft(''); } catch (error) { toast.error(error instanceof Error ? error.message : 'Sign in to leave a comment.'); } finally { setCommentBusy(false); } };
+
   useEffect(()=>{
     if(profile?.cursorEffect !== 'red') { setCursorTrail([]); return; }
     let frame=0; let nextId=0; let points:{x:number;y:number;id:number}[]=[];
@@ -142,20 +153,20 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const audio = audioRef.current;
     const video = backgroundVideoRef.current;
-    if (audio && profile?.audioUrl) {
-      audio.loop = true;
+    if (audio && activeTrackUrl) {
+      audio.loop = false;
       audio.autoplay = true;
       audio.preload = 'auto';
     }
     const attemptMediaPlayback = () => {
       // Try immediately, then retry on the first user gesture for browsers such as iOS Safari.
-      if (audio && profile?.audioUrl) void audio.play().catch(() => {});
+      if (audio && activeTrackUrl) void audio.play().catch(() => {});
       if (video && profile?.backgroundType === 'video') {
         video.muted = false;
         void video.play().catch(() => { video.muted = true; });
       }
     };
-    if (audio && profile?.audioUrl) {
+    if (audio && activeTrackUrl) {
       void audio.play().catch(() => {});
       audio.addEventListener('canplay', attemptMediaPlayback);
     }
@@ -168,7 +179,7 @@ const ProfilePage: React.FC = () => {
       window.removeEventListener('pointerdown', attemptMediaPlayback);
       window.removeEventListener('keydown', attemptMediaPlayback);
     };
-  }, [profile?.audioUrl, profile?.audioAutoplay, profile?.backgroundType, profile?.backgroundMedia]);
+  }, [activeTrackUrl, profile?.audioAutoplay, profile?.backgroundType, profile?.backgroundMedia]);
 
   useEffect(() => {
     if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
@@ -257,6 +268,9 @@ const ProfilePage: React.FC = () => {
   const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
   const { profilePicture, backgroundMedia, backgroundType, audioUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#c15bd7';
+  const musicTracks = (profile.audioTracks || []).filter((track:string) => typeof track === 'string' && track.trim()).map((url:string) => url.trim());
+  const activeTrackUrl = musicTracks[trackIndex] || profile.audioUrl || '';
+  const changeTrack = (direction:number) => { if (!musicTracks.length) return; setTrackIndex((current) => (current + direction + musicTracks.length) % musicTracks.length); setCurrentTime(0); };
   const bgOpacity = Math.max(0, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
   const cardBlur = Math.max(0, Math.min(40, profile.cardBlur ?? profile.profileBlur ?? 0));
@@ -337,7 +351,17 @@ const ProfilePage: React.FC = () => {
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
             </div>
           </div>
-          {audioUrl && <audio ref={audioRef} preload="auto" autoPlay loop src={audioUrl} className="hidden" aria-hidden="true" />}
+          {activeTrackUrl && <div className="mx-auto mt-5 w-full max-w-[420px] rounded-[18px] bg-[#dedede] p-4 text-black shadow-xl">
+            <div className="mb-3 flex items-center justify-between"><span className="text-[11px] font-semibold uppercase tracking-wider text-black/55">{musicTracks.length > 1 ? 'Track ' + (trackIndex + 1) + ' of ' + musicTracks.length : 'Now playing'}</span><span className="text-sm font-semibold">{profile.audioTitle || 'Profile music'}</span></div>
+            <audio ref={audioRef} preload="auto" autoPlay src={activeTrackUrl} onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onLoadedMetadata={e=>setDuration(e.currentTarget.duration||0)} onEnded={()=>{if(musicTracks.length>1)changeTrack(1);else setPlaying(false);}} className="hidden" />
+            <input aria-label="Music progress" type="range" min="0" max={Math.max(duration,1)} step="0.1" value={Math.min(currentTime,duration||0)} onChange={e=>{const value=Number(e.target.value);setCurrentTime(value);if(audioRef.current)audioRef.current.currentTime=value;}} className="w-full accent-black"/>
+            <div className="mt-1 flex justify-between text-[10px] font-medium text-black/65"><span>{Math.floor(currentTime/60)}:{String(Math.floor(currentTime%60)).padStart(2,'0')}</span><span>{Math.floor(duration/60)}:{String(Math.floor(duration%60)).padStart(2,'0')}</span></div>
+            <div className="mt-3 flex items-center justify-center gap-7">
+              <button type="button" aria-label="Previous track" onClick={()=>changeTrack(-1)} disabled={musicTracks.length<2} className="text-xl disabled:opacity-30">|◀</button>
+              <button type="button" aria-label={playing?'Pause':'Play'} onClick={()=>{const audio=audioRef.current;if(!audio)return;if(playing)audio.pause();else void audio.play().catch(()=>toast.info('Tap play to start the music.'));}} className="grid h-14 w-14 place-items-center rounded-full border-2 border-black text-2xl font-bold">{playing?'Ⅱ':'▶'}</button>
+              <button type="button" aria-label="Next track" onClick={()=>changeTrack(1)} disabled={musicTracks.length<2} className="text-xl disabled:opacity-30">▶|</button>
+            </div>
+          </div>}
           {(profile.showViews === true || profile.showStatus === true) && <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
             {profile.showViews === true && <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Eye size={13} /> Views</div>
