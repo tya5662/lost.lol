@@ -222,6 +222,10 @@ router.post('/login', async (req, res, next) => {
       res.status(401).json({ message: 'Incorrect email/username or password.' });
       return;
     }
+    if (user.banned) {
+      res.status(403).json({ message: 'This account is banned and cannot sign in.' });
+      return;
+    }
     if (user.username === 'pain') {
       let changed = false;
       if (user.role !== 'owner') { user.role = 'owner'; changed = true; }
