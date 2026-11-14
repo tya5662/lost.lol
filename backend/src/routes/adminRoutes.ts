@@ -94,10 +94,12 @@ router.patch('/users/:id/admin-role', async(req,res,next)=>{
   }catch(error){next(error);}
 });
 
-router.get('/users', async (_req, res, next) => {
+router.get('/users', async (req, res, next) => {
   try {
+    const actor=(req as any).actor;
+    if(!actor.rootOwner && !(actor.adminPermissions||[]).some((p:string)=>['view_dashboard','manage_users'].includes(p))){res.status(403).json({message:'You do not have permission to view user accounts.'});return;}
     const users = await User.find({})
-      .select('id username name email role rootOwner canBan canDemote canManageRoles canManagePremium canManageBadges canCustomizeUsers banned banReason bannedAt premium premiumSince badges verified customEmojis accentColor textColor backgroundColor fontFamily customFontFamily profileOpacity profileBlur usernameEffect backgroundEffect cursorEffect layout createdAt totalVisit')
+      .select('id username name email role adminRoleId rootOwner canBan canDemote canManageRoles canManagePremium canManageBadges canCustomizeUsers banned banReason bannedAt premium premiumSince badges verified customEmojis accentColor textColor backgroundColor fontFamily customFontFamily profileOpacity profileBlur usernameEffect backgroundEffect cursorEffect layout createdAt totalVisit')
       .sort({ createdAt: -1 })
       .lean();
     res.json(users);
