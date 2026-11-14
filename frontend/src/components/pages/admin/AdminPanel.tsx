@@ -52,7 +52,7 @@ export const AdminPanel:React.FC=()=>{
  return <div className="min-h-screen bg-[#070707] text-white">
   <header className="sticky top-0 z-30 border-b border-white/[.08] bg-[#0b0b0c]/95 backdrop-blur-xl"><div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
    <div><Link to="/dashboard" className="text-xl font-black">suffer<span className="text-zinc-300">.info</span></Link><div className="text-[10px] uppercase tracking-[.2em] text-zinc-500">Admin control center</div></div>
-   <div className="flex items-center gap-2">{canManageAdmins&&<Link to="/admin/roles" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Ranks & permissions</Link>}<Link to="/admin/homepage" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Homepage</Link><Link to="/dashboard" className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5">Dashboard</Link></div>
+   <div className="flex items-center gap-2">{isRootOwner&&<Link to="/admin/autopilot" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Suffer Autopilot</Link>}{canManageAdmins&&<Link to="/admin/roles" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Ranks & permissions</Link>}<Link to="/admin/homepage" className="rounded-xl border border-white/15 px-4 py-2 text-sm hover:bg-white/5">Homepage</Link><Link to="/dashboard" className="rounded-xl border border-white/10 px-4 py-2 text-sm hover:bg-white/5">Dashboard</Link></div>
   </div></header>
   <main className="mx-auto max-w-7xl px-5 py-7">
    <div className="mb-5 flex flex-wrap gap-2 rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-2">
