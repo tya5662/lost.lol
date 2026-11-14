@@ -163,15 +163,21 @@ const ProfilePage: React.FC = () => {
         void video.play().catch(() => { video.muted = true; });
       }
     };
-    // Start fetching the selected track immediately. Audible autoplay may be
-    // blocked by Safari; the compact play control then starts it on user tap.
+    // Attempt audible autoplay as soon as the source is attached and ready.
+    // iOS Safari may still require one tap because it blocks unsolicited audio.
+    const tryAutoplay = () => {
+      const currentAudio = audioRef.current;
+      if (currentAudio && activeTrackUrl) void currentAudio.play().catch(() => {});
+    };
     if (audio && activeTrackUrl) {
+      audio.autoplay = true;
       audio.preload = 'auto';
       audio.load();
       void audio.play().catch(() => {});
+      audio.addEventListener('canplay', tryAutoplay, { once: true });
     }
     attemptMediaPlayback();
-    return () => {};
+    return () => { if (audio) audio.removeEventListener('canplay', tryAutoplay); };
   }, [activeTrackUrl, profile?.audioAutoplay, profile?.backgroundType, profile?.backgroundMedia]);
 
   useEffect(() => {
@@ -341,27 +347,8 @@ const ProfilePage: React.FC = () => {
             {description && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3 }} className="mt-3 max-w-[480px] whitespace-pre-wrap text-sm leading-6" style={{ color: textColor, opacity: 0.72 }}>{description}</motion.p>}
             </div>
           </div>
-          {activeTrackUrl && <div className="mx-auto mt-5 w-full max-w-[420px] rounded-[18px] bg-[#dedede] p-4 text-black shadow-xl">
-            <div className="mb-3 flex items-center justify-between"><span className="text-[11px] font-semibold uppercase tracking-wider text-black/55">{musicTracks.length > 1 ? 'Track ' + (trackIndex + 1) + ' of ' + musicTracks.length : 'Now playing'}</span><span className="text-sm font-semibold">{profile.audioTitle || 'Profile music'}</span></div>
-            <audio ref={audioRef} preload="auto" autoPlay src={activeTrackUrl} onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onLoadedMetadata={e=>setDuration(e.currentTarget.duration||0)} onEnded={()=>{if(musicTracks.length>1)changeTrack(1);else setPlaying(false);}} className="hidden" />
-            <input aria-label="Music progress" type="range" min="0" max={Math.max(duration,1)} step="0.1" value={Math.min(currentTime,duration||0)} onChange={e=>{const value=Number(e.target.value);setCurrentTime(value);if(audioRef.current)audioRef.current.currentTime=value;}} className="w-full accent-black"/>
-            <div className="mt-1 flex justify-between text-[10px] font-medium text-black/65"><span>{Math.floor(currentTime/60)}:{String(Math.floor(currentTime%60)).padStart(2,'0')}</span><span>{Math.floor(duration/60)}:{String(Math.floor(duration%60)).padStart(2,'0')}</span></div>
-            <div className="mt-3 flex items-center justify-center gap-7">
-              <button type="button" aria-label="Previous track" onClick={()=>changeTrack(-1)} disabled={musicTracks.length<2} className="text-xl disabled:opacity-30">|◀</button>
-              <button type="button" aria-label={playing?'Pause':'Play'} onClick={()=>{const audio=audioRef.current;if(!audio)return;if(playing)audio.pause();else void audio.play().catch(()=>toast.info('Tap play to start the music.'));}} className="grid h-14 w-14 place-items-center rounded-full border-2 border-black text-2xl font-bold">{playing?'Ⅱ':'▶'}</button>
-              <button type="button" aria-label="Next track" onClick={()=>changeTrack(1)} disabled={musicTracks.length<2} className="text-xl disabled:opacity-30">▶|</button>
-            </div>
-          </div>}
-          {activeTrackUrl && <div className="mx-auto mt-4 flex w-full max-w-[420px] items-center gap-3 bg-transparent p-0 text-white">
-            <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center bg-transparent text-white/65"><AudioLines size={16} strokeWidth={1.6} /></span>
-            <div className="min-w-0 flex-1">
-              <div className="mb-1 flex items-center justify-between gap-3"><span className="truncate text-xs font-medium text-white/75">{profile.audioTitle || 'Profile music'}</span><span className="shrink-0 text-[10px] tabular-nums text-white/40">{Math.floor(currentTime/60)}:{String(Math.floor(currentTime%60)).padStart(2,'0')} / {Math.floor(duration/60)}:{String(Math.floor(duration%60)).padStart(2,'0')}</span></div>
-              <input aria-label="Music progress" type="range" min="0" max={Math.max(duration,1)} step="0.1" value={Math.min(currentTime,duration||0)} onChange={e=>{const value=Number(e.target.value);setCurrentTime(value);if(audioRef.current)audioRef.current.currentTime=value;}} className="h-1 w-full cursor-pointer accent-white/70"/>
-            </div>
-            <button type="button" aria-label={audioLoading?'Loading music':playing?'Pause':'Play'} aria-busy={audioLoading} onClick={()=>{const audio=audioRef.current;if(!audio)return;if(playing){audio.pause();return;}setAudioLoading(true);const attempt=audio.play();if(attempt)void attempt.then(()=>setAudioLoading(false)).catch(()=>{setAudioLoading(false);toast.info('Music could not start yet. Please try again.');});}} className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-transparent text-white transition hover:bg-white/10 disabled:opacity-50" disabled={audioLoading}>{audioLoading?<span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white"/>:playing?'Ⅱ':'▶'}</button>
-            {musicTracks.length>1 && <button type="button" aria-label="Next track" onClick={()=>changeTrack(1)} className="shrink-0 bg-transparent px-1 text-xs text-white/65 hover:text-white">▶|</button>}
-            <audio ref={audioRef} preload="auto" autoPlay src={activeTrackUrl} onLoadStart={()=>setAudioLoading(true)} onCanPlay={()=>setAudioLoading(false)} onPlaying={()=>{setPlaying(true);setAudioLoading(false);}} onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>{setAudioLoading(false);setPlaying(false);}} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onLoadedMetadata={e=>setDuration(e.currentTarget.duration||0)} onEnded={()=>{if(musicTracks.length>1)changeTrack(1);else setPlaying(false);}} className="hidden" />
-          </div>}
+
+
           {(profile.showViews === true || profile.showStatus === true) && <div className="mx-auto mt-4 grid max-w-[420px] grid-cols-2 gap-3">
             {profile.showViews === true && <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left">
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Eye size={13} /> Views</div>
@@ -371,6 +358,16 @@ const ProfilePage: React.FC = () => {
               <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-zinc-500"><Sparkles size={13} /> Status</div>
               <div className="mt-1 flex items-center gap-1.5 text-sm font-bold" style={{color:textColor}}><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.7)]" /> Online</div>
             </div>}
+          </div>}
+          {activeTrackUrl && <div className="mx-auto mt-4 flex w-full max-w-[420px] items-center gap-3 bg-transparent p-0 text-white">
+            <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center bg-transparent text-white/65"><AudioLines size={16} strokeWidth={1.6} /></span>
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex items-center justify-between gap-3"><span className="truncate text-xs font-medium text-white/75">{profile.audioTitle || 'Profile music'}</span><span className="shrink-0 text-[10px] tabular-nums text-white/40">{Math.floor(currentTime/60)}:{String(Math.floor(currentTime%60)).padStart(2,'0')} / {Math.floor(duration/60)}:{String(Math.floor(duration%60)).padStart(2,'0')}</span></div>
+              <input aria-label="Music progress" type="range" min="0" max={Math.max(duration,1)} step="0.1" value={Math.min(currentTime,duration||0)} onChange={e=>{const value=Number(e.target.value);setCurrentTime(value);if(audioRef.current)audioRef.current.currentTime=value;}} className="h-1 w-full cursor-pointer accent-white/70"/>
+            </div>
+            <button type="button" aria-label={audioLoading?'Loading music':playing?'Pause':'Play'} aria-busy={audioLoading} onClick={()=>{const audio=audioRef.current;if(!audio)return;if(playing){audio.pause();return;}setAudioLoading(true);const attempt=audio.play();if(attempt)void attempt.then(()=>setAudioLoading(false)).catch(()=>{setAudioLoading(false);toast.info('Music could not start yet. Please try again.');});}} className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-transparent text-white transition hover:bg-white/10 disabled:opacity-50" >{audioLoading?<span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white"/>:playing?'Ⅱ':'▶'}</button>
+            {musicTracks.length>1 && <button type="button" aria-label="Next track" onClick={()=>changeTrack(1)} className="shrink-0 bg-transparent px-1 text-xs text-white/65 hover:text-white">▶|</button>}
+            <audio ref={audioRef} preload="auto" autoPlay src={activeTrackUrl} onLoadStart={()=>setAudioLoading(true)} onCanPlay={()=>setAudioLoading(false)} onPlaying={()=>{setPlaying(true);setAudioLoading(false);}} onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>{setAudioLoading(false);setPlaying(false);}} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onLoadedMetadata={e=>setDuration(e.currentTarget.duration||0)} onEnded={()=>{if(musicTracks.length>1)changeTrack(1);else setPlaying(false);}} className="hidden" />
           </div>}
           {(profile.showDiscordPresence || profile.showLocation) && <div className="mx-auto mt-3 max-w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3">
             <div className="flex flex-wrap items-center gap-2">
