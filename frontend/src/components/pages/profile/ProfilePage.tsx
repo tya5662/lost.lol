@@ -106,6 +106,9 @@ const ProfilePage: React.FC = () => {
   const [profileComments, setProfileComments] = useState<any[]>([]);
   const [commentDraft, setCommentDraft] = useState('');
   const [commentBusy, setCommentBusy] = useState(false);
+  const musicTracks = (profile?.audioTracks || []).filter((track:string) => typeof track === 'string' && track.trim()).map((url:string) => url.trim());
+  const activeTrackUrl = musicTracks[trackIndex] || profile?.audioUrl || '';
+  const changeTrack = (direction:number) => { if (!musicTracks.length) return; setTrackIndex((current) => (current + direction + musicTracks.length) % musicTracks.length); setCurrentTime(0); };
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const backgroundVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -268,9 +271,6 @@ const ProfilePage: React.FC = () => {
   const linkSpacing = Math.max(4, Math.min(28, profile.linkSpacing ?? 12));
   const { profilePicture, backgroundMedia, backgroundType, audioUrl, name, description, links, username: profileUsername, usernameEffect = 'none', backgroundEffect = 'none', cursorEffect = 'none', fontFamily = 'Inter', customFontFamily = '', customFontUrl = '' } = profile;
   const accentColor = profile.accentColor || '#c15bd7';
-  const musicTracks = (profile.audioTracks || []).filter((track:string) => typeof track === 'string' && track.trim()).map((url:string) => url.trim());
-  const activeTrackUrl = musicTracks[trackIndex] || profile.audioUrl || '';
-  const changeTrack = (direction:number) => { if (!musicTracks.length) return; setTrackIndex((current) => (current + direction + musicTracks.length) % musicTracks.length); setCurrentTime(0); };
   const bgOpacity = Math.max(0, Math.min(1, profile.backgroundOpacity ?? 1));
   const cardOpacity = Math.max(0, Math.min(1, profile.cardOpacity ?? profile.profileOpacity ?? 0.92));
   const cardBlur = Math.max(0, Math.min(40, profile.cardBlur ?? profile.profileBlur ?? 0));
