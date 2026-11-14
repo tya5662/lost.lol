@@ -8,6 +8,8 @@ export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isRegister = location.pathname === '/register';
+  const isAdminLogin = location.pathname === '/admin/login';
+  const destination = isAdminLogin ? '/admin' : '/dashboard';
   const [username, setUsername] = useState(() => searchParams.get('username') ?? '');
   const [email, setEmail] = useState('');
   const [identifier, setIdentifier] = useState('');
@@ -74,7 +76,7 @@ export const AuthPage: React.FC = () => {
     try {
       if (otpStep) {
         await apiService.verifyOtp({ email: otpEmail, code: otpCode });
-        navigate('/dashboard');
+        navigate(destination);
         return;
       }
       const result = isRegister
@@ -112,19 +114,19 @@ export const AuthPage: React.FC = () => {
             <ArrowLeft size={19} />
             <span className="tracking-[-.03em] text-white">suffer.info</span>
           </Link>
-          {isRegister && <span className="rounded-full border border-white/15 bg-white/[.04] px-3 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-white/70 sm:text-[11px]">Create account</span>}
+          {isAdminLogin ? <span className="rounded-full border border-white/15 bg-white/[.04] px-3 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-white/70 sm:text-[11px]">Administrator access</span> : isRegister && <span className="rounded-full border border-white/15 bg-white/[.04] px-3 py-1 text-[9px] font-semibold uppercase tracking-[.2em] text-white/70 sm:text-[11px]">Create account</span>}
         </div>
 
         <div className={`px-5 pb-8 ${isRegister ? "pt-10 sm:px-12 sm:pb-12 sm:pt-14" : "pt-8 sm:px-12 sm:pb-12 sm:pt-10"}`}>
-          {isRegister && <div className="mb-9 sm:mb-11">
+          {(isRegister || isAdminLogin) && <div className="mb-9 sm:mb-11">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[.18em] text-white/70">
-              Your space starts here
+              {isAdminLogin ? 'Restricted area' : 'Your space starts here'}
             </p>
             <h1 className="text-[clamp(2.55rem,7vw,4.75rem)] font-semibold leading-[.98] tracking-[-.065em] text-white">
-              Claim your name
+              {isAdminLogin ? 'Admin sign in' : 'Claim your name'}
             </h1>
             <p className="mt-4 max-w-[530px] text-sm leading-6 text-[#aaa4a0] sm:text-base">
-              Set up your suffer.info account and bring the places you share together.
+              {isAdminLogin ? 'Sign in with an authorized administrator account. Access is verified by the server.' : 'Set up your suffer.info account and bring the places you share together.'}
             </p>
           </div>}
 
