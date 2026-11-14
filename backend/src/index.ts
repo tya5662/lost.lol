@@ -9,6 +9,7 @@ import siteSettingsRoutes from './routes/siteSettingsRoutes';
 import connectionRoutes from './routes/connectionRoutes';
 import communityTemplateRoutes from './routes/communityTemplateRoutes';
 import { mongoDB } from './config/database';
+import { rateLimit } from './middleware/rateLimit';
 
 const app=express();
 // Liveness endpoint intentionally runs before the database middleware so the platform can
@@ -16,11 +17,16 @@ const app=express();
 app.get('/health',(_req,res)=>{res.status(200).json({status:'ok'});});
 // Render sits behind a proxy; trust one proxy hop so req.ip reflects the client IP for trusted-device checks.
 app.set('trust proxy', 1);
+// Reject abusive authentication traffic before JSON parsing and database work.
+app.use('/auth', rateLimit({ windowMs: 60_000, max: 60, keyPrefix: 'auth' }));
+app.use('/auth/login', rateLimit({ windowMs: 10 * 60_000, max: 10, keyPrefix: 'login' }));
+app.use('/auth/register', rateLimit({ windowMs: 60 * 60_000, max: 5, keyPrefix: 'register' }));
+app.use('/auth/verify-otp', rateLimit({ windowMs: 10 * 60_000, max: 6, keyPrefix: 'verify-otp' }));
 if(!process.env.JWT_SECRET)console.error('JWT_SECRET is not configured; sign-up and sign-in requests will be unavailable.');
 const frontendOrigins=new Set([process.env.FRONTEND_URL,process.env.FRONTEND_URLS,'https://lost-lol.vercel.app','https://suffer.info','https://www.suffer.info'].filter((v):v is string=>Boolean(v)).flatMap(v=>v.split(',')).map(v=>v.trim().replace(/\/+$/,'')).filter(Boolean));
 const isAllowedFrontendOrigin=(origin?:string)=>{if(!origin)return true;if(frontendOrigins.has(origin))return true;try{const hostname=new URL(origin).hostname;return hostname==='localhost'||hostname==='127.0.0.1'||hostname==='lost-lol.vercel.app'||hostname.endsWith('.vercel.app')}catch{return false}};
 app.use(cors({origin:(origin,callback)=>callback(null,isAllowedFrontendOrigin(origin)),credentials:true,optionsSuccessStatus:204}));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use((_req,_res,next)=>{void mongoDB().then(()=>next()).catch(next)});
 // Readiness is checked after the database middleware succeeds.
 app.get('/ready',(_req,res)=>{res.status(200).json({status:'ready'});});
