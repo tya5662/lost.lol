@@ -16,7 +16,7 @@ router.get('/badges', isAuthenticated, async (req, res, next) => {
   try {
     const actor = await User.findOne({ id: (req.user as any).id });
     if (!actor) { res.status(401).json({ message: 'Authentication required.' }); return; }
-    const definitions = await Badge.find({}).sort({name:1}).lean();
+    const definitions = await Badge.find({available:true}).sort({name:1}).lean();
     const holders = await User.find({ badges: { $exists: true, $ne: [] } }).select('badges').lean();
     const rank:Record<string,number>={member:0,staff:1,'co-owner':2,owner:3};
     res.json(definitions.map((b:any)=>({
@@ -32,7 +32,7 @@ router.post('/badges/claim', isAuthenticated, async (req,res,next)=>{
   try {
     const actor = await User.findOne({ id: (req.user as any).id });
     const badgeName = typeof req.body?.badge === 'string' ? req.body.badge.trim() : '';
-    const badge:any = await Badge.findOne({name:badgeName}).lean();
+    const badge:any = await Badge.findOne({name:badgeName,available:true}).lean();
     if (!actor || !badge || !badge.selfClaimable) { res.status(400).json({message:'That badge is not self-claimable.'}); return; }
     const rank:Record<string,number>={member:0,staff:1,'co-owner':2,owner:3};
     const eligible=(!badge.requiredPremium||!!actor.premium)&&(rank[actor.role]??0)>=(rank[badge.requiredRole||'member']??0);
