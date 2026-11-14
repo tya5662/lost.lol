@@ -292,7 +292,7 @@ router.post('/users/:id/ban', async(req,res,next)=>{
 
 router.delete('/users/:id/ban', async(req,res,next)=>{
   try{
-    const actor=(req as any).actor; const target=await User.findOne({id:Number(req.params.id)});
+    const actor=(req as any).actor; const target=await User.findOne({id:Number(req.params.id)}).select('+bannedUsername');
     if(!target){res.status(404).json({message:'User not found.'});return;}
     const denial=canModerateTarget(actor,target,'unban'); if(denial){res.status(403).json({message:denial});return;}
     const priorUsername=(target as any).bannedUsername as string|undefined;
