@@ -243,7 +243,7 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-[#090909] text-[#f4f0ef]">
       <div className="w-full border-b border-white/[0.08] bg-[#0e0d0f] shadow-sm">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">lost<span className="text-[#d4d4d8]">.lol</span></h1>
+          <h1 className="text-xl font-semibold">suffer<span className="text-zinc-300">.info</span></h1>
           <Button
             variant="ghost"
             onClick={handleLogout}
