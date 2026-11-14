@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { isAuthenticated } from '../middleware/auth';
 import { SiteSettings } from '../model/siteSettings';
 import { User } from '../model/profiles';
+import { AdminRole } from '../model/adminRole';
 
 const router = Router();
 
@@ -64,9 +65,11 @@ router.get('/', async (_req, res, next) => {
 
 router.patch('/', isAuthenticated, async (req, res, next) => {
   try {
-    const actor = await User.findOne({ id: (req.user as any)?.id }).select('role');
-    if (!actor || actor.role !== 'owner') {
-      res.status(403).json({ message: 'Only the site owner can edit global site settings.' });
+    const actor = await User.findOne({ id: (req.user as any)?.id }).select('role rootOwner adminRoleId');
+    const assignedRole = actor?.adminRoleId ? await AdminRole.findById(actor.adminRoleId).lean() : null;
+    const permissions = assignedRole?.permissions || [];
+    if (!actor || (!actor.rootOwner && !permissions.includes('manage_site') && !permissions.includes('manage_homepage'))) {
+      res.status(403).json({ message: 'You do not have permission to edit global site settings.' });
       return;
     }
 
