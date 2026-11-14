@@ -31,6 +31,7 @@ const DashboardRouter:React.FC=()=>{const [user,setUser]=useState<User|null>(nul
  }
  if(parts[0]==='dashboard'&&parts[1]==='premium'&&parts[2])return <DashboardSection user={user} section={`premium-${parts[2]}`}/>;
  if(parts[0]==='dashboard'&&parts[1]==='site')return <SiteEditor user={user}/>;
+ if(parts[0]==='dashboard'&&(parts[1]==='links'||parts[1]==='connections')){window.history.replaceState({},'', '/dashboard/socials');return <DashboardSection user={user} section="socials"/>;}
  const section=parts[1]||'profile';
  return <DashboardSection user={user} section={section}/>;
 };
