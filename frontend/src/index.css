@@ -135,3 +135,31 @@
     50% { filter: drop-shadow(0 0 14px rgba(220,235,245,.18)); }
   }
 }
+
+/* Consistent, restrained dashboard motion and neutral controls */
+.suffer-template-dashboard section,
+.suffer-template-dashboard article,
+.suffer-template-dashboard [data-dashboard-card] {
+  transition: background-color .24s ease, border-color .24s ease, box-shadow .28s ease, transform .28s cubic-bezier(.22,1,.36,1);
+}
+.suffer-template-dashboard section:focus-within { border-color: rgba(212,212,216,.2); }
+.suffer-template-dashboard input[type="checkbox"],
+.suffer-template-dashboard input[type="range"] { accent-color: #a1a1aa; }
+.suffer-template-dashboard input,
+.suffer-template-dashboard select,
+.suffer-template-dashboard textarea {
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+}
+.suffer-template-dashboard input:focus,
+.suffer-template-dashboard select:focus,
+.suffer-template-dashboard textarea:focus {
+  border-color: rgba(212,212,216,.45);
+  box-shadow: 0 0 0 3px rgba(212,212,216,.06);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .suffer-template-dashboard main > section { animation: dashboard-enter .38s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes dashboard-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
