@@ -41,7 +41,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
  const music=section==='music';
  const widgets=section==='widgets';
  const analytics=section==='analytics';
- const linksPage=section==='links'; const connectionsPage=section==='connections'; const aliasesPage=section==='aliases'; const badgesPage=section==='badges'; const templatesPage=section==='templates';
+ const linksPage=false; const connectionsPage=false; const aliasesPage=section==='aliases'; const badgesPage=section==='badges'; const templatesPage=section==='templates';
  const uploadedAudioPresent=!!local.audioUrl?.startsWith('data:audio/')&&!removeUploadedAudio;
  const playlistTracks=((local.audioTracks||[]).filter(track=>!track.startsWith('data:')).length?(local.audioTracks||[]).filter(track=>!track.startsWith('data:')):(local.audioUrl&&!local.audioUrl.startsWith('data:')?[local.audioUrl]:[])).slice(0,30);
 
