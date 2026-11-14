@@ -403,11 +403,10 @@ export const getUserByUsername = async (req: Request, res: Response, next: NextF
     const { username } = req.params;
 
     // Find user and increment total visit
-    const user = await User.findOneAndUpdate(
-      { $or: [{ username }, { aliases: username }] },
-      { $inc: { totalVisit: 1 } },
-      { new: true }
-    );
+    const profileQuery = { $or: [{ username }, { aliases: username }] };
+    const user = req.query.preview === '1'
+      ? await User.findOne(profileQuery)
+      : await User.findOneAndUpdate(profileQuery, { $inc: { totalVisit: 1 } }, { new: true });
 
     if (!user || user.banned) {
        res.status(404).json({ message: 'User not found' });
