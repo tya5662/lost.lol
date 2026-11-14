@@ -1,35 +1,40 @@
 import multer from 'multer';
-import path from 'path';
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'uploads/');
-//   },
-//   filename: (req, file, cb) => {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-//   }
-// });
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 
-// export const upload = multer({
-//   storage: storage,
-//   limits: {
-//     fileSize: 10 * 1024 * 1024, // 10MB limit
-//   },
-//   fileFilter: (req, file, cb) => {
-//     if (file.fieldname === 'profilePicture') {
-//       if (!file.mimetype.startsWith('image/')) {
-//         return cb(new Error('Only images are allowed for profile picture'));
-//       }
-//     } else if (file.fieldname === 'backgroundMedia') {
-//       if (!file.mimetype.startsWith('image/') && !file.mimetype.startsWith('video/')) {
-//         return cb(new Error('Only images or videos are allowed for background'));
-//       }
-//     }
-//     cb(null, true);
-//   }
-// });
+// Keep uploads in memory because the current profile model stores media in MongoDB.
+// Explicit validation prevents unsupported files and oversized images from becoming
+// opaque Multer/Mongo errors that the dashboard displays as "Something broke!".
+const storage = multer.memoryStorage();
 
+export const upload = multer({
+  storage,
+  limits: {
+    fileSize: MAX_UPLOAD_BYTES,
+    files: 3,
+    fields: 40,
+    parts: 45,
+  },
+  fileFilter: (_req, file, callback) => {
+    if (file.fieldname === 'profilePicture' && !file.mimetype.startsWith('image/')) {
+      callback(new Error('Profile picture must be an image (JPG, PNG, WebP, GIF, or another supported image format).'));
+      return;
+    }
 
-const storage = multer.memoryStorage(); 
-export const upload = multer({ storage });
+    if (file.fieldname === 'backgroundMedia' &&
+      !file.mimetype.startsWith('image/') &&
+      !file.mimetype.startsWith('video/')) {
+      callback(new Error('Background media must be an image or video.'));
+      return;
+    }
+
+    if (file.fieldname === 'audioFile' && ![
+      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/aac',
+    ].includes(file.mimetype)) {
+      callback(new Error('Music must be an MP3 or supported audio file.'));
+      return;
+    }
+
+    callback(null, true);
+  },
+});
