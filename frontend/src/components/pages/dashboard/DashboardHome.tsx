@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Crown, Eye, Link2, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes, Award, Search, Menu, X as XIcon, Sparkles, Plug } from 'lucide-react';
+import { BarChart3, Crown, Eye, Palette, Settings, Share2, Shield, UserRound, Music2, Boxes, Award, Search, Menu, X as XIcon, Sparkles } from 'lucide-react';
 import { User } from '../../../types';
 
 const navGroups = [
