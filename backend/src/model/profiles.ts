@@ -30,11 +30,8 @@ const userSchema = new mongoose.Schema({
   trustedDeviceHashes: { type: [String], default: [], select: false },
 
   // Platform/team permissions
-  role: {
-    type: String,
-    enum: ['owner', 'co-owner', 'staff', 'member'],
-    default: 'member',
-  },
+  role: { type: String, default: 'member', trim: true, lowercase: true },
+  adminRoleId: { type: mongoose.Schema.Types.ObjectId, ref: 'AdminRole', default: null, index: true },
   rootOwner: { type: Boolean, default: false, index: true },
   canBan: { type: Boolean, default: false },
   canDemote: { type: Boolean, default: false },
