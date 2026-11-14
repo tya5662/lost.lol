@@ -134,7 +134,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user, onUpdate
           </label>
         </div>
         <div className="flex items-center justify-between rounded-lg border px-4 py-3" style={{ backgroundColor, borderColor: `${accentColor}66`, color: textColor }}>
-          <span className="text-xs font-semibold">lost.lol/{user.username}</span>
+          <span className="text-xs font-semibold">suffer.info/{user.username}</span>
           <span className="rounded-md px-2.5 py-1 text-[10px] font-bold text-white" style={{ backgroundColor: accentColor }}>Preview</span>
         </div>
       </section>
