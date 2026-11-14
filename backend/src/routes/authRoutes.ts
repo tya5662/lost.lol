@@ -65,6 +65,7 @@ const currentIpHash = (ip: string): string => {
   return createHmac('sha256', secret).update(ip || 'unknown').digest('hex');
 };
 
+const deviceHash = (deviceId: string): string => createHmac('sha256', process.env.JWT_SECRET || 'missing-secret').update(`device:${deviceId}`).digest('hex');
 const createOtp = (): string => String(randomInt(0, 1_000_000)).padStart(6, '0');
 const hashOtp = (email: string, code: string): string => createHmac('sha256', process.env.JWT_SECRET || 'missing-secret').update(`${email}:${code}`).digest('hex');
 
@@ -216,7 +217,7 @@ router.post('/login', async (req, res, next) => {
   }
 
   try {
-    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts +trustedIpHashes');
+    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts +trustedIpHashes +trustedDeviceHashes');
     if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
       res.status(401).json({ message: 'Incorrect email/username or password.' });
       return;
@@ -230,7 +231,9 @@ router.post('/login', async (req, res, next) => {
     }
 
     const ipHash = currentIpHash(req.ip || '');
-    const trusted = Array.isArray(user.trustedIpHashes) && user.trustedIpHashes.includes(ipHash);
+    const deviceId = typeof req.body.deviceId === 'string' ? req.body.deviceId.slice(0, 128) : '';
+    const browserHash = deviceId ? deviceHash(deviceId) : '';
+    const trusted = (Array.isArray(user.trustedIpHashes) && user.trustedIpHashes.includes(ipHash)) || (!!browserHash && Array.isArray((user as any).trustedDeviceHashes) && (user as any).trustedDeviceHashes.includes(browserHash));
     if (!user.emailVerified || !trusted) {
       if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
         res.status(503).json({ message: 'Email verification is not configured yet. Please try again later.' });
@@ -264,7 +267,7 @@ router.post('/verify-otp', async (req, res, next) => {
     return;
   }
   try {
-    const user = await User.findOne({ email }).select('+otpHash +otpExpiresAt +otpAttempts +trustedIpHashes');
+    const user = await User.findOne({ email }).select('+otpHash +otpExpiresAt +otpAttempts +trustedIpHashes +trustedDeviceHashes');
     if (!user || !user.otpHash || !user.otpExpiresAt || user.otpExpiresAt.getTime() < Date.now()) {
       res.status(400).json({ message: 'That code expired. Sign in or register again to get a new one.' });
       return;
@@ -288,6 +291,12 @@ router.post('/verify-otp', async (req, res, next) => {
     const ipHash = currentIpHash(req.ip || '');
     const trusted = Array.isArray(user.trustedIpHashes) ? user.trustedIpHashes.filter((value: string) => value !== ipHash) : [];
     user.trustedIpHashes = [...trusted, ipHash].slice(-10);
+    const deviceId = typeof req.body.deviceId === 'string' ? req.body.deviceId.slice(0, 128) : '';
+    if (deviceId) {
+      const browserHash = deviceHash(deviceId);
+      const devices = Array.isArray((user as any).trustedDeviceHashes) ? (user as any).trustedDeviceHashes.filter((value: string) => value !== browserHash) : [];
+      (user as any).trustedDeviceHashes = [...devices, browserHash].slice(-10);
+    }
     await user.save();
     res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 30, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
   } catch (error) {
