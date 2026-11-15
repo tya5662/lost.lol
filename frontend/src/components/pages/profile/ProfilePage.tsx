@@ -160,6 +160,7 @@ const ProfilePage: React.FC = () => {
       audio.loop = false;
       audio.autoplay = true;
       audio.preload = 'auto';
+      audio.muted = false;
     }
     const attemptMediaPlayback = () => {
       if (video && profile?.backgroundType === 'video') {
@@ -167,22 +168,35 @@ const ProfilePage: React.FC = () => {
         void video.play().catch(() => { video.muted = true; });
       }
     };
-    // Attempt audible autoplay as soon as the source is attached and ready.
-    // iOS Safari may still require one tap because it blocks unsolicited audio.
+    // Always attempt audible playback when a profile with music opens.
+    // Browsers (especially iOS Safari) may block sound until the visitor interacts.
     const tryAutoplay = () => {
       const currentAudio = audioRef.current;
-      if (currentAudio && activeTrackUrl) void currentAudio.play().catch(() => {});
+      if (currentAudio && activeTrackUrl) {
+        currentAudio.muted = false;
+        void currentAudio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      }
     };
     if (audio && activeTrackUrl) {
       audio.autoplay = true;
       audio.preload = 'auto';
+      audio.muted = false;
       audio.load();
-      void audio.play().catch(() => {});
+      void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
       audio.addEventListener('canplay', tryAutoplay, { once: true });
+      // Retry on the visitor's first gesture so iOS/Safari can start audible playback.
+      document.addEventListener('pointerdown', tryAutoplay, { once: true });
+      document.addEventListener('touchstart', tryAutoplay, { once: true, passive: true });
+      document.addEventListener('keydown', tryAutoplay, { once: true });
     }
     attemptMediaPlayback();
-    return () => { if (audio) audio.removeEventListener('canplay', tryAutoplay); };
-  }, [activeTrackUrl, profile?.audioAutoplay, profile?.backgroundType, profile?.backgroundMedia]);
+    return () => {
+      if (audio) audio.removeEventListener('canplay', tryAutoplay);
+      document.removeEventListener('pointerdown', tryAutoplay);
+      document.removeEventListener('touchstart', tryAutoplay);
+      document.removeEventListener('keydown', tryAutoplay);
+    };
+  }, [activeTrackUrl, profile?.backgroundType, profile?.backgroundMedia]);
 
   useEffect(() => {
     if (!profile?.typewriterEnabled || !(profile.typewriterTexts || []).length) { setTypewriterText(''); return; }
@@ -328,10 +342,7 @@ const ProfilePage: React.FC = () => {
       {cursorEffect === 'sparkle' && <canvas ref={cursorCanvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[100]" />}
       {backgroundEffect === 'grid' && <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />}
 
-      {profile.showBranding === true && <motion.a href="/" aria-label="suffer.info home" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .45 }} className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 text-sm font-bold tracking-tight text-white sm:left-8 sm:top-7">
-        <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#c15bd7]/35 bg-[#c15bd7]/10 text-[#ff5b67] shadow-[0_0_25px_rgba(193,91,215,.12)]"><AudioLines size={16} /></span>
-        suffer<span className="-ml-2 text-[#c15bd7]">.info</span>
-      </motion.a>}
+
       
       <motion.section initial={{ opacity: 0, y: 22, scale: .985 }} onPointerMove={(event)=>{const rect=event.currentTarget.getBoundingClientRect();const intensity=profile.cardTiltIntensity??15;setCardTilt({x:-((event.clientY-rect.top)/rect.height-.5)*2*intensity,y:((event.clientX-rect.left)/rect.width-.5)*2*intensity});}} onPointerLeave={()=>setCardTilt({x:0,y:0})} className={`suffer-template-card relative z-10 w-full max-w-[704px] overflow-hidden ${cardOpacity <= 0 ? 'profile-card-transparent' : ''}`} animate={profile.syncToBackground ? syncedMotion : { opacity: 1, y: 0, scale: 1 }} transition={profile.syncToBackground ? {duration: backgroundEffect === 'flicker' ? 1.15 : 3, repeat: Infinity, ease: 'easeInOut'} : { duration: .55, ease: [0.22, 1, 0.36, 1] }} style={{backgroundColor:profile.cardStyle==='solid'?`rgba(11,11,13,${cardOpacity})`:`rgba(8,8,8,${cardOpacity})`,backdropFilter:cardOpacity > 0 && cardBlur > 0 ? `blur(${cardBlur}px)` : 'none',borderRadius:cardRadius,border: 'none',boxShadow:cardOpacity > 0 ? '0 35px 120px rgba(0,0,0,.25),0 0 70px rgba(193,91,215,.04)' : 'none',transform:`perspective(${profile.cardTiltPerspective??1000}px) rotateX(${cardTilt.x}deg) rotateY(${cardTilt.y}deg)`,transition:'transform 180ms ease-out, background-color 250ms ease, box-shadow 250ms ease'}}>
         {cardOpacity <= 0 && <style>{`.profile-card-transparent [class*="bg-"] { background: transparent !important; background-color: transparent !important; }
@@ -414,7 +425,7 @@ const ProfilePage: React.FC = () => {
               </motion.a>
             ); })}
           </div>
-          {profile.showBranding === true && <div className="mx-auto mt-8 flex max-w-[420px] items-center justify-between border-t border-white/[0.08] pt-4 text-[10px] font-semibold uppercase tracking-[.14em] text-[#716a6b]"><span>suffer.info/{profileUsername}</span></div>}
+
         </div>
       </motion.section>
     </main>
