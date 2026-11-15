@@ -3,6 +3,7 @@ import { createHmac, randomBytes, randomInt, scrypt, timingSafeEqual } from 'cry
 import jwt from 'jsonwebtoken';
 import { isAuthenticated } from '../middleware/auth';
 import { User } from '../model/profiles';
+import { IpLoginLog } from '../model/ipLoginLog';
 
 const router = Router();
 const passwordKeyLength = 64;
@@ -63,6 +64,27 @@ const currentIpHash = (ip: string): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error('JWT_SECRET environment variable is required');
   return createHmac('sha256', secret).update(ip || 'unknown').digest('hex');
+};
+
+
+const recordIpEvent = async (user: any, req: any, event: 'login' | 'login_failed' | 'otp_login') => {
+  try {
+    const ip = String(req.ip || '').trim();
+    const secret = process.env.JWT_SECRET;
+    if (!user || !secret || !ip) return;
+    const ipHash = createHmac('sha256', secret).update(`ip-log:${ip}`).digest('hex');
+    await IpLoginLog.create({
+      userId: Number(user.id),
+      username: String(user.username || '').slice(0, 20),
+      ipHash,
+      event,
+      success: event !== 'login_failed',
+      userAgent: String(req.get?.('user-agent') || '').slice(0, 300),
+      createdAt: new Date(),
+    });
+  } catch (error) {
+    console.error('Unable to record account security event:', error instanceof Error ? error.message : 'unknown error');
+  }
 };
 
 const deviceHash = (deviceId: string): string => createHmac('sha256', process.env.JWT_SECRET || 'missing-secret').update(`device:${deviceId}`).digest('hex');
@@ -219,6 +241,7 @@ router.post('/login', async (req, res, next) => {
   try {
     const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] }).select('+passwordHash +otpHash +otpExpiresAt +otpAttempts +trustedIpHashes +trustedDeviceHashes');
     if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+      if (user) await recordIpEvent(user, req, 'login_failed');
       res.status(401).json({ message: 'Incorrect email/username or password.' });
       return;
     }
@@ -257,6 +280,7 @@ router.post('/login', async (req, res, next) => {
       return;
     }
 
+    await recordIpEvent(user, req, 'login');
     res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 30, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
   } catch (error) {
     next(error);
@@ -302,6 +326,7 @@ router.post('/verify-otp', async (req, res, next) => {
       (user as any).trustedDeviceHashes = [...devices, browserHash].slice(-10);
     }
     await user.save();
+    await recordIpEvent(user, req, 'otp_login');
     res.json({ token: issueToken(Number(user.id), user.email, user.username || ''), sessionDays: 30, user: { id: user.id, username: user.username, name: user.name, email: user.email } });
   } catch (error) {
     next(error);
