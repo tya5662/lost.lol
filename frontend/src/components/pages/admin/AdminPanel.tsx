@@ -64,16 +64,16 @@ export const AdminPanel:React.FC=()=>{
     {[['Accounts',users.length],['Premium',users.filter(u=>u.premium).length],['Team',users.filter(u=>u.role!=='member').length],['Verified',users.filter(u=>u.verified).length]].map(([k,v])=><div key={String(k)} className="rounded-2xl border border-white/[.07] bg-[#0d0d0f] p-5"><p className="text-xs text-zinc-500">{k}</p><p className="mt-2 text-2xl font-bold">{v}</p></div>)}
    </div>
    {error&&<div className="mb-4 rounded-xl border border-zinc-500/30 bg-zinc-500/10 p-4 text-sm text-zinc-300">{error}</div>}
-   <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-    <section className="overflow-hidden rounded-2xl border border-white/[.08] bg-[#0c0c0e]">
+   <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px]">
+    <section className="order-2 overflow-hidden rounded-2xl border border-white/[.08] bg-[#0c0c0e] lg:order-1">
      <div className="border-b border-white/[.07] p-4"><Field label="Search accounts" value={query} onChange={setQuery} placeholder="username, email, or display name"/></div>
      {loading?<div className="p-6 text-zinc-500">Loading users...</div>:<div className="divide-y divide-white/[.06]">{filtered.map(u=><button key={u.id} onClick={()=>setSelected(u.id)} className={`block w-full p-4 text-left transition-colors hover:bg-white/[.03] ${selected===u.id?'bg-zinc-500/[.06]':''}`}>
        <div className="flex items-center justify-between gap-3"><div className="min-w-0"><div className="truncate font-semibold">{u.username} {u.verified&&<span className="text-zinc-400">✓</span>}</div><div className="truncate text-xs text-zinc-500">{u.email}</div></div><span className="rounded-full bg-white/5 px-2 py-1 text-[10px] text-zinc-400">{u.role}</span></div>
        <div className="mt-3 flex flex-wrap gap-2"><span className="text-[10px] text-zinc-600">{u.totalVisit||0} views</span>{u.premium&&<span className="text-[10px] text-amber-300">premium</span>}{(u.badges||[]).map(b=><span key={b} className="rounded-full bg-zinc-500/10 px-2 py-1 text-[10px] text-zinc-300">{b}</span>)}</div>
      </button>)}</div>}
     </section>
-    <section className="space-y-4">
-     {!target?<div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-6 text-sm text-zinc-500">Select an account to manage roles, premium access, verification, colors, fonts, effects, badges, and custom emojis.</div>:
+    <section className="order-1 space-y-4 lg:sticky lg:top-24 lg:order-2 lg:self-start">
+     {!target?<div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-6 text-sm text-zinc-500">Select an account below. Its role, Premium, verification, moderation, permissions, and profile controls will appear here immediately.</div>:
      <>
       <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h2 className="font-semibold">{target.username}{target.rootOwner&&<span className="ml-2 rounded-full bg-zinc-500/10 px-2 py-1 text-[9px] uppercase tracking-wider text-zinc-300">Primary owner</span>}</h2><p className="mt-1 text-xs text-zinc-500">{target.email}</p>
        <div className="mt-5 grid gap-3 sm:grid-cols-2">
