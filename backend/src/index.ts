@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 import cors from 'cors';
 import path from 'path';
 import userRoutes from './routes/userRoutes';
@@ -32,7 +33,32 @@ app.use('/api/connections',connectionRoutes);
 app.use('/api/community-templates',communityTemplateRoutes);
 app.use('/api/users',userRoutes);
 app.use('/api/links',linkRoutes);
-app.use((err:Error,_req:express.Request,res:express.Response,_next:express.NextFunction)=>{console.error(err.stack);res.status(500).json({message:'Something broke!'});});
+app.use((err:Error,_req:express.Request,res:express.Response,_next:express.NextFunction)=>{
+  console.error('Request failed:', err);
+  if (err instanceof multer.MulterError) {
+    const tooLarge = err.code === 'LIMIT_FILE_SIZE';
+    res.status(tooLarge ? 413 : 400).json({
+      message: tooLarge
+        ? 'That file is too large. Please choose a file smaller than 8 MB.'
+        : err.code === 'LIMIT_UNEXPECTED_FILE'
+          ? 'Unexpected upload field. Please reselect the profile picture and try again.'
+          : 'The upload could not be processed. Please try again.',
+    });
+    return;
+  }
+  if (err.message.includes('Profile picture must be an image') ||
+      err.message.includes('Background media must be an image or video') ||
+      err.message.includes('Music must be an MP3')) {
+    res.status(400).json({ message: err.message });
+    return;
+  }
+  const mongoError = err as Error & { code?: number };
+  if (mongoError.code === 10334 || /document.*too large|BSON.*size/i.test(err.message)) {
+    res.status(413).json({ message: 'This media is too large to save to your profile. Please use a smaller image.' });
+    return;
+  }
+  res.status(500).json({message:'Something broke! Please try again. If it keeps happening, contact support.'});
+});
 app.get('/',(_req,res)=>{res.json({status:'ok'})});
 if(!process.env.VERCEL){void mongoDB().then(()=>{const port=Number(process.env.PORT)||3000;app.listen(port,()=>console.log(`Server is running on port ${port}`));}).catch((error:unknown)=>console.error('Unable to connect to MongoDB',error));}
 export default app;
