@@ -3,6 +3,7 @@ import {Link,useNavigate} from 'react-router-dom';
 import {apiService} from '../../../services/api';
 import {UserRole} from '../../../types';
 
+type AdminIpLog={ipHash:string;event:string;success:boolean;userAgent?:string;createdAt:string};
 type AdminUser={
  id:number;username:string;name?:string;email:string;role:UserRole;premium:boolean;badges:string[];
  totalVisit?:number;verified?:boolean;accentColor?:string;textColor?:string;backgroundColor?:string;
@@ -25,7 +26,7 @@ const Select=({label,value,onChange,options}:{label:string;value:string;onChange
 
 export const AdminPanel:React.FC=()=>{
  const navigate=useNavigate();
- const [users,setUsers]=useState<AdminUser[]>([]); const [error,setError]=useState(''); const [loading,setLoading]=useState(true);
+ const [users,setUsers]=useState<AdminUser[]>([]); const [ipLogs,setIpLogs]=useState<AdminIpLog[]>([]); const [ipLogsLoading,setIpLogsLoading]=useState(false); const [error,setError]=useState(''); const [loading,setLoading]=useState(true);
  const [activeTab,setActiveTab]=useState<'users'|'maintenance'>('users');
  const [maintenance,setMaintenance]=useState({maintenanceMode:false,maintenanceTitle:'We’ll be back soon',maintenanceMessage:'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:''}); const [maintenanceSaving,setMaintenanceSaving]=useState(false);
  const [query,setQuery]=useState(''); const [selected,setSelected]=useState<number|null>(null);
@@ -33,7 +34,8 @@ export const AdminPanel:React.FC=()=>{
  const [saving,setSaving]=useState(false); const [badgeDefs,setBadgeDefs]=useState<any[]>([]); const [me,setMe]=useState<any>(null); const [banReason,setBanReason]=useState(''); const [newBadge,setNewBadge]=useState({name:'',image:'',fontFamily:'Inter',textColor:'#f4f0ef',accentColor:'#a1a1aa',animation:'glow',description:'',selfClaimable:false,requiredPremium:false,requiredRole:'member',maxHolders:0,available:true,showOnProfiles:true});
  const load=async()=>{try{setUsers(await apiService.getAdminUsers() as AdminUser[])}catch(e){setError(e instanceof Error?e.message:'Unable to load admin panel')}finally{setLoading(false)}};
  useEffect(()=>{if(!localStorage.getItem('token')){navigate('/admin/login',{replace:true});return;}apiService.getAdminMe().then(async info=>{setMe(info);await load();apiService.getAdminBadgeDefinitions().then(setBadgeDefs).catch(()=>setBadgeDefs([]));apiService.getSiteSettings().then(s=>setMaintenance({maintenanceMode:!!s.maintenanceMode,maintenanceTitle:s.maintenanceTitle||'We’ll be back soon',maintenanceMessage:s.maintenanceMessage||'suffer.info is temporarily unavailable while we make improvements.',maintenanceEta:s.maintenanceEta||''})).catch(()=>{});}).catch(()=>navigate('/admin/login',{replace:true}));},[]);
- const target=users.find(u=>u.id===selected)||null; const isRootOwner=!!me?.rootOwner; const canManageAdmins=isRootOwner||(me?.permissions||[]).includes('manage_admins'); const canManageSite=isRootOwner||(me?.permissions||[]).some((p:string)=>['manage_site','manage_homepage'].includes(p));
+ const target=users.find(u=>u.id===selected)||null;
+ useEffect(()=>{if(!selected||!me?.rootOwner){setIpLogs([]);return;}let active=true;setIpLogsLoading(true);apiService.getAdminUserIpLogs(selected).then((rows:any)=>{if(active)setIpLogs(Array.isArray(rows)?rows:[])}).catch(e=>{if(active)setError(e instanceof Error?e.message:'Could not load account IP history')}).finally(()=>{if(active)setIpLogsLoading(false)});return()=>{active=false}},[selected,me?.rootOwner]); const isRootOwner=!!me?.rootOwner; const canManageAdmins=isRootOwner||(me?.permissions||[]).includes('manage_admins'); const canManageSite=isRootOwner||(me?.permissions||[]).some((p:string)=>['manage_site','manage_homepage'].includes(p));
  const saveMaintenance=async(next=maintenance)=>{setMaintenanceSaving(true);setError('');try{const saved=await apiService.updateSiteSettings({...await apiService.getSiteSettings(),...next} as any);setMaintenance({maintenanceMode:!!saved.maintenanceMode,maintenanceTitle:saved.maintenanceTitle||next.maintenanceTitle,maintenanceMessage:saved.maintenanceMessage||next.maintenanceMessage,maintenanceEta:saved.maintenanceEta||''});}catch(e){setError(e instanceof Error?e.message:'Could not save maintenance settings')}finally{setMaintenanceSaving(false)}};
  const update=async(id:number,body:{role?:UserRole;premium?:boolean})=>{setError('');try{await apiService.updateAdminUser(id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Update failed')}};
  const customize=async(body:Record<string,unknown>)=>{if(!target)return;setSaving(true);setError('');try{await apiService.updateAdminCustomization(target.id,body);await load()}catch(e){setError(e instanceof Error?e.message:'Customization update failed')}finally{setSaving(false)}};
@@ -76,6 +78,11 @@ export const AdminPanel:React.FC=()=>{
      {!target?<div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-6 text-sm text-zinc-500">Select an account to manage roles, premium access, verification, colors, fonts, effects, badges, and custom emojis.</div>:
      <>
       <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h2 className="font-semibold">{target.username}{target.rootOwner&&<span className="ml-2 rounded-full bg-zinc-500/10 px-2 py-1 text-[9px] uppercase tracking-wider text-zinc-300">Primary owner</span>}</h2><p className="mt-1 text-xs text-zinc-500">{target.email}</p>
+       {isRootOwner&&<div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-4">
+        <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Account IP history</h3><p className="mt-1 text-[11px] text-zinc-500">Private, one-way IP fingerprints · last 30 days</p></div><span className="text-[10px] text-zinc-500">{ipLogs.length} events</span></div>
+        {ipLogsLoading?<p className="mt-3 text-xs text-zinc-500">Loading security history…</p>:ipLogs.length===0?<p className="mt-3 text-xs text-zinc-500">No login IP events recorded for this account.</p>:<div className="mt-3 max-h-64 space-y-2 overflow-y-auto">{ipLogs.map((log,i)=><div key={i} className="rounded-lg border border-white/[.06] bg-white/[.02] px-3 py-2"><div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-xs text-zinc-200">IP fingerprint: {log.ipHash.slice(0,12)}…</span><span className={log.success?'text-[10px] text-emerald-300':'text-[10px] text-amber-300'}>{log.event.replace('_',' ')}</span></div><div className="mt-1 text-[10px] text-zinc-500">{new Date(log.createdAt).toLocaleString()}</div>{log.userAgent&&<div className="mt-1 truncate text-[10px] text-zinc-600">{log.userAgent}</div>}</div>)}</div>}
+       </div>}
+
        <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <Select label="Role" value={target.role} onChange={v=>update(target.id,{role:v as UserRole})} options={['member','staff','co-owner','owner']}/>
         <div><span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Premium</span><button onClick={()=>update(target.id,{premium:!target.premium})} className={`h-10 w-full rounded-xl ${target.premium?'bg-amber-500/20 text-amber-200':'bg-white/10 text-zinc-400'}`}>{target.premium?'Enabled':'Disabled'}</button></div>
