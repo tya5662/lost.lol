@@ -67,9 +67,10 @@ const currentIpHash = (ip: string): string => {
 };
 
 
-const recordIpEvent = async (user: any, req: any, event: 'login' | 'login_failed' | 'otp_login') => {
+const recordIpEvent = async (user: any, req: any, event: 'login' | 'login_failed' | 'login_pending' | 'otp_login') => {
   try {
-    const ip = String(req.ip || '').trim();
+    // Express trusts the single Render proxy hop; socket address is a safe fallback.
+    const ip = String(req.ip || req.socket?.remoteAddress || '').trim();
     const secret = process.env.JWT_SECRET;
     if (!user || !secret || !ip) return;
     const ipHash = createHmac('sha256', secret).update(`ip-log:${ip}`).digest('hex');
@@ -263,6 +264,8 @@ router.post('/login', async (req, res, next) => {
     const browserHash = deviceId ? deviceHash(deviceId) : '';
     const trusted = (Array.isArray(user.trustedIpHashes) && user.trustedIpHashes.includes(ipHash)) || (!!browserHash && Array.isArray((user as any).trustedDeviceHashes) && (user as any).trustedDeviceHashes.includes(browserHash));
     if (!user.emailVerified || !trusted) {
+      // Capture the client IP even if the user closes the page before completing OTP.
+      await recordIpEvent(user, req, 'login_pending');
       if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
         res.status(503).json({ message: 'Email verification is not configured yet. Please try again later.' });
         return;
