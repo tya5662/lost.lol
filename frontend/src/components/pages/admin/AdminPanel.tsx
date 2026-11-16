@@ -3,7 +3,7 @@ import {Link,useNavigate} from 'react-router-dom';
 import {apiService} from '../../../services/api';
 import {UserRole} from '../../../types';
 
-type AdminIpLog={ipHash:string;event:string;success:boolean;userAgent?:string;createdAt:string};
+type AdminIpLog={ipAddress?:string;ipHash?:string;event:string;success:boolean;userAgent?:string;createdAt:string};
 type AdminUser={
  id:number;username:string;name?:string;email:string;role:UserRole;premium:boolean;badges:string[];
  totalVisit?:number;verified?:boolean;accentColor?:string;textColor?:string;backgroundColor?:string;
@@ -79,8 +79,8 @@ export const AdminPanel:React.FC=()=>{
      <>
       <div className="rounded-2xl border border-white/[.08] bg-[#0c0c0e] p-5"><h2 className="font-semibold">{target.username}{target.rootOwner&&<span className="ml-2 rounded-full bg-zinc-500/10 px-2 py-1 text-[9px] uppercase tracking-wider text-zinc-300">Primary owner</span>}</h2><p className="mt-1 text-xs text-zinc-500">{target.email}</p>
        {isRootOwner&&<div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-4">
-        <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Account IP history</h3><p className="mt-1 text-[11px] text-zinc-500">Private, one-way IP fingerprints · last 30 days</p></div><span className="text-[10px] text-zinc-500">{ipLogs.length} events</span></div>
-        {ipLogsLoading?<p className="mt-3 text-xs text-zinc-500">Loading security history…</p>:ipLogs.length===0?<p className="mt-3 text-xs text-zinc-500">No login IP events recorded for this account.</p>:<div className="mt-3 max-h-64 space-y-2 overflow-y-auto">{ipLogs.map((log,i)=><div key={i} className="rounded-lg border border-white/[.06] bg-white/[.02] px-3 py-2"><div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-xs text-zinc-200">IP fingerprint: {log.ipHash.slice(0,12)}…</span><span className={log.success?'text-[10px] text-emerald-300':'text-[10px] text-amber-300'}>{log.event.replace('_',' ')}</span></div><div className="mt-1 text-[10px] text-zinc-500">{new Date(log.createdAt).toLocaleString()}</div>{log.userAgent&&<div className="mt-1 truncate text-[10px] text-zinc-600">{log.userAgent}</div>}</div>)}</div>}
+        <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Account IP history</h3><p className="mt-1 text-[11px] text-zinc-500">Full IP security logs · owner-only · auto-delete after 30 days</p></div><span className="text-[10px] text-zinc-500">{ipLogs.length} events</span></div>
+        {ipLogsLoading?<p className="mt-3 text-xs text-zinc-500">Loading security history…</p>:ipLogs.length===0?<p className="mt-3 text-xs text-zinc-500">No login IP events recorded for this account.</p>:<div className="mt-3 max-h-64 space-y-2 overflow-y-auto">{ipLogs.map((log,i)=><div key={i} className="rounded-lg border border-white/[.06] bg-white/[.02] px-3 py-2"><div className="flex flex-wrap items-center justify-between gap-2"><span className="font-mono text-xs text-zinc-200">IP address: {log.ipAddress||`Legacy fingerprint ${log.ipHash?.slice(0,12)||'unavailable'}…`}</span><span className={log.success?'text-[10px] text-emerald-300':'text-[10px] text-amber-300'}>{log.event.replace('_',' ')}</span></div><div className="mt-1 text-[10px] text-zinc-500">{new Date(log.createdAt).toLocaleString()}</div>{log.userAgent&&<div className="mt-1 truncate text-[10px] text-zinc-600">{log.userAgent}</div>}</div>)}</div>}
        </div>}
 
        <div className="mt-5 grid gap-3 sm:grid-cols-2">
