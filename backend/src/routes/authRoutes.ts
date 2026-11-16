@@ -77,6 +77,7 @@ const recordIpEvent = async (user: any, req: any, event: 'login' | 'login_failed
       userId: Number(user.id),
       username: String(user.username || '').slice(0, 20),
       ipHash,
+      ipAddress: ip,
       event,
       success: event !== 'login_failed',
       userAgent: String(req.get?.('user-agent') || '').slice(0, 300),
