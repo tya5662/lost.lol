@@ -420,7 +420,7 @@ router.get('/users/:id/ip-logs', async (req, res, next) => {
     if (!actor?.rootOwner) { res.status(403).json({ message: 'Only the primary owner can view account IP security logs.' }); return; }
     const userId = Number(req.params.id);
     if (!Number.isSafeInteger(userId)) { res.status(400).json({ message: 'Invalid user ID.' }); return; }
-    const logs = await IpLoginLog.find({ userId, createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }).sort({ createdAt: -1 }).limit(100).select('ipHash event success userAgent createdAt').lean();
+    const logs = await IpLoginLog.find({ userId, createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }).sort({ createdAt: -1 }).limit(100).select('ipAddress ipHash event success userAgent createdAt').lean();
     res.json(logs);
   } catch (error) { next(error); }
 });
