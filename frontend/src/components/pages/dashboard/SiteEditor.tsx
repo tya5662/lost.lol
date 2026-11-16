@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Save, ImagePlus, Sparkles, Trash2, Play, Type, Palette } from 'lucide-react';
+import { Eye, ImagePlus, Sparkles, Trash2, Play, Type, Palette } from 'lucide-react';
 import { apiService } from '../../../services/api';
 import { SiteCanvasElement, SiteMediaLayer, SiteSettings, User } from '../../../types';
 
@@ -17,10 +17,10 @@ const animationPresets=[
 
 export const SiteEditor:React.FC<{user:User}>=({user})=>{
  const [settings,setSettings]=React.useState<SiteSettings>(defaults);
- const [saving,setSaving]=React.useState(false); const [message,setMessage]=React.useState('');
+ const [saving,setSaving]=React.useState(false); const [message,setMessage]=React.useState(''); const [loaded,setLoaded]=React.useState(false); const saveQueue=React.useRef<Promise<unknown>>(Promise.resolve());
  const [selectedElement,setSelectedElement]=React.useState<string>('');
  const canvasRef=React.useRef<HTMLDivElement>(null);
- React.useEffect(()=>{apiService.getSiteSettings().then(s=>setSettings({...defaults,...s,mediaLayers:s.mediaLayers||[],canvasElements:s.canvasElements||[],siteAnimations:s.siteAnimations||[]})).catch(e=>setMessage(e instanceof Error?e.message:'Could not load site settings.'));},[]);
+ React.useEffect(()=>{apiService.getSiteSettings().then(s=>setSettings({...defaults,...s,mediaLayers:s.mediaLayers||[],canvasElements:s.canvasElements||[],siteAnimations:s.siteAnimations||[]})).catch(e=>setMessage(e instanceof Error?e.message:'Could not load site settings.')).finally(()=>setLoaded(true));},[]);
  const update=(key:keyof SiteSettings,value:unknown)=>setSettings(s=>({...s,[key]:value}));
  const updateMedia=(id:string,patch:Partial<SiteMediaLayer>)=>update('mediaLayers',settings.mediaLayers.map(m=>m.id===id?{...m,...patch}:m));
  const updateCanvas=(id:string,patch:Partial<SiteCanvasElement>)=>update('canvasElements',(settings.canvasElements||[]).map(el=>el.id===id?{...el,...patch}:el));
@@ -37,12 +37,12 @@ export const SiteEditor:React.FC<{user:User}>=({user})=>{
    if(file.size>3*1024*1024){setMessage('Images are limited to 3MB in the visual editor.');return;}
    const reader=new FileReader(); reader.onload=()=>update('mediaLayers',[...settings.mediaLayers,{id:crypto.randomUUID(),type:'image',url:String(reader.result||''),x:50,y:50,width:55,height:40,opacity:1,blur:0,rotation:0,zIndex:0,objectFit:'cover',autoplay:false,loop:false,muted:true}]); reader.readAsDataURL(file);
  };
- const save=async()=>{setSaving(true);setMessage('');try{setSettings(await apiService.updateSiteSettings(settings));setMessage('Saved — the live homepage now uses these settings.');}catch(e){setMessage(e instanceof Error?e.message:'Could not save the site.');}finally{setSaving(false);}};
+ React.useEffect(()=>{if(!loaded)return;const snapshot=settings;const timer=window.setTimeout(()=>{setSaving(true);setMessage('Saving changes…');saveQueue.current=saveQueue.current.catch(()=>undefined).then(()=>apiService.updateSiteSettings(snapshot)).then(()=>setMessage('All changes saved automatically.')).catch(e=>setMessage(e instanceof Error?e.message:'Could not save changes automatically.')).finally(()=>setSaving(false));},850);return()=>window.clearTimeout(timer);},[settings,loaded]);
  if(user.role!=='owner')return <section className="rounded-2xl border border-zinc-500/20 bg-zinc-500/5 p-6"><h2 className="text-lg font-semibold">Site Editor</h2><p className="mt-2 text-sm text-zinc-400">Only the site owner can edit global homepage settings.</p></section>;
  return <div className="space-y-5">
   <div className="sticky top-[73px] z-20 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#0b0b0c]/95 p-3 backdrop-blur-xl">
-   <div className="flex items-center gap-2"><Eye size={16} className="text-zinc-300"/><div><p className="text-sm font-semibold">Visual site builder</p><p className="text-[10px] text-zinc-500">Edit the preview and see changes instantly.</p></div></div>
-   <button disabled={saving} onClick={save} className="inline-flex items-center gap-2 rounded-xl bg-zinc-500 px-4 py-2 text-xs font-bold text-white disabled:opacity-50"><Save size={14}/>{saving?'Saving…':'Publish changes'}</button>
+   <div className="flex items-center gap-2"><Eye size={16} className="text-zinc-300"/><div><p className="text-sm font-semibold">Visual site builder</p><p className="text-[10px] text-zinc-500">Edits save automatically after you stop typing.</p></div></div>
+   <span className="rounded-xl border border-white/10 px-4 py-2 text-xs font-semibold text-zinc-300">{!loaded?'Loading…':saving?'Saving…':'Auto-saved'}</span>
   </div>
   {message&&<div className="rounded-xl border border-white/10 bg-white/[.03] px-4 py-3 text-xs text-zinc-300">{message}</div>}
   <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,.8fr)]">
@@ -67,7 +67,7 @@ export const SiteEditor:React.FC<{user:User}>=({user})=>{
     </div>
    </section>
    <div className="space-y-4">
-    <Panel icon={<Type size={15}/>} title="Freeform page editor" description="Add text or images, drag them around the preview, then adjust their size and position. Changes are saved with Publish changes.">
+    <Panel icon={<Type size={15}/>} title="Freeform page editor" description="Add text or images, drag them around the preview, then adjust their size and position. Changes save automatically.">
       <div className="grid grid-cols-2 gap-2"><button type="button" onClick={addText} className="rounded-xl border border-white/15 bg-white/[.05] px-3 py-3 text-xs font-semibold text-white">＋ Add text</button><label className="cursor-pointer rounded-xl border border-white/15 bg-white/[.05] px-3 py-3 text-center text-xs font-semibold text-white">＋ Add image<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={e=>{const file=e.target.files?.[0];if(file)addCanvasImage(file);e.currentTarget.value='';}}/></label></div>
       {(settings.canvasElements||[]).map(el=><div key={el.id} className={'space-y-2 rounded-xl border p-3 '+(selectedElement===el.id?'border-white/40 bg-white/[.05]':'border-white/10 bg-black/20')} onClick={()=>setSelectedElement(el.id)}><div className="flex items-center gap-2"><span className="flex-1 text-xs font-semibold">{el.type==='text'?'Text element':'Image element'}</span><button type="button" onClick={()=>{update('canvasElements',(settings.canvasElements||[]).filter(x=>x.id!==el.id));if(selectedElement===el.id)setSelectedElement('');}} className="text-xs text-zinc-300">Remove</button></div>{el.type==='text'&&<Field label="Text" value={el.content} onChange={v=>updateCanvas(el.id,{content:v})}/>}<div className="grid grid-cols-2 gap-2"><Num label="Width %" value={el.width} onChange={v=>updateCanvas(el.id,{width:Math.max(5,Math.min(100,v))})}/><Num label="Height px" value={el.height} onChange={v=>updateCanvas(el.id,{height:Math.max(20,Math.min(600,v))})}/><Num label="X %" value={el.x} onChange={v=>updateCanvas(el.id,{x:Math.max(0,Math.min(100,v))})}/><Num label="Y %" value={el.y} onChange={v=>updateCanvas(el.id,{y:Math.max(0,Math.min(100,v))})}/>{el.type==='text'&&<><Num label="Font size" value={el.fontSize} onChange={v=>updateCanvas(el.id,{fontSize:Math.max(8,Math.min(100,v))})}/><ColorField label="Text color" value={el.color} onChange={v=>updateCanvas(el.id,{color:v})}/></>}</div><p className="text-[10px] text-zinc-500">Drag this element directly in the preview to reposition it.</p></div>)}
     </Panel>

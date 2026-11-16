@@ -14,7 +14,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
  const navGroups=[
   {label:'Workspace',items:[['Overview','/dashboard',BarChart3],['Analytics','/dashboard/analytics',BarChart3]] as const},
   {label:'Profile',items:[['Profile','/dashboard/profile',UserRound],['Customize','/dashboard/appearance',Palette],['Badges','/dashboard/badges',Crown]] as const},
-  {label:'Content',items:[['Links','/dashboard/links',Link2],['Socials','/dashboard/socials',Share2],['Music','/dashboard/music',Music2],['Widgets','/dashboard/widgets',Boxes],['Templates','/dashboard/templates',Boxes],['Connections','/dashboard/connections',Plug]] as const},
+  {label:'Content',items:[['Socials','/dashboard/socials',Share2],['Music','/dashboard/music',Music2],['Widgets','/dashboard/widgets',Boxes],['Templates','/dashboard/templates',Boxes]] as const},
   {label:'Account',items:[['Settings','/dashboard/settings',Settings],...(user.role==='owner'?[['Site Editor','/dashboard/site',Palette] as const]:[])] as const}
  ] as const;
  const [local,setLocal]=React.useState<User>(user);
@@ -41,7 +41,7 @@ export const DashboardSection:React.FC<{user:User;section:string}>=({user,sectio
  const music=section==='music';
  const widgets=section==='widgets';
  const analytics=section==='analytics';
- const linksPage=section==='links'; const connectionsPage=section==='connections'; const aliasesPage=section==='aliases'; const badgesPage=section==='badges'; const templatesPage=section==='templates';
+ const linksPage=false; const connectionsPage=false; const aliasesPage=section==='aliases'; const badgesPage=section==='badges'; const templatesPage=section==='templates';
  const uploadedAudioPresent=!!local.audioUrl?.startsWith('data:audio/')&&!removeUploadedAudio;
  const playlistTracks=((local.audioTracks||[]).filter(track=>!track.startsWith('data:')).length?(local.audioTracks||[]).filter(track=>!track.startsWith('data:')):(local.audioUrl&&!local.audioUrl.startsWith('data:')?[local.audioUrl]:[])).slice(0,30);
 
