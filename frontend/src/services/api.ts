@@ -45,6 +45,7 @@ export const apiService={
  deleteAdminRole:async(id:string)=>requestJson(`/admin/roles/${encodeURIComponent(id)}`,{method:'DELETE',headers:authHeaders()}),
  assignAdminRole:async(id:number,roleId:string|null)=>requestJson(`/admin/users/${id}/admin-role`,{method:'PATCH',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({roleId})}),
  getAdminUsers:async()=>requestJson('/admin/users',{headers:authHeaders()}),
+ getAdminUserIpLogs:async(id:number)=>requestJson(`/admin/users/${id}/ip-logs`,{headers:authHeaders()}),
   deleteAdminAccount:async(id:number)=>requestJson(`/admin/users/${id}/account`,{method:'DELETE',headers:authHeaders()}),
  getAdminBadgeDefinitions:async()=>requestJson('/admin/badge-definitions',{headers:authHeaders()}),
  saveAdminBadgeDefinition:async(body:Record<string,unknown>)=>requestJson('/admin/badge-definitions',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(body)}),
